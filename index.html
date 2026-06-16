@@ -6,269 +6,102 @@
 <title>VER // EP by St</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-
 :root {
-  --black:  #000;
-  --near:   #0a0a0a;
-  --dim:    #111;
-  --border: #222;
-  --mid:    #555;
-  --light:  #999;
-  --white:  #fff;
-  --green:  #00ff41;
-  --amber:  #ffb800;
-  --red:    #ff2d2d;
+  --black:#000; --near:#0a0a0a; --dim:#111; --border:#222;
+  --mid:#555; --light:#999; --white:#fff;
+  --green:#00ff41; --amber:#ffb800; --red:#ff2d2d;
 }
-
 html, body {
-  height: 100dvh;
-  background: var(--black);
-  color: var(--white);
-  font-family: 'Courier New', monospace;
-  overflow: hidden;
-  touch-action: none;
+  height:100dvh; background:var(--black); color:var(--white);
+  font-family:'Courier New',monospace; overflow:hidden; touch-action:none;
 }
-
-#app {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-}
-
-/* ── HEADER ── */
+#app { display:flex; flex-direction:column; height:100dvh; }
 #header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-bottom:1px solid var(--border); flex-shrink:0;
 }
-
-#logo {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  border: 1px solid var(--border);
-  padding: 4px 7px;
-}
-
-#frameCount {
-  font-size: 9px;
-  color: var(--mid);
-  letter-spacing: 0.1em;
-}
-
-/* ── ZONA CÁMARA ── */
+#logo { font-size:10px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; }
+#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
 #cameraZone {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--near);
-  overflow: hidden;
+  flex:1; position:relative; display:flex; align-items:center;
+  justify-content:center; background:var(--near); overflow:hidden;
 }
-
-/* Canvas principal — lo que se ve */
-#viewCanvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  cursor: crosshair;
-  display: block;
-  /* Se ajusta por JS para ser cuadrado y caber en la zona */
-}
-
-/* Overlay de elipse de selección */
-#overlayCanvas {
-  position: absolute;
-  top: 0; left: 0;
-  pointer-events: none;
-}
-
-/* Video oculto para captura */
-#video { display: none; }
-
-/* Estado sin cámara */
-#cameraOff {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: var(--mid);
-}
-#cameraOff .icon { font-size: 40px; opacity: 0.3; }
-#cameraOff p { font-size: 9px; letter-spacing: 0.12em; text-align: center; line-height: 2; }
-
-/* ── ETIQUETAS ACUMULADAS ── */
+#viewCanvas { image-rendering:pixelated; image-rendering:crisp-edges; cursor:crosshair; display:block; }
+#overlayCanvas { position:absolute; top:0; left:0; pointer-events:none; }
+#video { display:none; }
+#cameraOff { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--mid); }
+#cameraOff .icon { font-size:40px; opacity:0.3; }
+#cameraOff p { font-size:9px; letter-spacing:0.12em; text-align:center; line-height:2; }
 #tagStrip {
-  flex-shrink: 0;
-  border-top: 1px solid var(--border);
-  min-height: 36px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  scrollbar-width: none;
+  flex-shrink:0; border-top:1px solid var(--border); min-height:36px;
+  overflow-x:auto; overflow-y:hidden; display:flex; align-items:center;
+  gap:5px; padding:6px 10px; scrollbar-width:none;
 }
-#tagStrip::-webkit-scrollbar { display: none; }
-
+#tagStrip::-webkit-scrollbar { display:none; }
 .etiqueta {
-  flex-shrink: 0;
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.1s;
-  position: relative;
+  flex-shrink:0; padding:4px 8px; border:1px solid var(--border);
+  font-size:8px; font-weight:700; letter-spacing:0.1em; white-space:nowrap;
+  cursor:pointer; transition:all 0.1s; position:relative;
 }
-
 .etiqueta .cnt {
-  position: absolute;
-  top: -4px; right: -4px;
-  background: var(--amber);
-  color: var(--black);
-  font-size: 7px;
-  font-weight: 700;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  position:absolute; top:-4px; right:-4px; background:var(--amber);
+  color:var(--black); font-size:7px; font-weight:700; width:14px; height:14px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
 }
-
-.etiqueta.active { background: var(--green); color: var(--black); border-color: var(--green); }
-
-/* ── PANEL DE PRIMITIVOS ── */
+.etiqueta.active { background:var(--green); color:var(--black); border-color:var(--green); }
 #primitivosPanel {
-  flex-shrink: 0;
-  border-top: 1px solid var(--border);
-  padding: 8px 10px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+  flex-shrink:0; border-top:1px solid var(--border); padding:8px 10px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
 }
-
 .prim-btn {
-  background: var(--dim);
-  border: 1px solid var(--border);
-  color: var(--light);
-  padding: 8px 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.1s;
-  line-height: 1.3;
+  background:var(--dim); border:1px solid var(--border); color:var(--light);
+  padding:8px 4px; font-family:'Courier New',monospace; font-size:8px;
+  font-weight:700; letter-spacing:0.06em; cursor:pointer; text-align:center;
+  transition:all 0.1s; line-height:1.3;
 }
-
-.prim-btn:active, .prim-btn.selected {
-  background: var(--white);
-  color: var(--black);
-  border-color: var(--white);
-}
-
-.prim-btn .icon { font-size: 14px; display: block; margin-bottom: 2px; }
-
-/* ── BOTTOM BAR ── */
-#bottomBar {
-  flex-shrink: 0;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 0;
-}
-
+.prim-btn:active, .prim-btn.selected { background:var(--white); color:var(--black); border-color:var(--white); }
+.prim-btn .icon { font-size:14px; display:block; margin-bottom:2px; }
+#bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; }
 .b-btn {
-  flex: 1;
-  background: var(--dim);
-  border: none;
-  border-right: 1px solid var(--border);
-  color: var(--light);
-  padding: 12px 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  letter-spacing: 0.07em;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.1s;
+  flex:1; background:var(--dim); border:none; border-right:1px solid var(--border);
+  color:var(--light); padding:12px 4px; font-family:'Courier New',monospace;
+  font-size:9px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.1s;
 }
-.b-btn:last-child { border-right: none; }
-.b-btn:active { background: var(--border); }
-.b-btn.primary { background: var(--white); color: var(--black); font-weight: 700; }
-
-/* ── RECONSTRUCCIÓN ── */
+.b-btn:last-child { border-right:none; }
+.b-btn:active { background:var(--border); }
+.b-btn.primary { background:var(--white); color:var(--black); font-weight:700; }
 #recPanel {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: var(--black);
-  z-index: 50;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  display:none; position:absolute; inset:0; background:var(--black); z-index:50;
+  flex-direction:column; align-items:center; justify-content:center; gap:12px;
 }
-#recPanel.visible { display: flex; }
-
-#recCanvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  border: 1px solid var(--border);
-}
-
-#recLabel {
-  font-size: 9px;
-  color: var(--mid);
-  letter-spacing: 0.1em;
-  text-align: center;
-  line-height: 1.8;
-}
-
+#recPanel.visible { display:flex; }
+#recCanvas { image-rendering:pixelated; image-rendering:crisp-edges; border:1px solid var(--border); }
+#recLabel { font-size:9px; color:var(--mid); letter-spacing:0.1em; text-align:center; line-height:1.8; }
 #btnCerrarRec {
-  padding: 8px 20px;
-  background: var(--dim);
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-family: 'Courier New', monospace;
-  font-size: 10px;
-  cursor: pointer;
+  padding:8px 20px; background:var(--dim); border:1px solid var(--border);
+  color:var(--white); font-family:'Courier New',monospace; font-size:10px; cursor:pointer;
 }
-
-/* Notif */
 #notif {
-  position: fixed;
-  bottom: 160px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--green);
-  color: var(--black);
-  padding: 6px 14px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  border-radius: 2px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 999;
-  white-space: nowrap;
+  position:fixed; bottom:160px; left:50%; transform:translateX(-50%);
+  background:var(--green); color:var(--black); padding:6px 14px; font-size:10px;
+  font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none;
+  opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap;
 }
-#notif.show { opacity: 1; }
+#notif.show { opacity:1; }
+#spotInfo {
+  position:absolute; bottom:8px; left:8px; font-size:8px; color:var(--green);
+  letter-spacing:0.1em; pointer-events:none; opacity:0; transition:opacity 0.3s;
+}
+#spotInfo.show { opacity:1; }
 </style>
 </head>
 <body>
 <div id="app">
-
   <div id="header">
     <div id="logo">EP·ST // VER</div>
     <div id="frameCount">0 etiquetas</div>
   </div>
 
-  <!-- ZONA CÁMARA -->
   <div id="cameraZone">
     <div id="cameraOff">
       <div class="icon">👁</div>
@@ -277,23 +110,11 @@ html, body {
     <canvas id="viewCanvas"></canvas>
     <canvas id="overlayCanvas"></canvas>
     <video id="video" autoplay playsinline muted></video>
-
-    <!-- Canal COLOR 16x16 -->
-    <div id="colorChannel" style="
-      position:absolute;
-      bottom:8px; right:8px;
-      display:none;
-    ">
-      <canvas id="colorCanvas" width="16" height="16" style="
-        width:64px; height:64px;
-        image-rendering:pixelated;
-        image-rendering:crisp-edges;
-        border:1px solid rgba(255,255,255,0.15);
-      "></canvas>
+    <div id="colorChannel" style="position:absolute;bottom:8px;right:8px;display:none;">
+      <canvas id="colorCanvas" width="16" height="16" style="width:64px;height:64px;image-rendering:pixelated;border:1px solid rgba(255,255,255,0.15);"></canvas>
       <div style="font-size:7px;color:var(--mid);letter-spacing:0.1em;text-align:center;margin-top:2px">COLOR 16²</div>
     </div>
-
-    <!-- Panel de reconstrucción -->
+    <div id="spotInfo"></div>
     <div id="recPanel">
       <canvas id="recCanvas"></canvas>
       <div id="recLabel">RECONSTRUCCIÓN ACUMULADA</div>
@@ -301,532 +122,337 @@ html, body {
     </div>
   </div>
 
-  <!-- ETIQUETAS ACUMULADAS -->
   <div id="tagStrip">
     <span style="font-size:8px;color:var(--mid);letter-spacing:0.1em;flex-shrink:0">ETIQ</span>
   </div>
 
-  <!-- PRIMITIVOS VISUALES -->
   <div id="primitivosPanel">
+    <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
+      <span class="icon">·</span>SPOT
+    </button>
     <button class="prim-btn" data-prim="BORDE_BRUSCO" onclick="selectPrim(this)">
-      <span class="icon">▐</span>BORDE BRUSCO
+      <span class="icon">▐</span>BORDE
     </button>
     <button class="prim-btn" data-prim="HORIZONTAL" onclick="selectPrim(this)">
-      <span class="icon">━</span>HORIZONTAL
+      <span class="icon">━</span>HORIZ
     </button>
     <button class="prim-btn" data-prim="VERTICAL" onclick="selectPrim(this)">
-      <span class="icon">┃</span>VERTICAL
-    </button>
-    <button class="prim-btn" data-prim="PUNTITOS" onclick="selectPrim(this)">
-      <span class="icon">⠿</span>PUNTITOS
+      <span class="icon">┃</span>VERT
     </button>
     <button class="prim-btn" data-prim="MASA_OSCURA" onclick="selectPrim(this)">
-      <span class="icon">■</span>MASA OSCURA
+      <span class="icon">■</span>OSCURA
     </button>
     <button class="prim-btn" data-prim="MASA_CLARA" onclick="selectPrim(this)">
-      <span class="icon">□</span>MASA CLARA
+      <span class="icon">□</span>CLARA
     </button>
     <button class="prim-btn" data-prim="MOVIMIENTO" onclick="selectPrim(this)">
-      <span class="icon">≋</span>MOVIMIENTO
+      <span class="icon">≋</span>MOVIM
     </button>
     <button class="prim-btn" data-prim="FOCO" onclick="selectPrim(this)">
       <span class="icon">◉</span>FOCO
     </button>
   </div>
 
-  <!-- BOTTOM BAR -->
   <div id="bottomBar">
     <button class="b-btn" id="btnCam" onclick="toggleCamera()">📷 CÁMARA</button>
     <button class="b-btn" id="btnFreeze" onclick="freezeFrame()" disabled>⏸ CONGELAR</button>
     <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
     <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
   </div>
-
 </div>
 
 <div id="notif"></div>
 
 <script>
-// ════════════════════════════════════════════
-// ESTADO
-// ════════════════════════════════════════════
-
-const RES   = 64; // canal BRILLO — resolución principal
-const CRES  = 16; // canal COLOR — resolución cromática
+const RES=64, CRES=16;
 
 const state = {
-  stream:    null,
-  running:   false,
-  frozen:    false,
-  primActivo: null,
-
-  // Acumulador de etiquetas por celda
-  // grid[row][col] = { BORDE_BRUSCO: n, HORIZONTAL: n, ... }
-  grid: Array.from({length: RES}, () => Array.from({length: RES}, () => ({}))),
-
-  // Elipse en curso
-  elipse: null,       // { x1, y1, x2, y2 } en coords canvas
-  dragging: false,
-  dragStart: null,
-
-  totalEtiquetas: 0,
+  stream:null, running:false, frozen:false, primActivo:null,
+  grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
+  spots: [],        // {id, col, row, x, y}
+  elipse:null, dragging:false, dragStart:null,
+  totalEtiquetas:0, spotSeq:0,
+  tapMoved:false,
 };
 
-// ════════════════════════════════════════════
-// CANVAS SETUP
-// ════════════════════════════════════════════
-
-const viewCanvas   = document.getElementById('viewCanvas');
+const viewCanvas    = document.getElementById('viewCanvas');
 const overlayCanvas = document.getElementById('overlayCanvas');
 const vCtx = viewCanvas.getContext('2d');
 const oCtx = overlayCanvas.getContext('2d');
 const video = document.getElementById('video');
-
-// Canvas interno de trabajo (64×64)
 const workCanvas = document.createElement('canvas');
 workCanvas.width = workCanvas.height = RES;
 const wCtx = workCanvas.getContext('2d');
-
-// Canal COLOR — 16x16 saturado, bajo contraste
 const colorCanvas = document.getElementById('colorCanvas');
 const cCtx = colorCanvas.getContext('2d');
 const colorWork = document.createElement('canvas');
 colorWork.width = colorWork.height = CRES;
 const cwCtx = colorWork.getContext('2d');
-
 let animFrame = null;
 
 function resizeCanvases() {
   const zone = document.getElementById('cameraZone');
   const size = Math.min(zone.clientWidth, zone.clientHeight) * 0.92;
-  viewCanvas.style.width = viewCanvas.style.height = size + 'px';
+  viewCanvas.style.width = viewCanvas.style.height = size+'px';
   viewCanvas.width = viewCanvas.height = size;
-  overlayCanvas.style.width = overlayCanvas.style.height = size + 'px';
+  overlayCanvas.style.width = overlayCanvas.style.height = size+'px';
   overlayCanvas.width = overlayCanvas.height = size;
-  // Centrar
-  const offX = (zone.clientWidth - size) / 2;
-  const offY = (zone.clientHeight - size) / 2;
-  viewCanvas.style.position = 'absolute';
-  viewCanvas.style.left = offX + 'px';
-  viewCanvas.style.top = offY + 'px';
-  overlayCanvas.style.left = offX + 'px';
-  overlayCanvas.style.top = offY + 'px';
+  const offX=(zone.clientWidth-size)/2, offY=(zone.clientHeight-size)/2;
+  viewCanvas.style.position='absolute'; viewCanvas.style.left=offX+'px'; viewCanvas.style.top=offY+'px';
+  overlayCanvas.style.left=offX+'px'; overlayCanvas.style.top=offY+'px';
 }
-
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
-// ════════════════════════════════════════════
-// CÁMARA
-// ════════════════════════════════════════════
-
-async function toggleCamera() {
-  if (state.running) {
-    stopCamera();
-  } else {
-    await startCamera();
-  }
-}
-
+// ── CÁMARA ──
+async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
 async function startCamera() {
   try {
-    state.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 320 } },
-      audio: false
-    });
-    video.srcObject = state.stream;
-    await video.play();
-    state.running = true;
-    state.frozen = false;
-    document.getElementById('cameraOff').style.display = 'none';
-    document.getElementById('colorChannel').style.display = 'block';
-    viewCanvas.style.display = 'block';
-    overlayCanvas.style.display = 'block';
-    document.getElementById('btnCam').textContent = '■ PARAR';
-    document.getElementById('btnFreeze').disabled = false;
+    state.stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false});
+    video.srcObject=state.stream; await video.play();
+    state.running=true; state.frozen=false;
+    document.getElementById('cameraOff').style.display='none';
+    document.getElementById('colorChannel').style.display='block';
+    viewCanvas.style.display='block'; overlayCanvas.style.display='block';
+    document.getElementById('btnCam').textContent='■ PARAR';
+    document.getElementById('btnFreeze').disabled=false;
     renderLoop();
-  } catch(e) {
-    showNotif('Sin permiso de cámara');
-  }
+  } catch(e) { showNotif('Sin permiso de cámara'); }
 }
-
 function stopCamera() {
-  if (state.stream) state.stream.getTracks().forEach(t => t.stop());
-  state.running = false;
-  if (animFrame) cancelAnimationFrame(animFrame);
-  document.getElementById('btnCam').textContent = '📷 CÁMARA';
-  document.getElementById('btnFreeze').disabled = true;
-  document.getElementById('cameraOff').style.display = 'flex';
-  viewCanvas.style.display = 'none';
-  overlayCanvas.style.display = 'none';
+  if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
+  state.running=false; if(animFrame) cancelAnimationFrame(animFrame);
+  document.getElementById('btnCam').textContent='📷 CÁMARA';
+  document.getElementById('btnFreeze').disabled=true;
+  document.getElementById('cameraOff').style.display='flex';
+  viewCanvas.style.display='none'; overlayCanvas.style.display='none';
 }
-
 function freezeFrame() {
-  state.frozen = !state.frozen;
-  document.getElementById('btnFreeze').textContent = state.frozen ? '▶ REANUDAR' : '⏸ CONGELAR';
-  document.getElementById('btnFreeze').classList.toggle('primary', state.frozen);
+  state.frozen=!state.frozen;
+  document.getElementById('btnFreeze').textContent=state.frozen?'▶ REANUDAR':'⏸ CONGELAR';
+  document.getElementById('btnFreeze').classList.toggle('primary',state.frozen);
 }
 
-// ════════════════════════════════════════════
-// LOOP DE RENDER
-// ════════════════════════════════════════════
-
+// ── RENDER ──
 function renderLoop() {
-  if (!state.running) return;
-
-  if (!state.frozen && video.readyState >= 2) {
-    // 1. Capturar frame en 64×64
-    wCtx.drawImage(video, 0, 0, RES, RES);
-
-    // 2a. Canal BRILLO — convertir a escala de grises
-    const imgData = wCtx.getImageData(0, 0, RES, RES);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const g = Math.round(0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]);
-      d[i] = d[i+1] = d[i+2] = g;
+  if(!state.running) return;
+  if(!state.frozen && video.readyState>=2) {
+    wCtx.drawImage(video,0,0,RES,RES);
+    const imgData=wCtx.getImageData(0,0,RES,RES), d=imgData.data;
+    for(let i=0;i<d.length;i+=4){ const g=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]); d[i]=d[i+1]=d[i+2]=g; }
+    wCtx.putImageData(imgData,0,0);
+    cwCtx.drawImage(video,0,0,CRES,CRES);
+    const cData=cwCtx.getImageData(0,0,CRES,CRES), cd=cData.data;
+    for(let i=0;i<cd.length;i+=4){
+      const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2], s=2.2, m=128;
+      cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));
+      cd[i+1]=Math.min(255,Math.max(0,m+(cd[i+1]-br)*s+(br-m)*0.25));
+      cd[i+2]=Math.min(255,Math.max(0,m+(cd[i+2]-br)*s+(br-m)*0.25));
     }
-    wCtx.putImageData(imgData, 0, 0);
-
-    // 2b. Canal COLOR — 16x16, saturado, bajo contraste de brillo
-    cwCtx.drawImage(video, 0, 0, CRES, CRES);
-    const cData = cwCtx.getImageData(0, 0, CRES, CRES);
-    const cd = cData.data;
-    for (let i = 0; i < cd.length; i += 4) {
-      // Calcular brillo
-      const br = 0.299 * cd[i] + 0.587 * cd[i+1] + 0.114 * cd[i+2];
-      // Restar el brillo para aislar color puro (residuo cromático)
-      // y saturar adrede
-      const satFactor = 2.2; // saturación
-      const midGray = 128;
-      cd[i]   = Math.min(255, Math.max(0, midGray + (cd[i]   - br) * satFactor + (br - midGray) * 0.25));
-      cd[i+1] = Math.min(255, Math.max(0, midGray + (cd[i+1] - br) * satFactor + (br - midGray) * 0.25));
-      cd[i+2] = Math.min(255, Math.max(0, midGray + (cd[i+2] - br) * satFactor + (br - midGray) * 0.25));
-    }
-    cwCtx.putImageData(cData, 0, 0);
-    // Escalar al canvas visible
-    cCtx.imageSmoothingEnabled = false;
-    cCtx.drawImage(colorWork, 0, 0, 16, 16);
-
-    // 3. Escalar al canvas de vista (pixelado)
-    const s = viewCanvas.width;
-    vCtx.imageSmoothingEnabled = false;
-    vCtx.drawImage(workCanvas, 0, 0, s, s);
-
-    // 4. Superponer acumulación de etiquetas (glow tenue)
+    cwCtx.putImageData(cData,0,0);
+    cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
+    const sz=viewCanvas.width;
+    vCtx.imageSmoothingEnabled=false; vCtx.drawImage(workCanvas,0,0,sz,sz);
     renderAcumulacion();
   }
-
-  // 5. Dibujar elipse en curso
-  if (state.elipse) renderElipse();
-
-  animFrame = requestAnimationFrame(renderLoop);
+  renderOverlay();
+  animFrame=requestAnimationFrame(renderLoop);
 }
 
-// ════════════════════════════════════════════
-// ACUMULACIÓN VISUAL
-// ════════════════════════════════════════════
-
 function renderAcumulacion() {
-  const s = viewCanvas.width;
-  const cs = s / RES;
-  const maxAcum = Math.max(1, state.totalEtiquetas / (RES * RES) * 20);
-
-  // Overlay muy tenue de calor de etiquetas
+  const s=viewCanvas.width, cs=s/RES;
+  const maxAcum=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
   vCtx.save();
-  for (let r = 0; r < RES; r++) {
-    for (let c = 0; c < RES; c++) {
-      const cell = state.grid[r][c];
-      const total = Object.values(cell).reduce((s,v)=>s+v, 0);
-      if (total < 1) continue;
-      const alpha = Math.min(0.35, total / maxAcum * 0.35);
-      vCtx.fillStyle = `rgba(0,255,65,${alpha})`;
-      vCtx.fillRect(c * cs, r * cs, cs, cs);
-    }
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+    const total=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
+    if(total<1) continue;
+    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.35,total/maxAcum*0.35)})`;
+    vCtx.fillRect(c*cs,r*cs,cs,cs);
   }
   vCtx.restore();
 }
 
-// ════════════════════════════════════════════
-// ELIPSE DE SELECCIÓN
-// ════════════════════════════════════════════
-
-function renderElipse() {
-  const {x1,y1,x2,y2} = state.elipse;
-  const cx = (x1+x2)/2, cy = (y1+y2)/2;
-  const rx = Math.abs(x2-x1)/2, ry = Math.abs(y2-y1)/2;
-
-  oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-  oCtx.strokeStyle = 'rgba(0,255,65,0.8)';
-  oCtx.lineWidth = 1.5;
-  oCtx.setLineDash([4,3]);
-  oCtx.beginPath();
-  oCtx.ellipse(cx, cy, Math.max(1,rx), Math.max(1,ry), 0, 0, Math.PI*2);
-  oCtx.stroke();
-  oCtx.setLineDash([]);
-
-  // Focos
-  const foc = Math.sqrt(Math.max(0, rx*rx - ry*ry));
-  oCtx.fillStyle = 'rgba(255,184,0,0.9)';
-  oCtx.beginPath(); oCtx.arc(cx-foc, cy, 3, 0, Math.PI*2); oCtx.fill();
-  oCtx.beginPath(); oCtx.arc(cx+foc, cy, 3, 0, Math.PI*2); oCtx.fill();
+function renderOverlay() {
+  oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+  // Spots
+  state.spots.forEach(sp=>{
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
+    oCtx.fillStyle='rgba(0,255,65,0.9)'; oCtx.fill();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
+    oCtx.strokeStyle='rgba(0,255,65,0.35)'; oCtx.lineWidth=1.5; oCtx.stroke();
+  });
+  // Elipse en curso
+  if(state.elipse) drawElipse(state.elipse);
 }
 
-// ════════════════════════════════════════════
-// INTERACCIÓN — DIBUJAR ELIPSE
-// ════════════════════════════════════════════
+// ── SPOT ──
+function marcarSpot(x, y) {
+  const s=viewCanvas.width;
+  const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
+  const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
+  const id=++state.spotSeq;
+  state.spots.push({id,col,row,x,y});
+  state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
+  state.totalEtiquetas++;
+  actualizarTagStrip('SPOT');
+  updateFrameCount();
+  const el=document.getElementById('spotInfo');
+  el.textContent=`SPOT ${id} · (${col},${row})`;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1400);
+}
 
+// ── ELIPSE ──
+function drawElipse(e) {
+  const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
+  const rx=Math.abs(e.x2-e.x1)/2, ry=Math.abs(e.y2-e.y1)/2;
+  oCtx.strokeStyle='rgba(0,255,65,0.8)'; oCtx.lineWidth=1.5; oCtx.setLineDash([4,3]);
+  oCtx.beginPath(); oCtx.ellipse(cx,cy,Math.max(1,rx),Math.max(1,ry),0,0,Math.PI*2); oCtx.stroke();
+  oCtx.setLineDash([]);
+  const foc=Math.sqrt(Math.max(0,rx*rx-ry*ry));
+  oCtx.fillStyle='rgba(255,184,0,0.9)';
+  oCtx.beginPath(); oCtx.arc(cx-foc,cy,3,0,Math.PI*2); oCtx.fill();
+  oCtx.beginPath(); oCtx.arc(cx+foc,cy,3,0,Math.PI*2); oCtx.fill();
+}
+
+// ── INTERACCIÓN ──
 function getCanvasPos(e) {
-  const rect = overlayCanvas.getBoundingClientRect();
-  const touch = e.touches ? e.touches[0] : e;
-  return {
-    x: touch.clientX - rect.left,
-    y: touch.clientY - rect.top,
-  };
+  const rect=overlayCanvas.getBoundingClientRect();
+  const t=e.touches?e.touches[0]:e;
+  return {x:t.clientX-rect.left, y:t.clientY-rect.top};
 }
 
 function onPointerDown(e) {
-  if (!state.primActivo) { showNotif('Selecciona un primitivo primero'); return; }
-  if (!state.running) return;
+  if(!state.running) return;
   e.preventDefault();
-  const p = getCanvasPos(e);
-  state.dragging = true;
-  state.dragStart = p;
-  state.elipse = { x1: p.x, y1: p.y, x2: p.x, y2: p.y };
+  state.tapMoved=false;
+  const p=getCanvasPos(e);
+  state.dragStart=p;
+  if(state.primActivo==='SPOT') return; // espera pointerUp
+  if(!state.primActivo){showNotif('Selecciona un primitivo');return;}
+  state.dragging=true;
+  state.elipse={x1:p.x,y1:p.y,x2:p.x,y2:p.y};
 }
 
 function onPointerMove(e) {
-  if (!state.dragging) return;
   e.preventDefault();
-  const p = getCanvasPos(e);
-  state.elipse = { ...state.elipse, x2: p.x, y2: p.y };
+  if(!state.dragStart) return;
+  const p=getCanvasPos(e);
+  const dx=p.x-state.dragStart.x, dy=p.y-state.dragStart.y;
+  if(Math.sqrt(dx*dx+dy*dy)>6) state.tapMoved=true;
+  if(state.dragging && state.elipse) state.elipse={...state.elipse,x2:p.x,y2:p.y};
 }
 
 function onPointerUp(e) {
-  if (!state.dragging) return;
   e.preventDefault();
-  state.dragging = false;
-
-  if (state.elipse && state.primActivo) {
-    etiquetarElipse(state.elipse, state.primActivo);
+  const p=getCanvasPos(e);
+  if(state.primActivo==='SPOT'){
+    if(!state.tapMoved) marcarSpot(p.x,p.y);
+    state.dragStart=null; state.tapMoved=false; return;
   }
-
-  // Limpiar elipse
-  state.elipse = null;
-  oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+  if(!state.dragging){state.dragStart=null;return;}
+  state.dragging=false;
+  if(state.elipse && state.primActivo) etiquetarElipse(state.elipse,state.primActivo);
+  state.elipse=null; state.dragStart=null;
 }
 
-// Touch
-overlayCanvas.addEventListener('touchstart', onPointerDown, {passive:false});
-overlayCanvas.addEventListener('touchmove',  onPointerMove, {passive:false});
-overlayCanvas.addEventListener('touchend',   onPointerUp,   {passive:false});
-// Mouse
-overlayCanvas.addEventListener('mousedown',  onPointerDown);
-overlayCanvas.addEventListener('mousemove',  onPointerMove);
-overlayCanvas.addEventListener('mouseup',    onPointerUp);
+overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
+overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
+overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
+overlayCanvas.addEventListener('mousedown', onPointerDown);
+overlayCanvas.addEventListener('mousemove', onPointerMove);
+overlayCanvas.addEventListener('mouseup',   onPointerUp);
 
-// ════════════════════════════════════════════
-// ETIQUETAR ELIPSE → CELDAS
-// ════════════════════════════════════════════
-
-function etiquetarElipse(elipse, prim) {
-  const s = viewCanvas.width;
-  const cs = s / RES;
-  const {x1,y1,x2,y2} = elipse;
-  const cx = (x1+x2)/2, cy = (y1+y2)/2;
-  const rx = Math.max(cs/2, Math.abs(x2-x1)/2);
-  const ry = Math.max(cs/2, Math.abs(y2-y1)/2);
-
-  let count = 0;
-  for (let r = 0; r < RES; r++) {
-    for (let c = 0; c < RES; c++) {
-      // Centro de la celda en coords canvas
-      const px = c * cs + cs/2;
-      const py = r * cs + cs/2;
-      // ¿Está dentro de la elipse?
-      const dx = (px - cx) / rx;
-      const dy = (py - cy) / ry;
-      if (dx*dx + dy*dy <= 1) {
-        state.grid[r][c][prim] = (state.grid[r][c][prim] || 0) + 1;
-        count++;
-        state.totalEtiquetas++;
-      }
-    }
+// ── ETIQUETAR ELIPSE ──
+function etiquetarElipse(elipse,prim) {
+  const s=viewCanvas.width, cs=s/RES;
+  const cx=(elipse.x1+elipse.x2)/2, cy=(elipse.y1+elipse.y2)/2;
+  const rx=Math.max(cs/2,Math.abs(elipse.x2-elipse.x1)/2);
+  const ry=Math.max(cs/2,Math.abs(elipse.y2-elipse.y1)/2);
+  let count=0;
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+    const px=c*cs+cs/2, py=r*cs+cs/2;
+    const dx=(px-cx)/rx, dy=(py-cy)/ry;
+    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
   }
-
-  if (count > 0) {
-    actualizarTagStrip(prim);
-    updateFrameCount();
-    showNotif(prim.replace('_',' ') + ' · ' + count + ' celdas');
-  }
+  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim.replace('_',' ')+' · '+count+' celdas'); }
 }
 
-// ════════════════════════════════════════════
-// PRIMITIVOS
-// ════════════════════════════════════════════
-
+// ── PRIMITIVOS ──
 function selectPrim(btn) {
-  document.querySelectorAll('.prim-btn').forEach(b => b.classList.remove('selected'));
-  const prim = btn.dataset.prim;
-  if (state.primActivo === prim) {
-    state.primActivo = null;
-  } else {
-    state.primActivo = prim;
-    btn.classList.add('selected');
-  }
+  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
+  const prim=btn.dataset.prim;
+  state.primActivo=(state.primActivo===prim)?null:prim;
+  if(state.primActivo) btn.classList.add('selected');
 }
 
-// ════════════════════════════════════════════
-// TAG STRIP
-// ════════════════════════════════════════════
-
-const tagCounts = {};
-
+// ── TAG STRIP ──
+const tagCounts={};
 function actualizarTagStrip(prim) {
-  tagCounts[prim] = (tagCounts[prim] || 0) + 1;
-
-  let el = document.querySelector(`.etiqueta[data-prim="${prim}"]`);
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'etiqueta';
-    el.dataset.prim = prim;
-    el.textContent = prim.replace('_',' ');
-    const cnt = document.createElement('span');
-    cnt.className = 'cnt';
-    el.appendChild(cnt);
-    el.addEventListener('click', () => {
-      el.classList.toggle('active');
-      state.primActivo = el.classList.contains('active') ? prim : null;
-    });
+  tagCounts[prim]=(tagCounts[prim]||0)+1;
+  let el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
+  if(!el){
+    el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=prim;
+    el.textContent=prim.replace('_',' ');
+    const cnt=document.createElement('span'); cnt.className='cnt'; el.appendChild(cnt);
+    el.addEventListener('click',()=>{ el.classList.toggle('active'); state.primActivo=el.classList.contains('active')?prim:null; });
     document.getElementById('tagStrip').appendChild(el);
   }
-
-  el.querySelector('.cnt').textContent = tagCounts[prim] > 99 ? '99+' : tagCounts[prim];
+  el.querySelector('.cnt').textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
 }
+function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiquetas'; }
 
-function updateFrameCount() {
-  document.getElementById('frameCount').textContent = state.totalEtiquetas + ' etiquetas';
-}
-
-// ════════════════════════════════════════════
-// RECONSTRUCCIÓN
-// ════════════════════════════════════════════
-
+// ── RECONSTRUCCIÓN ──
 function verReconstruccion() {
-  if (state.totalEtiquetas === 0) { showNotif('Etiqueta algo primero'); return; }
-
-  const panel = document.getElementById('recPanel');
-  panel.classList.add('visible');
-
-  const cvs = document.getElementById('recCanvas');
-  const size = Math.min(window.innerWidth, window.innerHeight) * 0.7;
-  cvs.width = cvs.height = size;
-  cvs.style.width = cvs.style.height = size + 'px';
-
-  const ctx = cvs.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
-
-  const cs = size / RES;
-
-  // Reconstruir: cada celda se colorea según sus etiquetas acumuladas
-  for (let r = 0; r < RES; r++) {
-    for (let c = 0; c < RES; c++) {
-      const cell = state.grid[r][c];
-      const total = Object.values(cell).reduce((s,v)=>s+v,0);
-
-      if (total === 0) {
-        // Sin etiquetar — gris neutro
-        ctx.fillStyle = 'rgb(40,40,40)';
-        ctx.fillRect(c*cs, r*cs, cs, cs);
-        continue;
-      }
-
-      // Color según primitivo dominante
-      const dom = Object.entries(cell).sort((a,b)=>b[1]-a[1])[0][0];
-      const intensidad = Math.min(1, total / 10);
-
-      const colores = {
-        BORDE_BRUSCO: [255, 255, 255],
-        HORIZONTAL:   [0, 200, 255],
-        VERTICAL:     [255, 100, 0],
-        PUNTITOS:     [0, 255, 65],
-        MASA_OSCURA:  [20, 20, 40],
-        MASA_CLARA:   [220, 220, 200],
-        MOVIMIENTO:   [255, 0, 200],
-        FOCO:         [255, 220, 0],
-      };
-
-      const [r1,g1,b1] = colores[dom] || [128,128,128];
-      const base = 40;
-      ctx.fillStyle = `rgb(${Math.round(base+r1*intensidad*0.85)},${Math.round(base+g1*intensidad*0.85)},${Math.round(base+b1*intensidad*0.85)})`;
-      ctx.fillRect(c*cs, r*cs, cs, cs);
-    }
+  if(state.totalEtiquetas===0){showNotif('Etiqueta algo primero');return;}
+  const panel=document.getElementById('recPanel'); panel.classList.add('visible');
+  const cvs=document.getElementById('recCanvas');
+  const size=Math.min(window.innerWidth,window.innerHeight)*0.7;
+  cvs.width=cvs.height=size; cvs.style.width=cvs.style.height=size+'px';
+  const ctx=cvs.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  const cs=size/RES;
+  const colores={SPOT:[0,255,65],BORDE_BRUSCO:[255,255,255],HORIZONTAL:[0,200,255],VERTICAL:[255,100,0],MASA_OSCURA:[20,20,40],MASA_CLARA:[220,220,200],MOVIMIENTO:[255,0,200],FOCO:[255,220,0]};
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+    const cell=state.grid[r][c], total=Object.values(cell).reduce((a,v)=>a+v,0);
+    if(total===0){ctx.fillStyle='rgb(40,40,40)';ctx.fillRect(c*cs,r*cs,cs,cs);continue;}
+    const dom=Object.entries(cell).sort((a,b)=>b[1]-a[1])[0][0];
+    const int=Math.min(1,total/10), [r1,g1,b1]=colores[dom]||[128,128,128], base=40;
+    ctx.fillStyle=`rgb(${Math.round(base+r1*int*0.85)},${Math.round(base+g1*int*0.85)},${Math.round(base+b1*int*0.85)})`;
+    ctx.fillRect(c*cs,r*cs,cs,cs);
   }
-
-  // Label informativo
-  const tipos = Object.keys(tagCounts).length;
-  const desc = Object.entries(tagCounts)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,3)
-    .map(([k,v])=>k.replace('_',' ')+' ×'+v)
-    .join(' · ');
-
-  document.getElementById('recLabel').textContent =
-    tipos + ' PRIMITIVOS · ' + state.totalEtiquetas + ' MARCAS\n' + desc;
+  // Marcar spots en reconstrucción
+  state.spots.forEach(sp=>{
+    const sx=sp.col*cs+cs/2, sy=sp.row*cs+cs/2;
+    ctx.beginPath(); ctx.arc(sx,sy,cs*0.8,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,255,65,0.7)'; ctx.fill();
+  });
+  const desc=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>k.replace('_',' ')+'×'+v).join(' · ');
+  document.getElementById('recLabel').textContent=Object.keys(tagCounts).length+' PRIMITIVOS · '+state.totalEtiquetas+' MARCAS\n'+desc;
 }
+function cerrarRec(){ document.getElementById('recPanel').classList.remove('visible'); }
 
-function cerrarRec() {
-  document.getElementById('recPanel').classList.remove('visible');
-}
-
-// ════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════
-
+// ── EXPORT ──
 function exportarEtiquetas() {
-  if (state.totalEtiquetas === 0) { showNotif('Nada que exportar'); return; }
-
-  // Comprimir el grid — solo celdas con etiquetas
-  const celdas = [];
-  for (let r = 0; r < RES; r++) {
-    for (let c = 0; c < RES; c++) {
-      const cell = state.grid[r][c];
-      if (Object.keys(cell).length > 0) {
-        celdas.push({ r, c, etiquetas: cell });
-      }
-    }
-  }
-
-  // Capturar canal color actual como array de pixeles
-  const cImgData = cCtx.getImageData(0, 0, CRES, CRES);
-  const colorPixels = [];
-  for (let i = 0; i < cImgData.data.length; i += 4) {
-    colorPixels.push([cImgData.data[i], cImgData.data[i+1], cImgData.data[i+2]]);
-  }
-
-  const data = {
-    canal_brillo: { resolucion: RES, total_etiquetas: state.totalEtiquetas, primitivos: tagCounts, celdas },
-    canal_color:  { resolucion: CRES, pixeles: colorPixels },
-    imagen_ensonada: null,
-    timestamp: new Date().toISOString(),
+  if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
+  const celdas=[];
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length>0) celdas.push({r,c,etiquetas:state.grid[r][c]});
+  const cImgData=cCtx.getImageData(0,0,CRES,CRES), colorPixels=[];
+  for(let i=0;i<cImgData.data.length;i+=4) colorPixels.push([cImgData.data[i],cImgData.data[i+1],cImgData.data[i+2]]);
+  const data={
+    canal_brillo:{resolucion:RES,total_etiquetas:state.totalEtiquetas,primitivos:tagCounts,celdas},
+    canal_color:{resolucion:CRES,pixeles:colorPixels},
+    spots:state.spots.map(sp=>({id:sp.id,col:sp.col,row:sp.row})),
+    timestamp:new Date().toISOString()
   };
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ver_' + Date.now() + '.json';
-  a.click();
-  showNotif('JSON exportado · ' + celdas.length + ' celdas');
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ver_'+Date.now()+'.json'; a.click();
+  showNotif('JSON exportado · '+celdas.length+' celdas');
 }
 
-// ════════════════════════════════════════════
-// UTIL
-// ════════════════════════════════════════════
-
-function showNotif(msg, dur=2000) {
-  const n = document.getElementById('notif');
-  n.textContent = msg;
-  n.classList.add('show');
-  setTimeout(()=>n.classList.remove('show'), dur);
+// ── UTIL ──
+function showNotif(msg,dur=2000){
+  const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),dur);
 }
 </script>
 </body>
