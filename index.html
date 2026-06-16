@@ -130,14 +130,14 @@ html, body {
     <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
       <span class="icon">·</span>SPOT
     </button>
-    <button class="prim-btn" data-prim="BORDE_BRUSCO" onclick="selectPrim(this)">
-      <span class="icon">▐</span>BORDE
+    <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
+      <span class="icon">∠</span>ÁNGULO
     </button>
-    <button class="prim-btn" data-prim="HORIZONTAL" onclick="selectPrim(this)">
-      <span class="icon">━</span>HORIZ
+    <button class="prim-btn" data-prim="MEMBRANA" onclick="selectPrim(this)">
+      <span class="icon">◯</span>MEMBRANA
     </button>
-    <button class="prim-btn" data-prim="VERTICAL" onclick="selectPrim(this)">
-      <span class="icon">┃</span>VERT
+    <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
+      <span class="icon">▒</span>GRAD
     </button>
     <button class="prim-btn" data-prim="MASA_OSCURA" onclick="selectPrim(this)">
       <span class="icon">■</span>OSCURA
@@ -274,15 +274,43 @@ function renderAcumulacion() {
 
 function renderOverlay() {
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-  // Spots
+
+  // Spots guardados
   state.spots.forEach(sp=>{
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
     oCtx.fillStyle='rgba(0,255,65,0.9)'; oCtx.fill();
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
     oCtx.strokeStyle='rgba(0,255,65,0.35)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
-  // Elipse en curso
-  if(state.elipse) drawElipse(state.elipse);
+
+  // Gesto en curso
+  const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
+  if(!p1) return;
+
+  // Punto P1
+  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
+  oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
+
+  if(p2){
+    // Línea P1→P2
+    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
+    oCtx.strokeStyle='rgba(0,255,65,0.7)'; oCtx.lineWidth=1.5;
+    oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
+
+    // Punto P2
+    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2);
+    oCtx.fillStyle='rgba(0,255,65,0.8)'; oCtx.fill();
+  }
+
+  // P3 si existe
+  if(gesto.p3||( gesto.fase===2 && gesto.moviendo && gesto.p2)){
+    const p3=gesto.p3||gesto.moviendo;
+    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p3.x,p3.y);
+    oCtx.strokeStyle='rgba(0,212,255,0.6)'; oCtx.lineWidth=1.2;
+    oCtx.setLineDash([3,4]); oCtx.stroke(); oCtx.setLineDash([]);
+    oCtx.beginPath(); oCtx.arc(p3.x,p3.y,4,0,Math.PI*2);
+    oCtx.fillStyle='rgba(0,212,255,0.8)'; oCtx.fill();
+  }
 }
 
 // ── SPOT ──
@@ -316,6 +344,15 @@ function drawElipse(e) {
 }
 
 // ── INTERACCIÓN ──
+// Gestos: SPOT=tap · ANGULO=P1(down)→P2(up) luego P3 opcional(tap)
+// Estado del gesto en curso
+const gesto = {
+  fase: 0,      // 0=esperando, 1=P1 fijo esperando P2, 2=P1+P2 fijos esperando P3
+  p1:null, p2:null, p3:null,
+  moviendo:null, // posición actual del dedo mientras arrastra
+  tapMoved:false,
+};
+
 function getCanvasPos(e) {
   const rect=overlayCanvas.getBoundingClientRect();
   const t=e.touches?e.touches[0]:e;
@@ -325,35 +362,60 @@ function getCanvasPos(e) {
 function onPointerDown(e) {
   if(!state.running) return;
   e.preventDefault();
-  state.tapMoved=false;
+  gesto.tapMoved=false;
   const p=getCanvasPos(e);
-  state.dragStart=p;
-  if(state.primActivo==='SPOT') return; // espera pointerUp
-  if(!state.primActivo){showNotif('Selecciona un primitivo');return;}
-  state.dragging=true;
-  state.elipse={x1:p.x,y1:p.y,x2:p.x,y2:p.y};
+
+  if(state.primActivo==='SPOT'){ gesto.moviendo=p; return; }
+  if(!state.primActivo){ showNotif('Selecciona un primitivo'); return; }
+
+  if(gesto.fase===0){
+    gesto.p1=p; gesto.moviendo=p; gesto.fase=1;
+  } else if(gesto.fase===2){
+    // P3: tap sobre el gesto existente
+    gesto.p3=p; gesto.moviendo=p;
+  }
 }
 
 function onPointerMove(e) {
   e.preventDefault();
-  if(!state.dragStart) return;
+  if(!gesto.moviendo) return;
   const p=getCanvasPos(e);
-  const dx=p.x-state.dragStart.x, dy=p.y-state.dragStart.y;
-  if(Math.sqrt(dx*dx+dy*dy)>6) state.tapMoved=true;
-  if(state.dragging && state.elipse) state.elipse={...state.elipse,x2:p.x,y2:p.y};
+  if(gesto.p1){
+    const dx=p.x-gesto.p1.x, dy=p.y-gesto.p1.y;
+    if(Math.sqrt(dx*dx+dy*dy)>6) gesto.tapMoved=true;
+  }
+  gesto.moviendo=p;
 }
 
 function onPointerUp(e) {
   e.preventDefault();
   const p=getCanvasPos(e);
+
+  // SPOT: tap simple
   if(state.primActivo==='SPOT'){
-    if(!state.tapMoved) marcarSpot(p.x,p.y);
-    state.dragStart=null; state.tapMoved=false; return;
+    if(!gesto.tapMoved) marcarSpot(p.x,p.y);
+    gesto.moviendo=null; gesto.tapMoved=false; return;
   }
-  if(!state.dragging){state.dragStart=null;return;}
-  state.dragging=false;
-  if(state.elipse && state.primActivo) etiquetarElipse(state.elipse,state.primActivo);
-  state.elipse=null; state.dragStart=null;
+
+  if(gesto.fase===1){
+    // Fin de P2
+    gesto.p2=p; gesto.moviendo=null; gesto.fase=2;
+    showNotif('P3 opcional — toca para añadir · toca FUERA para confirmar');
+    // Timer: si no hay P3 en 2s, ejecutar con P1+P2
+    gesto._timer=setTimeout(()=>{ if(gesto.fase===2) ejecutarGesto(); }, 2000);
+  } else if(gesto.fase===2 && gesto.p3){
+    // P3 recibido, ejecutar
+    clearTimeout(gesto._timer);
+    ejecutarGesto();
+  }
+}
+
+function ejecutarGesto() {
+  if(!gesto.p1||!gesto.p2) return;
+  if(state.primActivo==='ANGULO') etiquetarAngulo(gesto.p1, gesto.p2, gesto.p3);
+  else etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
+  // Reset gesto
+  gesto.fase=0; gesto.p1=gesto.p2=gesto.p3=gesto.moviendo=null; gesto.tapMoved=false;
 }
 
 overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
@@ -376,6 +438,87 @@ function etiquetarElipse(elipse,prim) {
     if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
   }
   if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim.replace('_',' ')+' · '+count+' celdas'); }
+}
+
+// ── ETIQUETAR ÁNGULO ──
+// Ley: intensidad siempre decae desde P1
+// P1+P2 = foco con decaimiento estándar (cono desde P1 hacia P2)
+// P3 sobre eje = modifica concentración (cerca P1=duro, lejos=suave)
+// P3 fuera del eje = ángulo real, P1 es vértice entre vector P1→P2 y vector P1→P3
+function etiquetarAngulo(p1, p2, p3) {
+  const s=viewCanvas.width, cs=s/RES;
+  const dx=p2.x-p1.x, dy=p2.y-p1.y;
+  const longEje=Math.sqrt(dx*dx+dy*dy);
+  if(longEje<4) return;
+
+  let count=0;
+
+  if(!p3) {
+    // Solo P1+P2: decaimiento estándar tipo foco desde P1
+    // Cada celda recibe intensidad según distancia perpendicular al eje y proyección
+    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+      const px=c*cs+cs/2, py=r*cs+cs/2;
+      // Proyección sobre el eje P1→P2
+      const t=((px-p1.x)*dx+(py-p1.y)*dy)/(longEje*longEje);
+      if(t<0||t>1.2) continue; // solo hacia adelante
+      // Distancia perpendicular al eje
+      const perpX=px-(p1.x+t*dx), perpY=py-(p1.y+t*dy);
+      const distPerp=Math.sqrt(perpX*perpX+perpY*perpY);
+      // Apertura del cono crece con t (más lejos = más ancho)
+      const radioMax=longEje*0.35*(0.3+t);
+      if(distPerp>radioMax) continue;
+      // Intensidad: dura cerca de P1, suave lejos — ley universal
+      const intensidad=Math.round((1-t)*8)+1;
+      state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
+      count++; state.totalEtiquetas++;
+    }
+  } else {
+    // Con P3: determinar si está sobre el eje o fuera
+    const t3=((p3.x-p1.x)*dx+(p3.y-p1.y)*dy)/(longEje*longEje);
+    const perpX3=p3.x-(p1.x+t3*dx), perpY3=p3.y-(p1.y+t3*dy);
+    const distPerp3=Math.sqrt(perpX3*perpX3+perpY3*perpY3);
+    const sobreEje=distPerp3<longEje*0.25;
+
+    if(sobreEje) {
+      // P3 sobre el eje: modifica concentración
+      // t3 cercano a 0 (cerca P1) = muy concentrado · t3 > 1 = muy repartido
+      const concentracion=Math.max(0.1, Math.min(2.0, t3));
+      for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+        const px=c*cs+cs/2, py=r*cs+cs/2;
+        const t=((px-p1.x)*dx+(py-p1.y)*dy)/(longEje*longEje);
+        if(t<0||t>1.2) continue;
+        const perpX=px-(p1.x+t*dx), perpY=py-(p1.y+t*dy);
+        const distPerp=Math.sqrt(perpX*perpX+perpY*perpY);
+        const radioMax=longEje*0.35*(0.3+t)*concentracion;
+        if(distPerp>radioMax) continue;
+        const intensidad=Math.round((1-t)*8)+1;
+        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
+        count++; state.totalEtiquetas++;
+      }
+    } else {
+      // P3 fuera del eje: ángulo real — P1 es vértice
+      const dx2=p3.x-p1.x, dy2=p3.y-p1.y;
+      const long2=Math.sqrt(dx2*dx2+dy2*dy2);
+      for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+        const px=c*cs+cs/2, py=r*cs+cs/2;
+        const vx=px-p1.x, vy=py-p1.y;
+        const distP1=Math.sqrt(vx*vx+vy*vy);
+        if(distP1<1) continue;
+        // Ángulo del punto respecto a P1
+        const t1=((vx)*dx+(vy)*dy)/(longEje*distP1);   // cos con eje1
+        const t2=((vx)*dx2+(vy)*dy2)/(long2*distP1);   // cos con eje2
+        // El punto está dentro del ángulo si está del lado de ambos ejes
+        if(t1<0.3||t2<0.3) continue;
+        // Intensidad decae con distancia desde P1
+        const maxDist=Math.max(longEje,long2);
+        const intensidad=Math.max(1,Math.round((1-distP1/maxDist)*8));
+        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
+        count++; state.totalEtiquetas++;
+      }
+    }
+  }
+
+  if(count>0){ actualizarTagStrip('ANGULO'); updateFrameCount(); showNotif('ÁNGULO · '+count+' celdas'); }
 }
 
 // ── PRIMITIVOS ──
