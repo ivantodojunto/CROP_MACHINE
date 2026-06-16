@@ -353,26 +353,65 @@ function renderOverlay() {
 }
 
 function renderIntensidadPreview(p1, p2, p3) {
-  const s=previewCanvas.width, cs=s/RES;
+  const s=previewCanvas.width;
   pCtx.clearRect(0,0,s,s);
-  const dx=p2.x-p1.x, dy=p2.y-p1.y;
-  const longEje=Math.sqrt(dx*dx+dy*dy);
-  if(longEje<4) return;
+  const dx2=p2.x-p1.x, dy2=p2.y-p1.y;
+  const long2=Math.sqrt(dx2*dx2+dy2*dy2);
+  if(long2<4) return;
 
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2, py=r*cs+cs/2;
-    const t=((px-p1.x)*dx+(py-p1.y)*dy)/(longEje*longEje);
-    if(t<0||t>1.3) continue;
-    const perpX=px-(p1.x+t*dx), perpY=py-(p1.y+t*dy);
-    const distPerp=Math.sqrt(perpX*perpX+perpY*perpY);
-    const conc=p3?Math.max(0.1,Math.min(2,((p3.x-p1.x)*dx+(p3.y-p1.y)*dy)/(longEje*longEje))):1;
-    const radioMax=longEje*0.35*(0.3+t)*conc;
-    if(distPerp>radioMax) continue;
-    // Intensidad: dura cerca de P1 — ley universal
-    const intens=1-t;
-    pCtx.fillStyle=`rgba(255,184,0,${(intens*0.6).toFixed(2)})`;
-    pCtx.fillRect(c*cs, r*cs, cs, cs);
+  // Ángulo del eje P1→P2
+  const angEje=Math.atan2(dy2,dx2);
+
+  let apertura, alcance;
+
+  if(p3){
+    // Con P3: calcular si está sobre el eje o fuera
+    const dx3=p3.x-p1.x, dy3=p3.y-p1.y;
+    const long3=Math.sqrt(dx3*dx3+dy3*dy3);
+    const t3=((dx3)*dx2+(dy3)*dy2)/(long2*long2);
+    const perpX3=p3.x-(p1.x+t3*dx2), perpY3=p3.y-(p1.y+t3*dy2);
+    const distPerp3=Math.sqrt(perpX3*perpX3+perpY3*perpY3);
+    const sobreEje=distPerp3<long2*0.25;
+
+    if(sobreEje){
+      // P3 sobre eje: concentración. cerca P1=estrecho, lejos=ancho
+      apertura=Math.max(0.05, Math.min(Math.PI*0.8, (1-Math.min(1,t3)) * Math.PI*0.5 + 0.05));
+      alcance=long2;
+    } else {
+      // P3 fuera: ángulo real entre P1→P2 y P1→P3
+      const angP3=Math.atan2(dy3,dx3);
+      apertura=Math.abs(angP3-angEje);
+      if(apertura>Math.PI) apertura=Math.PI*2-apertura;
+      apertura=apertura/2;
+      alcance=Math.max(long2,long3);
+    }
+  } else {
+    // Solo P1+P2: cono estándar ~35°
+    apertura=Math.PI*0.18;
+    alcance=long2;
   }
+
+  // Gradiente cónico — clip triangular + radial desde P1
+  pCtx.save();
+  pCtx.beginPath();
+  pCtx.moveTo(p1.x, p1.y);
+  // Dos rayos del cono
+  const ray=alcance*1.3;
+  pCtx.lineTo(p1.x+Math.cos(angEje-apertura)*ray, p1.y+Math.sin(angEje-apertura)*ray);
+  // Arco
+  pCtx.arc(p1.x, p1.y, ray, angEje-apertura, angEje+apertura);
+  pCtx.closePath();
+  pCtx.clip();
+
+  // Gradiente radial desde P1: duro en centro, se apaga con distancia
+  const grad=pCtx.createRadialGradient(p1.x,p1.y,0, p1.x,p1.y,alcance*1.1);
+  grad.addColorStop(0,   'rgba(255,220,80,0.92)');
+  grad.addColorStop(0.15,'rgba(255,184,0,0.75)');
+  grad.addColorStop(0.45,'rgba(255,140,0,0.35)');
+  grad.addColorStop(1,   'rgba(255,80,0,0.0)');
+  pCtx.fillStyle=grad;
+  pCtx.fillRect(0,0,s,s);
+  pCtx.restore();
 }
 
 // ── SPOT ──
