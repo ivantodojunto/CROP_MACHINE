@@ -32,23 +32,39 @@ html, body {
 #cameraOff { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--mid); }
 #cameraOff .icon { font-size:40px; opacity:0.3; }
 #cameraOff p { font-size:9px; letter-spacing:0.12em; text-align:center; line-height:2; }
+/* tagStrip ahora es columna izquierda flotante sobre la imagen */
 #tagStrip {
-  flex-shrink:0; border-top:1px solid var(--border); min-height:36px;
-  overflow-x:auto; overflow-y:hidden; display:flex; align-items:center;
-  gap:5px; padding:6px 10px; scrollbar-width:none;
+  position:absolute; left:0; top:0; bottom:0; width:90px;
+  overflow-x:hidden; overflow-y:auto; display:flex; flex-direction:column;
+  gap:4px; padding:6px 5px; scrollbar-width:none; z-index:10;
+  background:linear-gradient(to right, rgba(0,0,0,0.75) 70%, transparent);
+  pointer-events:none;
+  transition: opacity 0.2s;
 }
+#tagStrip.operando { opacity:0; pointer-events:none; }
 #tagStrip::-webkit-scrollbar { display:none; }
 .etiqueta {
-  flex-shrink:0; padding:4px 8px; border:1px solid var(--border);
-  font-size:8px; font-weight:700; letter-spacing:0.1em; white-space:nowrap;
-  cursor:pointer; transition:all 0.1s; position:relative;
+  flex-shrink:0; padding:6px 8px; border:1px solid var(--border);
+  font-size:9px; font-weight:700; letter-spacing:0.08em;
+  cursor:pointer; transition:all 0.2s;
+  background:rgba(0,0,0,0.7); color:var(--mid);
+  display:flex; align-items:center; gap:6px;
+  pointer-events:all; min-height:32px;
 }
+/* Indicador de estado — círculo a la izquierda */
+.etiqueta .estado {
+  width:9px; height:9px; border-radius:50%; flex-shrink:0;
+  border:1px solid var(--mid); background:transparent;
+  transition: all 0.3s;
+}
+.etiqueta.gris .estado  { background:var(--mid); border-color:var(--mid); }
+.etiqueta.amarillo .estado { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
+.etiqueta.gris  { color:var(--light); border-color:var(--mid); }
+.etiqueta.amarillo { color:var(--amber); border-color:var(--amber); }
 .etiqueta .cnt {
-  position:absolute; top:-4px; right:-4px; background:var(--amber);
-  color:var(--black); font-size:7px; font-weight:700; width:14px; height:14px;
-  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  margin-left:auto; font-size:7px; color:var(--mid); font-weight:400;
 }
-.etiqueta.active { background:var(--green); color:var(--black); border-color:var(--green); }
+.etiqueta.active { outline:1px solid var(--green); }
 #primitivosPanel {
   flex-shrink:0; border-top:1px solid var(--border); padding:8px 10px;
   display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
@@ -115,21 +131,20 @@ html, body {
       <div style="font-size:7px;color:var(--mid);letter-spacing:0.1em;text-align:center;margin-top:2px">COLOR 16²</div>
     </div>
     <div id="spotInfo"></div>
+    <div id="tagStrip"></div>
     <canvas id="previewCanvas" style="position:absolute;top:0;left:0;pointer-events:none;opacity:0.55;display:none;"></canvas>
-    <div id="gestoBar" style="display:none;position:absolute;bottom:8px;left:50%;transform:translateX(-50%);align-items:center;gap:8px;background:rgba(0,0,0,0.8);border:1px solid #222;padding:6px 10px;">
-      <span id="gestoLabel" style="font-size:8px;color:#00ff41;letter-spacing:0.1em;"></span>
-      <button onclick="confirmarGesto()" style="background:#00ff41;color:#000;border:none;font-family:monospace;font-size:8px;font-weight:700;padding:4px 8px;cursor:pointer;">✓ OK</button>
-      <button onclick="cancelarGesto()" style="background:#111;color:#999;border:1px solid #222;font-family:monospace;font-size:8px;padding:4px 8px;cursor:pointer;">✕</button>
+    <div id="gestoBar" style="display:none;position:absolute;top:10px;right:10px;flex-direction:column;align-items:flex-end;gap:6px;z-index:20;">
+      <span id="gestoLabel" style="font-size:8px;color:#00ff41;letter-spacing:0.1em;background:rgba(0,0,0,0.7);padding:3px 6px;"></span>
+      <div style="display:flex;gap:6px;">
+        <button onclick="confirmarGesto()" style="background:#00ff41;color:#000;border:none;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:2px;">✓</button>
+        <button onclick="cancelarGesto()" style="background:rgba(0,0,0,0.8);color:#ff2d2d;border:1px solid #ff2d2d;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:2px;">✕</button>
+      </div>
     </div>
     <div id="recPanel">
       <canvas id="recCanvas"></canvas>
       <div id="recLabel">RECONSTRUCCIÓN ACUMULADA</div>
       <button id="btnCerrarRec" onclick="cerrarRec()">✕ VOLVER</button>
     </div>
-  </div>
-
-  <div id="tagStrip">
-    <span style="font-size:8px;color:var(--mid);letter-spacing:0.1em;flex-shrink:0">ETIQ</span>
   </div>
 
   <div id="primitivosPanel">
@@ -179,7 +194,12 @@ const state = {
   elipse:null, dragging:false, dragStart:null,
   totalEtiquetas:0, spotSeq:0,
   tapMoved:false,
+  evidencia: {},    // {id: count} — evidencia acumulada por etiqueta
 };
+
+// Umbrales de estado
+const UMBRAL_GRIS    = 1;   // mínimo para pasar a gris
+const UMBRAL_AMARILLO = 8;  // para señal fuerte
 
 const viewCanvas    = document.getElementById('viewCanvas');
 const overlayCanvas = document.getElementById('overlayCanvas');
@@ -218,11 +238,13 @@ function mostrarGestoBar(label) {
   const bar = document.getElementById('gestoBar');
   document.getElementById('gestoLabel').textContent = label;
   bar.style.display = 'flex';
+  document.getElementById('tagStrip').classList.add('operando');
 }
 function ocultarGestoBar() {
   document.getElementById('gestoBar').style.display = 'none';
   previewCanvas.style.display = 'none';
   pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
+  document.getElementById('tagStrip').classList.remove('operando');
 }
 function confirmarGesto() {
   if(gesto.fase>=1 && gesto.p1 && (gesto.p2||gesto.moviendo)) {
@@ -239,6 +261,7 @@ function cancelarGesto() {
 }
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
+window.addEventListener('DOMContentLoaded', iniciarEtiquetasBase);
 
 // ── CÁMARA ──
 async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
@@ -456,7 +479,7 @@ const gesto = {
 
 function getCanvasPos(e) {
   const rect=overlayCanvas.getBoundingClientRect();
-  const t=e.touches?e.touches[0]:e;
+  const t=(e.touches&&e.touches.length>0)?e.touches[0]:(e.changedTouches&&e.changedTouches.length>0)?e.changedTouches[0]:e;
   return {x:t.clientX-rect.left, y:t.clientY-rect.top};
 }
 
@@ -633,17 +656,90 @@ function selectPrim(btn) {
 
 // ── TAG STRIP ──
 const tagCounts={};
+
+// ── STARTER PACK nivel 0 ──
+const ETIQUETAS_BASE = [
+  { id:'LUZ',     color:'#fffbe6' },
+  { id:'SOMBRA',  color:'#1a1a2e' },
+  { id:'ROJO',    color:'#ff2d2d' },
+  { id:'VERDE',   color:'#00ff41' },
+  { id:'AZUL',    color:'#0088ff' },
+  { id:'AMARILLO',color:'#ffb800' },
+  { id:'MARRÓN',  color:'#8b5c2a' },
+  { id:'CARNE',   color:'#e8a87c' },
+];
+
+function iniciarEtiquetasBase() {
+  ETIQUETAS_BASE.forEach(e => {
+    tagCounts[e.id] = 0;
+    if(!document.querySelector(`.etiqueta[data-prim="${e.id}"]`))
+      crearEtiquetaEl(e.id);
+  });
+}
+
+function crearEtiquetaEl(id) {
+  const el = document.createElement('div');
+  el.className = 'etiqueta';
+  el.dataset.prim = id;
+  const dot = document.createElement('span');
+  dot.className = 'estado';
+  el.appendChild(dot);
+  el.appendChild(document.createTextNode(id));
+  const cnt = document.createElement('span');
+  cnt.className = 'cnt';
+  cnt.textContent = '0';
+  el.appendChild(cnt);
+  el.addEventListener('click', () => {
+    const wasActive = el.classList.contains('active');
+    document.querySelectorAll('.etiqueta').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
+    if(!wasActive){
+      el.classList.add('active');
+      state.primActivo = id;
+    } else {
+      state.primActivo = null;
+    }
+  });
+  document.getElementById('tagStrip').appendChild(el);
+  return el;
+}
+
 function actualizarTagStrip(prim) {
   tagCounts[prim]=(tagCounts[prim]||0)+1;
   let el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
-  if(!el){
-    el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=prim;
-    el.textContent=prim.replace('_',' ');
-    const cnt=document.createElement('span'); cnt.className='cnt'; el.appendChild(cnt);
-    el.addEventListener('click',()=>{ el.classList.toggle('active'); state.primActivo=el.classList.contains('active')?prim:null; });
-    document.getElementById('tagStrip').appendChild(el);
-  }
+  if(!el) el=crearEtiquetaEl(prim);
   el.querySelector('.cnt').textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
+  sumarEvidencia(prim, 1);
+}
+
+function sumarEvidencia(id, cantidad) {
+  state.evidencia[id] = (state.evidencia[id]||0) + cantidad;
+  const ev = state.evidencia[id];
+  const el = document.querySelector(`.etiqueta[data-prim="${id}"]`);
+  if(!el) return;
+
+  const eraAmarillo = el.classList.contains('amarillo');
+  const eraGris     = el.classList.contains('gris');
+
+  el.classList.remove('gris','amarillo');
+
+  if(ev >= UMBRAL_AMARILLO) {
+    el.classList.add('amarillo');
+    if(!eraAmarillo) activarSenal(id); // primer disparo
+  } else if(ev >= UMBRAL_GRIS) {
+    el.classList.add('gris');
+    if(!eraGris) activarFondo(id);
+  }
+}
+
+function activarFondo(id) {
+  // Señal de fondo: captura el estado actual del grid para esta etiqueta
+  // Se queda fija — foto del momento de activación
+  showNotif(id + ' · señal activa');
+}
+
+function activarSenal(id) {
+  showNotif(id + ' · ⚡ UMBRAL', 3000);
 }
 function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiquetas'; }
 
@@ -693,6 +789,9 @@ function exportarEtiquetas() {
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ver_'+Date.now()+'.json'; a.click();
   showNotif('JSON exportado · '+celdas.length+' celdas');
 }
+
+// ── INIT ──
+iniciarEtiquetasBase();
 
 // ── UTIL ──
 function showNotif(msg,dur=2000){
