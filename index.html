@@ -254,6 +254,18 @@ const state = {
 
 const gesto = { fase:0, p1:null, p2:null, downPos:null, moviendo:null, tapMoved:false, _timer:null };
 
+// Array extensible de vistas — añade aquí sin tocar nada más
+const VISTAS = [
+  { id:'BN',       label:'B/N',      color:'#888'   },
+  { id:'COLOR',    label:'COLOR',    color:'#ffb800' },
+  { id:'ANALISIS', label:'ANÁLISIS', color:'#7ab'   },
+  { id:'UMBRAL1',  label:'UMBRAL 1', color:'#aaa',  umbral:60  },
+  { id:'UMBRAL2',  label:'UMBRAL 2', color:'#aaa',  umbral:100 },
+  { id:'UMBRAL3',  label:'UMBRAL 3', color:'#aaa',  umbral:140 },
+  { id:'UMBRAL4',  label:'UMBRAL 4', color:'#aaa',  umbral:180 },
+  { id:'UMBRAL5',  label:'UMBRAL 5', color:'#aaa',  umbral:220 },
+];
+
 let viewCanvas, overlayCanvas, vCtx, oCtx;
 let video, workCanvas, wCtx, colorCanvas, cCtx, colorWork, cwCtx;
 let animFrame=null;
@@ -311,7 +323,8 @@ async function startCamera() {
     state.stream=await navigator.mediaDevices.getUserMedia({
       video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false
     });
-    video.srcObject=state.stream; await video.play();
+    video.srcObject=state.stream;
+    await new Promise(res=>{ video.oncanplay=res; video.play(); });
     state.running=true; state.frozen=false;
     document.getElementById('cameraOff').style.display='none';
     document.getElementById('colorChannel').style.display='block';
@@ -345,17 +358,12 @@ function actualizarBtnCam() {
 }
 
 function toggleCanal() {
-  state.canal = state.canal==='BN' ? 'COLOR' : 'BN';
+  state.vistaIdx = (state.vistaIdx + 1) % VISTAS.length;
+  const v = VISTAS[state.vistaIdx];
   const btn = document.getElementById('btnCanal');
-  if(state.canal==='COLOR'){
-    btn.textContent='COLOR';
-    btn.style.color='#ffb800';
-    btn.style.borderColor='#ffb800';
-  } else {
-    btn.textContent='B/N';
-    btn.style.color='#666';
-    btn.style.borderColor='#444';
-  }
+  btn.textContent = v.label;
+  btn.style.color = v.color;
+  btn.style.borderColor = v.color;
 }
 
 function freezeFrame() {
@@ -392,11 +400,26 @@ function renderLoop() {
     cwCtx.putImageData(cd_,0,0);
     cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
     const sz=viewCanvas.width; vCtx.imageSmoothingEnabled=false;
-    if(state.canal==='BN'){
+    const vista = VISTAS[state.vistaIdx];
+    if(vista.id==='BN'){
       vCtx.drawImage(workCanvas,0,0,sz,sz);
-    } else {
-      // Escalar canal color 16x16 a toda la vista
+    } else if(vista.id==='COLOR'){
       vCtx.drawImage(colorWork,0,0,sz,sz);
+    } else if(vista.id==='ANALISIS'){
+      vCtx.fillStyle='#000'; vCtx.fillRect(0,0,sz,sz);
+    } else if(vista.id.startsWith('UMBRAL')){
+      // Umbral: canvas temporal — NO tocar workCanvas
+      const imgU=wCtx.getImageData(0,0,RES,RES);
+      const du=new Uint8ClampedArray(imgU.data);
+      for(let i=0;i<du.length;i+=4){
+        const v2=du[i]>vista.umbral?255:0;
+        du[i]=du[i+1]=du[i+2]=v2; du[i+3]=255;
+      }
+      const tmpCanvas=document.createElement('canvas');
+      tmpCanvas.width=tmpCanvas.height=RES;
+      tmpCanvas.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
+      vCtx.imageSmoothingEnabled=false;
+      vCtx.drawImage(tmpCanvas,0,0,sz,sz);
     }
     renderAcumulacion();
   }
