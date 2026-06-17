@@ -10,6 +10,10 @@
   --black:#000; --near:#0a0a0a; --dim:#111; --border:#222;
   --mid:#555; --light:#999; --white:#fff;
   --green:#00ff41; --amber:#ffb800; --red:#ff2d2d;
+  /* Formas */
+  --r-op:  3px;   /* operaciones: tiende al cuadrado */
+  --r-etiq:20px;  /* etiquetas: píldora */
+  --r-modo:50%;   /* modos/lentes: círculo */
 }
 html, body {
   height:100dvh; background:var(--black); color:var(--white);
@@ -44,12 +48,13 @@ html, body {
 #tagStrip.operando { opacity:0; pointer-events:none; }
 #tagStrip::-webkit-scrollbar { display:none; }
 .etiqueta {
-  flex-shrink:0; padding:6px 8px; border:1px solid var(--border);
+  flex-shrink:0; padding:6px 10px; border:1px solid var(--border);
   font-size:9px; font-weight:700; letter-spacing:0.08em;
   cursor:pointer; transition:all 0.2s;
   background:rgba(0,0,0,0.7); color:var(--mid);
   display:flex; align-items:center; gap:6px;
   pointer-events:all; min-height:32px;
+  border-radius:var(--r-etiq);
 }
 /* Indicador de estado — círculo a la izquierda */
 .etiqueta .estado {
@@ -65,6 +70,21 @@ html, body {
   margin-left:auto; font-size:7px; color:var(--mid); font-weight:400;
 }
 .etiqueta.active { outline:1px solid var(--green); }
+/* Marco activo: borde más grueso + pequeña pestaña */
+.etiqueta.es-marco {
+  border-color: rgba(0,255,65,0.6);
+  border-width: 2px;
+  position: relative;
+}
+.etiqueta.es-marco::after {
+  content: attr(data-prim);
+  position: absolute;
+  top: -14px; left: 4px;
+  font-size: 6px; color: rgba(0,255,65,0.5);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  pointer-events: none;
+}
 #primitivosPanel {
   flex-shrink:0; border-top:1px solid var(--border); padding:8px 10px;
   display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
@@ -74,6 +94,7 @@ html, body {
   padding:8px 4px; font-family:'Courier New',monospace; font-size:8px;
   font-weight:700; letter-spacing:0.06em; cursor:pointer; text-align:center;
   transition:all 0.1s; line-height:1.3;
+  border-radius:var(--r-op);
 }
 .prim-btn:active, .prim-btn.selected { background:var(--white); color:var(--black); border-color:var(--white); }
 .prim-btn .icon { font-size:14px; display:block; margin-bottom:2px; }
@@ -82,6 +103,7 @@ html, body {
   flex:1; background:var(--dim); border:none; border-right:1px solid var(--border);
   color:var(--light); padding:12px 4px; font-family:'Courier New',monospace;
   font-size:9px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.1s;
+  border-radius:0; /* en barra, sin radio para que encajen */
 }
 .b-btn:last-child { border-right:none; }
 .b-btn:active { background:var(--border); }
@@ -131,13 +153,35 @@ html, body {
       <div style="font-size:7px;color:var(--mid);letter-spacing:0.1em;text-align:center;margin-top:2px">COLOR 16²</div>
     </div>
     <div id="spotInfo"></div>
+    <!-- Botones contextuales sobre columna izquierda -->
+    <div id="etiqActions" style="
+      position:absolute; left:0; top:0; width:90px;
+      display:none; flex-direction:column; gap:4px;
+      padding:6px 5px; z-index:11; pointer-events:all;
+      background:rgba(0,0,0,0.85); border-bottom:1px solid #222;
+    ">
+      <button id="btnMarco" onclick="usarComoMarco()" style="display:none;
+        background:transparent; border:1px solid #555; color:#999;
+        font-family:monospace; font-size:7px; font-weight:700;
+        letter-spacing:0.08em; padding:5px 6px; cursor:pointer;
+        text-align:left; border-radius:3px;">
+        ⬚ USAR COMO MARCO
+      </button>
+      <button id="btnIdentificar" onclick="identificar()" style="display:none;
+        background:transparent; border:1px solid #555; color:#999;
+        font-family:monospace; font-size:7px; font-weight:700;
+        letter-spacing:0.08em; padding:5px 6px; cursor:pointer;
+        text-align:left; border-radius:3px;">
+        ? IDENTIFICAR
+      </button>
+    </div>
     <div id="tagStrip"></div>
     <canvas id="previewCanvas" style="position:absolute;top:0;left:0;pointer-events:none;opacity:0.55;display:none;"></canvas>
     <div id="gestoBar" style="display:none;position:absolute;top:10px;right:10px;flex-direction:column;align-items:flex-end;gap:6px;z-index:20;">
       <span id="gestoLabel" style="font-size:8px;color:#00ff41;letter-spacing:0.1em;background:rgba(0,0,0,0.7);padding:3px 6px;"></span>
       <div style="display:flex;gap:6px;">
-        <button onclick="confirmarGesto()" style="background:#00ff41;color:#000;border:none;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:2px;">✓</button>
-        <button onclick="cancelarGesto()" style="background:rgba(0,0,0,0.8);color:#ff2d2d;border:1px solid #ff2d2d;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:2px;">✕</button>
+        <button onclick="confirmarGesto()" style="background:#00ff41;color:#000;border:none;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:3px;">✓</button>
+        <button onclick="cancelarGesto()" style="background:rgba(0,0,0,0.8);color:#ff2d2d;border:1px solid #ff2d2d;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:3px;">✕</button>
       </div>
     </div>
     <div id="recPanel">
@@ -239,12 +283,14 @@ function mostrarGestoBar(label) {
   document.getElementById('gestoLabel').textContent = label;
   bar.style.display = 'flex';
   document.getElementById('tagStrip').classList.add('operando');
+  actualizarBotonesEtiq();
 }
 function ocultarGestoBar() {
   document.getElementById('gestoBar').style.display = 'none';
   previewCanvas.style.display = 'none';
   pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
   document.getElementById('tagStrip').classList.remove('operando');
+  actualizarBotonesEtiq();
 }
 function confirmarGesto() {
   if(gesto.fase>=1 && gesto.p1 && (gesto.p2||gesto.moviendo)) {
@@ -652,6 +698,7 @@ function selectPrim(btn) {
   const prim=btn.dataset.prim;
   state.primActivo=(state.primActivo===prim)?null:prim;
   if(state.primActivo) btn.classList.add('selected');
+  actualizarBotonesEtiq();
 }
 
 // ── TAG STRIP ──
@@ -788,6 +835,53 @@ function exportarEtiquetas() {
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ver_'+Date.now()+'.json'; a.click();
   showNotif('JSON exportado · '+celdas.length+' celdas');
+}
+
+// ── MARCO ──
+state.marcoActivo = null; // etiqueta usada como marco
+
+function actualizarBotonesEtiq() {
+  const actions = document.getElementById('etiqActions');
+  const btnMarco = document.getElementById('btnMarco');
+  const btnId = document.getElementById('btnIdentificar');
+
+  const haySeleccion = !!state.primActivo;
+  const hayGesto = gesto.fase > 0;
+
+  // Mostrar panel si hay algo que mostrar
+  const mostrar = haySeleccion || hayGesto;
+  actions.style.display = mostrar ? 'flex' : 'none';
+
+  // USAR COMO MARCO: solo si hay etiqueta seleccionada y no hay gesto activo
+  btnMarco.style.display = (haySeleccion && !hayGesto) ? 'block' : 'none';
+
+  // IDENTIFICAR: solo durante gesto activo (fase 2+)
+  btnId.style.display = (hayGesto && gesto.fase >= 2) ? 'block' : 'none';
+
+  // Si hay marco activo, resaltar columna
+  const tagStrip = document.getElementById('tagStrip');
+  tagStrip.style.borderLeft = state.marcoActivo
+    ? '2px solid rgba(0,255,65,0.5)'
+    : 'none';
+}
+
+function usarComoMarco() {
+  if(!state.primActivo) return;
+  state.marcoActivo = state.primActivo;
+  // Añadir "joroba" visual a la etiqueta marco
+  document.querySelectorAll('.etiqueta').forEach(el => {
+    el.classList.remove('es-marco');
+  });
+  const elMarco = document.querySelector(`.etiqueta[data-prim="${state.marcoActivo}"]`);
+  if(elMarco) elMarco.classList.add('es-marco');
+  actualizarBotonesEtiq();
+  showNotif('Marco: ' + state.marcoActivo);
+}
+
+function identificar() {
+  // Asocia la operación actual a una etiqueta nueva o existente
+  // Por ahora: notif + reset marco
+  showNotif('IDENTIFICAR — próximamente');
 }
 
 // ── INIT ──
