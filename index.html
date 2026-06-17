@@ -364,8 +364,55 @@ function renderLoop() {
     const sz=viewCanvas.width; vCtx.imageSmoothingEnabled=false; vCtx.drawImage(workCanvas,0,0,sz,sz);
     renderAcumulacion();
   }
+  renderDeteccion();
   renderOverlay();
   animFrame=requestAnimationFrame(renderLoop);
+}
+
+function renderDeteccion() {
+  if(!viewCanvas || !state.primActivo) return;
+  const s=viewCanvas.width, cs=s/RES;
+  const imgData=wCtx.getImageData(0,0,RES,RES), d=imgData.data;
+
+  function brillo(r,c){ return d[((r*RES)+c)*4]; }
+
+  vCtx.save();
+  vCtx.strokeStyle='rgba(255,255,255,0.7)';
+  vCtx.lineWidth=1;
+
+  // Cada 2 celdas para no saturar
+  for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
+    const dx = brillo(r,c+1) - brillo(r,c-1); // gradiente X
+    const dy = brillo(r+1,c) - brillo(r-1,c); // gradiente Y
+    const mag = Math.sqrt(dx*dx+dy*dy);
+
+    // Solo donde hay cambio significativo
+    if(mag < 18) continue;
+
+    // Filtrar según etiqueta activa
+    const b = brillo(r,c);
+    let mostrar = false;
+    if(state.primActivo==='LUZ')    mostrar = b > 150;
+    else if(state.primActivo==='SOMBRA') mostrar = b < 100;
+    else mostrar = true; // resto de etiquetas: mostrar todo
+
+    if(!mostrar) continue;
+
+    // Centro de la celda
+    const cx = c*cs + cs/2;
+    const cy = r*cs + cs/2;
+
+    // Vector normalizado, largo proporcional a magnitud
+    const len = Math.min(cs*0.9, mag/255*cs*2);
+    const nx = dx/mag, ny = dy/mag;
+
+    vCtx.beginPath();
+    vCtx.moveTo(cx - nx*len/2, cy - ny*len/2);
+    vCtx.lineTo(cx + nx*len/2, cy + ny*len/2);
+    vCtx.stroke();
+  }
+
+  vCtx.restore();
 }
 
 function renderAcumulacion() {
