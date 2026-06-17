@@ -10,310 +10,309 @@
   --black:#000; --near:#0a0a0a; --dim:#111; --border:#222;
   --mid:#555; --light:#999; --white:#fff;
   --green:#00ff41; --amber:#ffb800; --red:#ff2d2d;
-  /* Formas */
-  --r-op:  3px;   /* operaciones: tiende al cuadrado */
-  --r-etiq:20px;  /* etiquetas: píldora */
-  --r-modo:50%;   /* modos/lentes: círculo */
+  --r-op:3px; --r-etiq:20px; --r-modo:50%;
 }
-html, body {
-  height:100dvh; background:var(--black); color:var(--white);
-  font-family:'Courier New',monospace; overflow:hidden; touch-action:none;
-}
+html,body { height:100dvh; background:var(--black); color:var(--white); font-family:'Courier New',monospace; overflow:hidden; touch-action:none; }
 #app { display:flex; flex-direction:column; height:100dvh; }
-#header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 12px; border-bottom:1px solid var(--border); flex-shrink:0;
-}
-#logo { font-size:10px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; }
-#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
-#cameraZone {
-  flex:1; position:relative; display:flex; align-items:center;
-  justify-content:center; background:var(--near); overflow:hidden;
-}
-#viewCanvas { image-rendering:pixelated; image-rendering:crisp-edges; display:block; pointer-events:none; }
+
+/* HEADER */
+#header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; gap:8px; }
+#modosBar { margin-left:auto; }
+#logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; flex-shrink:0; }
+#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; flex-shrink:0; }
+#modosBar { display:flex; gap:6px; align-items:center; }
+.modo-btn { width:32px; height:32px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
+.modo-btn img { width:18px; height:18px; filter:invert(0.5); display:block; }
+.modo-btn.active { border-color:var(--green); background:rgba(0,255,65,0.1); }
+.modo-btn.active img { filter:invert(1) sepia(1) saturate(3) hue-rotate(90deg); }
+
+/* TOP STRIP */
+.top-slot { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px 4px; min-height:36px; cursor:pointer; transition:background 0.15s; }
+.top-slot:active { background:var(--dim); }
+.top-slot.activo { background:rgba(0,255,65,0.08); }
+.slot-label { font-size:6px; color:var(--mid); letter-spacing:0.12em; font-weight:700; }
+.slot-val { font-size:9px; color:var(--light); letter-spacing:0.08em; font-weight:700; margin-top:2px; }
+.top-slot.activo .slot-val { color:var(--green); }
+
+/* ZONA CÁMARA */
+#cameraZone { flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:var(--near); overflow:hidden; }
+#viewCanvas { image-rendering:pixelated; display:block; pointer-events:none; }
 #overlayCanvas { position:absolute; top:0; left:0; cursor:crosshair; }
+#previewCanvas { position:absolute; top:0; left:0; pointer-events:none; opacity:0.6; display:none; }
 #video { display:none; }
 #cameraOff { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--mid); }
 #cameraOff .icon { font-size:40px; opacity:0.3; }
 #cameraOff p { font-size:9px; letter-spacing:0.12em; text-align:center; line-height:2; }
-/* tagStrip ahora es columna izquierda flotante sobre la imagen */
+
+/* COLOR CHANNEL */
+#colorChannel { position:absolute; bottom:8px; right:8px; display:none; }
+#colorCanvas { width:64px; height:64px; image-rendering:pixelated; border:1px solid rgba(255,255,255,0.15); display:block; }
+
+/* SPOT INFO */
+#spotInfo { position:absolute; bottom:8px; left:96px; font-size:8px; color:var(--green); letter-spacing:0.1em; pointer-events:none; opacity:0; transition:opacity 0.3s; }
+#spotInfo.show { opacity:1; }
+
+/* ETIQUETAS — columna izquierda flotante */
 #tagStrip {
-  position:absolute; left:0; top:0; bottom:0; width:90px;
+  position:absolute; left:0; top:0; bottom:0; width:88px;
   overflow-x:hidden; overflow-y:auto; display:flex; flex-direction:column;
-  gap:4px; padding:6px 5px; scrollbar-width:none; z-index:10;
-  background:linear-gradient(to right, rgba(0,0,0,0.75) 70%, transparent);
-  pointer-events:none;
-  transition: opacity 0.2s;
+  gap:3px; padding:40px 5px 6px; scrollbar-width:none; z-index:10;
+  background:linear-gradient(to right,rgba(0,0,0,0.78) 75%,transparent);
+  transition:opacity 0.2s;
 }
 #tagStrip.operando { opacity:0; pointer-events:none; }
 #tagStrip::-webkit-scrollbar { display:none; }
 .etiqueta {
-  flex-shrink:0; padding:6px 10px; border:1px solid var(--border);
-  font-size:9px; font-weight:700; letter-spacing:0.08em;
-  cursor:pointer; transition:all 0.2s;
-  background:rgba(0,0,0,0.7); color:var(--mid);
-  display:flex; align-items:center; gap:6px;
-  pointer-events:all; min-height:32px;
-  border-radius:var(--r-etiq);
+  flex-shrink:0; padding:5px 8px; border:1px solid var(--border);
+  font-size:8px; font-weight:700; letter-spacing:0.07em;
+  cursor:pointer; transition:all 0.15s;
+  background:rgba(0,0,0,0.6); color:var(--mid);
+  display:flex; align-items:center; gap:5px;
+  pointer-events:all; border-radius:var(--r-etiq);
 }
-/* Indicador de estado — círculo a la izquierda */
-.etiqueta .estado {
-  width:9px; height:9px; border-radius:50%; flex-shrink:0;
-  border:1px solid var(--mid); background:transparent;
-  transition: all 0.3s;
-}
-.etiqueta.gris .estado  { background:var(--mid); border-color:var(--mid); }
-.etiqueta.amarillo .estado { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
-.etiqueta.gris  { color:var(--light); border-color:var(--mid); }
+.etiqueta .estado { width:8px; height:8px; border-radius:50%; flex-shrink:0; border:1px solid var(--mid); background:transparent; transition:all 0.3s; }
+.etiqueta .cnt { margin-left:auto; font-size:7px; color:var(--mid); font-weight:400; }
+.etiqueta.gris .estado { background:var(--mid); border-color:var(--mid); }
+.etiqueta.gris { color:var(--light); border-color:var(--mid); }
+.etiqueta.amarillo .estado { background:var(--amber); border-color:var(--amber); box-shadow:0 0 5px var(--amber); }
 .etiqueta.amarillo { color:var(--amber); border-color:var(--amber); }
-.etiqueta .cnt {
-  margin-left:auto; font-size:7px; color:var(--mid); font-weight:400;
+.etiqueta.active { outline:1px solid var(--green); color:var(--green); }
+.etiqueta.es-marco { border-color:rgba(0,255,65,0.5); border-width:2px; }
+.etiqueta.es-marco::after { content:attr(data-prim); position:absolute; top:-13px; left:6px; font-size:6px; color:rgba(0,255,65,0.45); letter-spacing:0.1em; white-space:nowrap; pointer-events:none; }
+
+/* BOTONES CONTEXTUALES sobre columna */
+#etiqActions {
+  position:absolute; left:0; top:0; width:88px;
+  display:none; flex-direction:column; gap:3px;
+  padding:5px; z-index:11; pointer-events:all;
+  background:rgba(0,0,0,0.88); border-bottom:1px solid var(--border);
 }
-.etiqueta.active { outline:1px solid var(--green); }
-/* Marco activo: borde más grueso + pequeña pestaña */
-.etiqueta.es-marco {
-  border-color: rgba(0,255,65,0.6);
-  border-width: 2px;
-  position: relative;
-}
-.etiqueta.es-marco::after {
-  content: attr(data-prim);
-  position: absolute;
-  top: -14px; left: 4px;
-  font-size: 6px; color: rgba(0,255,65,0.5);
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  pointer-events: none;
-}
+.ctx-btn { background:transparent; border:1px solid var(--border); color:var(--mid); font-family:'Courier New',monospace; font-size:7px; font-weight:700; letter-spacing:0.07em; padding:5px 6px; cursor:pointer; text-align:left; border-radius:var(--r-op); transition:all 0.1s; }
+.ctx-btn:active { background:var(--dim); color:var(--white); }
+
+/* ZONA DECISIÓN */
+.gesto-ok  { background:var(--green); color:var(--black); border:none; font-family:'Courier New',monospace; font-size:14px; font-weight:700; cursor:pointer; border-radius:var(--r-op); flex-shrink:0; }
+.gesto-cancel { background:rgba(0,0,0,0.85); color:var(--red); border:1px solid var(--red); font-family:'Courier New',monospace; font-size:14px; font-weight:700; cursor:pointer; border-radius:var(--r-op); flex-shrink:0; }
+
+/* REC PANEL */
+#recPanel { display:none; position:absolute; inset:0; background:var(--black); z-index:50; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+#recPanel.visible { display:flex; }
+#recCanvas { image-rendering:pixelated; border:1px solid var(--border); }
+#recLabel { font-size:9px; color:var(--mid); letter-spacing:0.1em; text-align:center; line-height:1.8; }
+#btnCerrarRec { padding:8px 20px; background:var(--dim); border:1px solid var(--border); color:var(--white); font-family:'Courier New',monospace; font-size:10px; cursor:pointer; border-radius:var(--r-op); }
+
+/* HERRAMIENTAS */
+#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
 #primitivosPanel {
-  flex-shrink:0; border-top:1px solid var(--border); padding:8px 10px;
-  display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
+  display:grid; grid-template-rows:repeat(2,54px); grid-auto-flow:column; grid-auto-columns:54px;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; gap:3px; padding:5px;
 }
+#primitivosPanel::-webkit-scrollbar { display:none; }
 .prim-btn {
   background:var(--dim); border:1px solid var(--border); color:var(--light);
-  padding:8px 4px; font-family:'Courier New',monospace; font-size:8px;
-  font-weight:700; letter-spacing:0.06em; cursor:pointer; text-align:center;
-  transition:all 0.1s; line-height:1.3;
-  border-radius:var(--r-op);
+  padding:4px 2px; font-family:'Courier New',monospace; font-size:7px; font-weight:700;
+  letter-spacing:0.05em; cursor:pointer; text-align:center; transition:all 0.1s;
+  border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  width:54px; height:54px;
 }
+.prim-btn img { width:24px; height:24px; filter:invert(0.6); display:block; }
 .prim-btn:active, .prim-btn.selected { background:var(--white); color:var(--black); border-color:var(--white); }
-.prim-btn .icon { font-size:14px; display:block; margin-bottom:2px; }
-#bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; }
-.b-btn {
-  flex:1; background:var(--dim); border:none; border-right:1px solid var(--border);
-  color:var(--light); padding:12px 4px; font-family:'Courier New',monospace;
-  font-size:9px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.1s;
-  border-radius:0; /* en barra, sin radio para que encajen */
-}
+.prim-btn.selected img { filter:invert(0); }
+
+/* BOTTOM BAR — ancho fijo centrado */
+#bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
+#bottomBar .inner { display:flex; width:100%; max-width:480px; }
+.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:var(--mid); padding:9px 4px; font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.1s; border-radius:0; min-width:0; }
 .b-btn:last-child { border-right:none; }
-.b-btn:active { background:var(--border); }
+.b-btn:active { background:var(--border); color:var(--white); }
 .b-btn.primary { background:var(--white); color:var(--black); font-weight:700; }
-#recPanel {
-  display:none; position:absolute; inset:0; background:var(--black); z-index:50;
-  flex-direction:column; align-items:center; justify-content:center; gap:12px;
-}
-#recPanel.visible { display:flex; }
-#recCanvas { image-rendering:pixelated; image-rendering:crisp-edges; border:1px solid var(--border); }
-#recLabel { font-size:9px; color:var(--mid); letter-spacing:0.1em; text-align:center; line-height:1.8; }
-#btnCerrarRec {
-  padding:8px 20px; background:var(--dim); border:1px solid var(--border);
-  color:var(--white); font-family:'Courier New',monospace; font-size:10px; cursor:pointer;
-}
-#notif {
-  position:fixed; bottom:160px; left:50%; transform:translateX(-50%);
-  background:var(--green); color:var(--black); padding:6px 14px; font-size:10px;
-  font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none;
-  opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap;
-}
+
+/* NOTIF */
+#notif { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
 #notif.show { opacity:1; }
-#spotInfo {
-  position:absolute; bottom:8px; left:8px; font-size:8px; color:var(--green);
-  letter-spacing:0.1em; pointer-events:none; opacity:0; transition:opacity 0.3s;
-}
-#spotInfo.show { opacity:1; }
 </style>
 </head>
 <body>
 <div id="app">
+
   <div id="header">
     <div id="logo">EP·ST // VER</div>
-    <div id="frameCount">0 etiquetas</div>
+    <div id="modosBar">
+      <button class="modo-btn active" data-modo="DETECTING" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/DETECTING MODE.png" alt="D">
+      </button>
+      <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/ZEN MODE.png" alt="Z">
+      </button>
+      <button class="modo-btn" data-modo="TOOLS" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/TOOLS MODE.png" alt="T">
+      </button>
+      <button class="modo-btn" data-modo="GENERATE" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GENERATE MODE.png" alt="G">
+      </button>
+    </div>
+    <div id="frameCount">0 etiq</div>
+  </div>
+
+  <!-- TIRA SUPERIOR: MARCO · OPERACIÓN · SEÑALAR -->
+  <div id="topStrip" style="flex-shrink:0;display:flex;gap:0;border-bottom:1px solid var(--border);">
+    <div class="top-slot" id="slotMarco" style="border-right:1px solid var(--border);">
+      <span class="slot-label">MARCO</span>
+      <span class="slot-val" id="valMarco">—</span>
+    </div>
+    <div class="top-slot" id="slotOp" style="border-right:1px solid var(--border);">
+      <span class="slot-label">OPERACIÓN</span>
+      <span class="slot-val" id="valOp">—</span>
+    </div>
+    <div class="top-slot" id="slotSenal">
+      <span class="slot-label">SEÑALAR</span>
+      <span class="slot-val" id="valSenal">—</span>
+    </div>
   </div>
 
   <div id="cameraZone">
-    <div id="cameraOff">
-      <div class="icon">👁</div>
-      <p>PULSA CÁMARA<br>PARA EMPEZAR A VER</p>
+    <div id="cameraOff" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--mid);cursor:pointer;">
+      <div style="font-size:48px;opacity:0.25;">👁</div>
+      <p style="font-size:11px;letter-spacing:0.15em;text-align:center;">TOCA PARA EMPEZAR</p>
     </div>
     <canvas id="viewCanvas"></canvas>
     <canvas id="overlayCanvas"></canvas>
+    <canvas id="previewCanvas"></canvas>
     <video id="video" autoplay playsinline muted></video>
-    <div id="colorChannel" style="position:absolute;bottom:8px;right:8px;display:none;">
-      <canvas id="colorCanvas" width="16" height="16" style="width:64px;height:64px;image-rendering:pixelated;border:1px solid rgba(255,255,255,0.15);"></canvas>
-      <div style="font-size:7px;color:var(--mid);letter-spacing:0.1em;text-align:center;margin-top:2px">COLOR 16²</div>
+    <div id="colorChannel">
+      <canvas id="colorCanvas" width="16" height="16"></canvas>
+      <div style="font-size:6px;color:var(--mid);text-align:center;margin-top:2px">COLOR 16²</div>
     </div>
     <div id="spotInfo"></div>
-    <!-- Botones contextuales sobre columna izquierda -->
-    <div id="etiqActions" style="
-      position:absolute; left:0; top:0; width:90px;
-      display:none; flex-direction:column; gap:4px;
-      padding:6px 5px; z-index:11; pointer-events:all;
-      background:rgba(0,0,0,0.85); border-bottom:1px solid #222;
-    ">
-      <button id="btnMarco" onclick="usarComoMarco()" style="display:none;
-        background:transparent; border:1px solid #555; color:#999;
-        font-family:monospace; font-size:7px; font-weight:700;
-        letter-spacing:0.08em; padding:5px 6px; cursor:pointer;
-        text-align:left; border-radius:3px;">
-        ⬚ USAR COMO MARCO
-      </button>
-      <button id="btnIdentificar" onclick="identificar()" style="display:none;
-        background:transparent; border:1px solid #555; color:#999;
-        font-family:monospace; font-size:7px; font-weight:700;
-        letter-spacing:0.08em; padding:5px 6px; cursor:pointer;
-        text-align:left; border-radius:3px;">
-        ? IDENTIFICAR
-      </button>
-    </div>
-    <div id="tagStrip"></div>
-    <canvas id="previewCanvas" style="position:absolute;top:0;left:0;pointer-events:none;opacity:0.55;display:none;"></canvas>
-    <div id="gestoBar" style="display:none;position:absolute;top:10px;right:10px;flex-direction:column;align-items:flex-end;gap:6px;z-index:20;">
-      <span id="gestoLabel" style="font-size:8px;color:#00ff41;letter-spacing:0.1em;background:rgba(0,0,0,0.7);padding:3px 6px;"></span>
-      <div style="display:flex;gap:6px;">
-        <button onclick="confirmarGesto()" style="background:#00ff41;color:#000;border:none;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:3px;">✓</button>
-        <button onclick="cancelarGesto()" style="background:rgba(0,0,0,0.8);color:#ff2d2d;border:1px solid #ff2d2d;font-family:monospace;font-size:11px;font-weight:700;width:40px;height:40px;cursor:pointer;border-radius:3px;">✕</button>
+    <!-- ZONA DE DECISIÓN: siempre visible durante operación -->
+    <div id="decisionZone" style="display:none;position:absolute;top:8px;left:8px;z-index:15;display:none;flex-direction:column;gap:4px;">
+      <!-- Fila principal: referencia + OK + Cancel -->
+      <div style="display:flex;gap:4px;align-items:stretch;">
+        <div id="refEtiq" style="width:80px;height:36px;border:1px solid var(--border);background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--mid);border-radius:var(--r-op);cursor:pointer;" onclick="seleccionarRefEtiq()">—</div>
+        <button class="gesto-ok" onclick="confirmarGesto()" style="width:36px;height:36px;">✓</button>
+        <button class="gesto-cancel" onclick="cancelarGesto()" style="width:36px;height:36px;">✕</button>
+      </div>
+      <!-- Botones contextuales debajo -->
+      <div id="ctxBtns" style="display:flex;flex-direction:column;gap:3px;">
+        <button id="btnMarco" class="ctx-btn" onclick="usarComoMarco()" style="display:none">⬚ MARCO</button>
+        <button id="btnIdentificar" class="ctx-btn" onclick="identificar()" style="display:none">? IDENTIFICAR</button>
       </div>
     </div>
+    <div id="etiqActions" style="display:none"></div>
+    <div id="tagStrip"></div>
+
     <div id="recPanel">
       <canvas id="recCanvas"></canvas>
-      <div id="recLabel">RECONSTRUCCIÓN ACUMULADA</div>
+      <div id="recLabel"></div>
       <button id="btnCerrarRec" onclick="cerrarRec()">✕ VOLVER</button>
     </div>
   </div>
 
-  <div id="primitivosPanel">
-    <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
-      <span class="icon">·</span>SPOT
-    </button>
-    <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
-      <span class="icon">∠</span>ÁNGULO
-    </button>
-    <button class="prim-btn" data-prim="MEMBRANA" onclick="selectPrim(this)">
-      <span class="icon">◯</span>MEMBRANA
-    </button>
-    <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
-      <span class="icon">▒</span>GRAD
-    </button>
-    <button class="prim-btn" data-prim="MASA_OSCURA" onclick="selectPrim(this)">
-      <span class="icon">■</span>OSCURA
-    </button>
-    <button class="prim-btn" data-prim="MASA_CLARA" onclick="selectPrim(this)">
-      <span class="icon">□</span>CLARA
-    </button>
-    <button class="prim-btn" data-prim="MOVIMIENTO" onclick="selectPrim(this)">
-      <span class="icon">≋</span>MOVIM
-    </button>
-    <button class="prim-btn" data-prim="FOCO" onclick="selectPrim(this)">
-      <span class="icon">◉</span>FOCO
-    </button>
+  <div id="toolsWrapper">
+    <div id="primitivosPanel">
+      <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/POSSITION.png" alt="·">SPOT
+      </button>
+      <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/ANGLE.png" alt="∠">ÁNGULO
+      </button>
+      <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/FUZZY_AREA.png" alt="◯">ÁREA
+      </button>
+      <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GRADIENT.png" alt="▒">GRAD
+      </button>
+      <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/NOISE.png" alt="≋">RUIDO
+      </button>
+      <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/VERTEX.png" alt="◆">VÉRTICE
+      </button>
+      <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/PATTERN.png" alt="⊞">PATRÓN
+      </button>
+      <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/FIGURE.png" alt="▣">FIGURA
+      </button>
+    </div>
   </div>
 
   <div id="bottomBar">
-    <button class="b-btn" id="btnCam" onclick="toggleCamera()">📷 CÁMARA</button>
-    <button class="b-btn" id="btnFreeze" onclick="freezeFrame()" disabled>⏸ CONGELAR</button>
-    <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
-    <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
+    <div class="inner">
+      <button class="b-btn" id="btnCam" onclick="toggleCamera()">📷 CAM</button>
+      <button class="b-btn" id="btnFreeze" onclick="freezeFrame()" disabled>⏸</button>
+      <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
+      <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
+    </div>
   </div>
-</div>
 
+</div>
 <div id="notif"></div>
 
 <script>
 const RES=64, CRES=16;
+const BASE_ASSETS='https://ivantodojunto.github.io/CROP_MACHINE/assets/';
+const UMBRAL_GRIS=1, UMBRAL_AMARILLO=8;
 
 const state = {
-  stream:null, running:false, frozen:false, primActivo:null,
+  stream:null, running:false, frozen:false, primActivo:null, modo:'DETECTING',
+  marcoActivo:null,
   grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
-  spots: [],        // {id, col, row, x, y}
-  elipse:null, dragging:false, dragStart:null,
+  spots:[],
   totalEtiquetas:0, spotSeq:0,
-  tapMoved:false,
-  evidencia: {},    // {id: count} — evidencia acumulada por etiqueta
+  evidencia:{},
 };
 
-// Umbrales de estado
-const UMBRAL_GRIS    = 1;   // mínimo para pasar a gris
-const UMBRAL_AMARILLO = 8;  // para señal fuerte
+const gesto = { fase:0, p1:null, p2:null, p3:null, moviendo:null, tapMoved:false, _timer:null };
 
-const viewCanvas    = document.getElementById('viewCanvas');
-const overlayCanvas = document.getElementById('overlayCanvas');
-const vCtx = viewCanvas.getContext('2d');
-const oCtx = overlayCanvas.getContext('2d');
-const video = document.getElementById('video');
-const workCanvas = document.createElement('canvas');
-workCanvas.width = workCanvas.height = RES;
-const wCtx = workCanvas.getContext('2d');
-const colorCanvas = document.getElementById('colorCanvas');
-const cCtx = colorCanvas.getContext('2d');
-const colorWork = document.createElement('canvas');
-colorWork.width = colorWork.height = CRES;
-const cwCtx = colorWork.getContext('2d');
-const previewCanvas = document.getElementById('previewCanvas');
-const pCtx = previewCanvas.getContext('2d');
-let animFrame = null;
+// Canvas refs
+let viewCanvas, overlayCanvas, vCtx, oCtx;
+let video, workCanvas, wCtx, colorCanvas, cCtx, colorWork, cwCtx;
+let previewCanvas, pCtx, animFrame=null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cameraOff').addEventListener('click', startCamera);
+  viewCanvas    = document.getElementById('viewCanvas');
+  overlayCanvas = document.getElementById('overlayCanvas');
+  previewCanvas = document.getElementById('previewCanvas');
+  vCtx = viewCanvas.getContext('2d');
+  oCtx = overlayCanvas.getContext('2d');
+  pCtx = previewCanvas.getContext('2d');
+  video = document.getElementById('video');
+  colorCanvas = document.getElementById('colorCanvas');
+  cCtx = colorCanvas.getContext('2d');
+  workCanvas = document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d');
+  colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
+  resizeCanvases();
+  iniciarEtiquetasBase();
+  // Eventos touch/mouse
+  overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
+  overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
+  overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
+  overlayCanvas.addEventListener('mousedown', onPointerDown);
+  overlayCanvas.addEventListener('mousemove', onPointerMove);
+  overlayCanvas.addEventListener('mouseup',   onPointerUp);
+});
+
+window.addEventListener('resize', resizeCanvases);
 
 function resizeCanvases() {
-  const zone = document.getElementById('cameraZone');
-  const size = Math.min(zone.clientWidth, zone.clientHeight) * 0.92;
-  viewCanvas.style.width = viewCanvas.style.height = size+'px';
-  viewCanvas.width = viewCanvas.height = size;
-  overlayCanvas.style.width = overlayCanvas.style.height = size+'px';
-  overlayCanvas.width = overlayCanvas.height = size;
-  previewCanvas.style.width = previewCanvas.style.height = size+'px';
-  previewCanvas.width = previewCanvas.height = size;
+  if(!viewCanvas) return;
+  const zone=document.getElementById('cameraZone');
+  const size=Math.min(zone.clientWidth,zone.clientHeight)*0.92;
+  [viewCanvas,overlayCanvas,previewCanvas].forEach(c=>{
+    c.style.width=c.style.height=size+'px'; c.width=c.height=size;
+    c.style.position='absolute';
+  });
   const offX=(zone.clientWidth-size)/2, offY=(zone.clientHeight-size)/2;
-  viewCanvas.style.position='absolute'; viewCanvas.style.left=offX+'px'; viewCanvas.style.top=offY+'px';
-  overlayCanvas.style.left=offX+'px'; overlayCanvas.style.top=offY+'px';
-  previewCanvas.style.position='absolute'; previewCanvas.style.left=offX+'px'; previewCanvas.style.top=offY+'px';
+  [viewCanvas,overlayCanvas,previewCanvas].forEach(c=>{ c.style.left=offX+'px'; c.style.top=offY+'px'; });
 }
-
-// ── BARRA DE GESTO ──
-function mostrarGestoBar(label) {
-  const bar = document.getElementById('gestoBar');
-  document.getElementById('gestoLabel').textContent = label;
-  bar.style.display = 'flex';
-  document.getElementById('tagStrip').classList.add('operando');
-  actualizarBotonesEtiq();
-}
-function ocultarGestoBar() {
-  document.getElementById('gestoBar').style.display = 'none';
-  previewCanvas.style.display = 'none';
-  pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
-  document.getElementById('tagStrip').classList.remove('operando');
-  actualizarBotonesEtiq();
-}
-function confirmarGesto() {
-  if(gesto.fase>=1 && gesto.p1 && (gesto.p2||gesto.moviendo)) {
-    if(!gesto.p2) gesto.p2=gesto.moviendo;
-    clearTimeout(gesto._timer);
-    ejecutarGesto();
-  }
-  ocultarGestoBar();
-}
-function cancelarGesto() {
-  clearTimeout(gesto._timer);
-  gesto.fase=0; gesto.p1=gesto.p2=gesto.p3=gesto.moviendo=null; gesto.tapMoved=false;
-  ocultarGestoBar();
-}
-window.addEventListener('resize', resizeCanvases);
-resizeCanvases();
-window.addEventListener('DOMContentLoaded', iniciarEtiquetasBase);
 
 // ── CÁMARA ──
 async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
 async function startCamera() {
   try {
-    state.stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false});
+    state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false});
     video.srcObject=state.stream; await video.play();
     state.running=true; state.frozen=false;
     document.getElementById('cameraOff').style.display='none';
@@ -322,12 +321,12 @@ async function startCamera() {
     document.getElementById('btnCam').textContent='■ PARAR';
     document.getElementById('btnFreeze').disabled=false;
     renderLoop();
-  } catch(e) { showNotif('Sin permiso de cámara'); }
+  } catch(e){ showNotif('Sin permiso de cámara'); }
 }
 function stopCamera() {
   if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
   state.running=false; if(animFrame) cancelAnimationFrame(animFrame);
-  document.getElementById('btnCam').textContent='📷 CÁMARA';
+  document.getElementById('btnCam').textContent='📷 CAM';
   document.getElementById('btnFreeze').disabled=true;
   document.getElementById('cameraOff').style.display='flex';
   viewCanvas.style.display='none'; overlayCanvas.style.display='none';
@@ -343,21 +342,20 @@ function renderLoop() {
   if(!state.running) return;
   if(!state.frozen && video.readyState>=2) {
     wCtx.drawImage(video,0,0,RES,RES);
-    const imgData=wCtx.getImageData(0,0,RES,RES), d=imgData.data;
+    const id=wCtx.getImageData(0,0,RES,RES), d=id.data;
     for(let i=0;i<d.length;i+=4){ const g=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]); d[i]=d[i+1]=d[i+2]=g; }
-    wCtx.putImageData(imgData,0,0);
+    wCtx.putImageData(id,0,0);
     cwCtx.drawImage(video,0,0,CRES,CRES);
-    const cData=cwCtx.getImageData(0,0,CRES,CRES), cd=cData.data;
+    const cd_=cwCtx.getImageData(0,0,CRES,CRES), cd=cd_.data;
     for(let i=0;i<cd.length;i+=4){
-      const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2], s=2.2, m=128;
+      const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2],s=2.2,m=128;
       cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));
       cd[i+1]=Math.min(255,Math.max(0,m+(cd[i+1]-br)*s+(br-m)*0.25));
       cd[i+2]=Math.min(255,Math.max(0,m+(cd[i+2]-br)*s+(br-m)*0.25));
     }
-    cwCtx.putImageData(cData,0,0);
+    cwCtx.putImageData(cd_,0,0);
     cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
-    const sz=viewCanvas.width;
-    vCtx.imageSmoothingEnabled=false; vCtx.drawImage(workCanvas,0,0,sz,sz);
+    const sz=viewCanvas.width; vCtx.imageSmoothingEnabled=false; vCtx.drawImage(workCanvas,0,0,sz,sz);
     renderAcumulacion();
   }
   renderOverlay();
@@ -365,126 +363,62 @@ function renderLoop() {
 }
 
 function renderAcumulacion() {
-  const s=viewCanvas.width, cs=s/RES;
-  const maxAcum=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
+  const s=viewCanvas.width,cs=s/RES,maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
   vCtx.save();
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const total=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
-    if(total<1) continue;
-    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.35,total/maxAcum*0.35)})`;
-    vCtx.fillRect(c*cs,r*cs,cs,cs);
+    const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
+    if(t<1) continue;
+    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.35,t/maxA*0.35)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
   }
   vCtx.restore();
 }
 
 function renderOverlay() {
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-
-  // Spots guardados
   state.spots.forEach(sp=>{
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
-    oCtx.fillStyle='rgba(0,255,65,0.9)'; oCtx.fill();
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(0,255,65,0.35)'; oCtx.lineWidth=1.5; oCtx.stroke();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.9)'; oCtx.fill();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2); oCtx.strokeStyle='rgba(0,255,65,0.3)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
-
-  // Gesto en curso
   const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
-
-  // Punto P1
-  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
-  oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
-
+  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2); oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
   if(p2){
-    // Línea P1→P2
     oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
-    oCtx.strokeStyle='rgba(0,255,65,0.7)'; oCtx.lineWidth=1.5;
-    oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
-
-    // Punto P2
-    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2);
-    oCtx.fillStyle='rgba(0,255,65,0.8)'; oCtx.fill();
+    oCtx.strokeStyle='rgba(0,255,65,0.7)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
+    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.8)'; oCtx.fill();
+    if(state.primActivo==='ANGULO') renderIntensidadPreview(p1,p2,gesto.p3||(gesto.fase===2?gesto.moviendo:null));
   }
-
-  // P3 si existe
-  if(gesto.p3||( gesto.fase===2 && gesto.moviendo && gesto.p2)){
-    const p3=gesto.p3||gesto.moviendo;
-    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p3.x,p3.y);
-    oCtx.strokeStyle='rgba(0,212,255,0.6)'; oCtx.lineWidth=1.2;
-    oCtx.setLineDash([3,4]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p3.x,p3.y,4,0,Math.PI*2);
-    oCtx.fillStyle='rgba(0,212,255,0.8)'; oCtx.fill();
-  }
-
-  // Preview de intensidad en tiempo real
-  if(p1 && p2 && state.primActivo==='ANGULO') renderIntensidadPreview(p1, p2, gesto.p3);
-}
-
-function renderIntensidadPreview(p1, p2, p3) {
-  const s=previewCanvas.width;
-  pCtx.clearRect(0,0,s,s);
-  const dx2=p2.x-p1.x, dy2=p2.y-p1.y;
-  const long2=Math.sqrt(dx2*dx2+dy2*dy2);
-  if(long2<4) return;
-
-  // Ángulo del eje P1→P2
-  const angEje=Math.atan2(dy2,dx2);
-
-  let apertura, alcance;
-
+  const p3=gesto.p3||(gesto.fase===2&&gesto.moviendo&&gesto.p2?gesto.moviendo:null);
   if(p3){
-    // Con P3: calcular si está sobre el eje o fuera
-    const dx3=p3.x-p1.x, dy3=p3.y-p1.y;
-    const long3=Math.sqrt(dx3*dx3+dy3*dy3);
-    const t3=((dx3)*dx2+(dy3)*dy2)/(long2*long2);
-    const perpX3=p3.x-(p1.x+t3*dx2), perpY3=p3.y-(p1.y+t3*dy2);
-    const distPerp3=Math.sqrt(perpX3*perpX3+perpY3*perpY3);
-    const sobreEje=distPerp3<long2*0.25;
-
-    if(sobreEje){
-      // P3 sobre eje: concentración. cerca P1=estrecho, lejos=ancho
-      apertura=Math.max(0.05, Math.min(Math.PI*0.8, (1-Math.min(1,t3)) * Math.PI*0.5 + 0.05));
-      alcance=long2;
-    } else {
-      // P3 fuera: ángulo real entre P1→P2 y P1→P3
-      const angP3=Math.atan2(dy3,dx3);
-      apertura=Math.abs(angP3-angEje);
-      if(apertura>Math.PI) apertura=Math.PI*2-apertura;
-      apertura=apertura/2;
-      alcance=Math.max(long2,long3);
-    }
-  } else {
-    // Solo P1+P2: cono estándar ~35°
-    apertura=Math.PI*0.18;
-    alcance=long2;
+    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p3.x,p3.y);
+    oCtx.strokeStyle='rgba(0,212,255,0.6)'; oCtx.lineWidth=1.2; oCtx.setLineDash([3,4]); oCtx.stroke(); oCtx.setLineDash([]);
+    oCtx.beginPath(); oCtx.arc(p3.x,p3.y,4,0,Math.PI*2); oCtx.fillStyle='rgba(0,212,255,0.8)'; oCtx.fill();
   }
-
-  // Gradiente cónico — clip triangular + radial desde P1
-  pCtx.save();
-  pCtx.beginPath();
-  pCtx.moveTo(p1.x, p1.y);
-  // Dos rayos del cono
-  const ray=alcance*1.3;
-  pCtx.lineTo(p1.x+Math.cos(angEje-apertura)*ray, p1.y+Math.sin(angEje-apertura)*ray);
-  // Arco
-  pCtx.arc(p1.x, p1.y, ray, angEje-apertura, angEje+apertura);
-  pCtx.closePath();
-  pCtx.clip();
-
-  // Gradiente radial desde P1: duro en centro, se apaga con distancia
-  const grad=pCtx.createRadialGradient(p1.x,p1.y,0, p1.x,p1.y,alcance*1.1);
-  grad.addColorStop(0,   'rgba(255,220,80,0.92)');
-  grad.addColorStop(0.15,'rgba(255,184,0,0.75)');
-  grad.addColorStop(0.45,'rgba(255,140,0,0.35)');
-  grad.addColorStop(1,   'rgba(255,80,0,0.0)');
-  pCtx.fillStyle=grad;
-  pCtx.fillRect(0,0,s,s);
-  pCtx.restore();
 }
 
-// ── SPOT ──
-function marcarSpot(x, y) {
+function renderIntensidadPreview(p1,p2,p3) {
+  const s=previewCanvas.width; pCtx.clearRect(0,0,s,s);
+  const dx=p2.x-p1.x,dy=p2.y-p1.y,L=Math.sqrt(dx*dx+dy*dy); if(L<4) return;
+  const angEje=Math.atan2(dy,dx);
+  let apertura=Math.PI*0.18, alcance=L;
+  if(p3){
+    const dx3=p3.x-p1.x,dy3=p3.y-p1.y,L3=Math.sqrt(dx3*dx3+dy3*dy3);
+    const t3=((dx3)*dx+(dy3)*dy)/(L*L);
+    const perpX=p3.x-(p1.x+t3*dx),perpY=p3.y-(p1.y+t3*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
+    if(dp<L*0.25){ apertura=Math.max(0.05,Math.min(Math.PI*0.8,(1-Math.min(1,t3))*Math.PI*0.5+0.05)); alcance=L; }
+    else { const a3=Math.atan2(dy3,dx3); let diff=Math.abs(a3-angEje); if(diff>Math.PI) diff=Math.PI*2-diff; apertura=diff/2; alcance=Math.max(L,L3); }
+  }
+  pCtx.save();
+  pCtx.beginPath(); pCtx.moveTo(p1.x,p1.y);
+  pCtx.arc(p1.x,p1.y,alcance*1.3,angEje-apertura,angEje+apertura); pCtx.closePath(); pCtx.clip();
+  const grad=pCtx.createRadialGradient(p1.x,p1.y,0,p1.x,p1.y,alcance*1.1);
+  grad.addColorStop(0,'rgba(255,220,80,0.92)'); grad.addColorStop(0.15,'rgba(255,184,0,0.75)');
+  grad.addColorStop(0.45,'rgba(255,140,0,0.35)'); grad.addColorStop(1,'rgba(255,80,0,0.0)');
+  pCtx.fillStyle=grad; pCtx.fillRect(0,0,s,s); pCtx.restore();
+}
+
+// ── SPOTS ──
+function marcarSpot(x,y) {
   const s=viewCanvas.width;
   const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
   const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
@@ -492,204 +426,141 @@ function marcarSpot(x, y) {
   state.spots.push({id,col,row,x,y});
   state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
   state.totalEtiquetas++;
-  actualizarTagStrip('SPOT');
-  updateFrameCount();
+  actualizarTagStrip('SPOT'); updateFrameCount();
   const el=document.getElementById('spotInfo');
-  el.textContent=`SPOT ${id} · (${col},${row})`;
-  el.classList.add('show');
+  el.textContent=`SPOT ${id} · (${col},${row})`; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),1400);
 }
 
-// ── ELIPSE ──
-function drawElipse(e) {
-  const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
-  const rx=Math.abs(e.x2-e.x1)/2, ry=Math.abs(e.y2-e.y1)/2;
-  oCtx.strokeStyle='rgba(0,255,65,0.8)'; oCtx.lineWidth=1.5; oCtx.setLineDash([4,3]);
-  oCtx.beginPath(); oCtx.ellipse(cx,cy,Math.max(1,rx),Math.max(1,ry),0,0,Math.PI*2); oCtx.stroke();
-  oCtx.setLineDash([]);
-  const foc=Math.sqrt(Math.max(0,rx*rx-ry*ry));
-  oCtx.fillStyle='rgba(255,184,0,0.9)';
-  oCtx.beginPath(); oCtx.arc(cx-foc,cy,3,0,Math.PI*2); oCtx.fill();
-  oCtx.beginPath(); oCtx.arc(cx+foc,cy,3,0,Math.PI*2); oCtx.fill();
+// ── ÁNGULO ──
+function etiquetarAngulo(p1,p2,p3) {
+  const s=viewCanvas.width,cs=s/RES;
+  const dx=p2.x-p1.x,dy=p2.y-p1.y,L=Math.sqrt(dx*dx+dy*dy); if(L<4) return;
+  let count=0;
+  if(!p3){
+    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+      const px=c*cs+cs/2,py=r*cs+cs/2;
+      const t=((px-p1.x)*dx+(py-p1.y)*dy)/(L*L); if(t<0||t>1.2) continue;
+      const perpX=px-(p1.x+t*dx),perpY=py-(p1.y+t*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
+      if(dp>L*0.35*(0.3+t)) continue;
+      const intens=Math.round((1-t)*8)+1;
+      state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intens; count++; state.totalEtiquetas++;
+    }
+  } else {
+    const dx3=p3.x-p1.x,dy3=p3.y-p1.y,L3=Math.sqrt(dx3*dx3+dy3*dy3);
+    const t3=((dx3)*dx+(dy3)*dy)/(L*L);
+    const perpX=p3.x-(p1.x+t3*dx),perpY=p3.y-(p1.y+t3*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
+    const sobreEje=dp<L*0.25;
+    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+      const px=c*cs+cs/2,py=r*cs+cs/2;
+      if(sobreEje){
+        const t=((px-p1.x)*dx+(py-p1.y)*dy)/(L*L); if(t<0||t>1.2) continue;
+        const pX=px-(p1.x+t*dx),pY=py-(p1.y+t*dy),d=Math.sqrt(pX*pX+pY*pY);
+        const conc=Math.max(0.1,Math.min(2,t3));
+        if(d>L*0.35*(0.3+t)*conc) continue;
+        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+Math.round((1-t)*8)+1; count++; state.totalEtiquetas++;
+      } else {
+        const vx=px-p1.x,vy=py-p1.y,dP1=Math.sqrt(vx*vx+vy*vy); if(dP1<1) continue;
+        const t1=((vx)*dx+(vy)*dy)/(L*dP1),t2=((vx)*dx3+(vy)*dy3)/(L3*dP1);
+        if(t1<0.3||t2<0.3) continue;
+        const intens=Math.max(1,Math.round((1-dP1/Math.max(L,L3))*8));
+        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intens; count++; state.totalEtiquetas++;
+      }
+    }
+  }
+  if(count>0){ actualizarTagStrip('ANGULO'); updateFrameCount(); showNotif('ÁNGULO · '+count+' celdas'); }
+}
+
+// ── ÁREA (elipse) ──
+function etiquetarElipse(elipse,prim) {
+  const s=viewCanvas.width,cs=s/RES;
+  const cx=(elipse.x1+elipse.x2)/2,cy=(elipse.y1+elipse.y2)/2;
+  const rx=Math.max(cs/2,Math.abs(elipse.x2-elipse.x1)/2),ry=Math.max(cs/2,Math.abs(elipse.y2-elipse.y1)/2);
+  let count=0;
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+    const px=c*cs+cs/2,py=r*cs+cs/2,dx=(px-cx)/rx,dy=(py-cy)/ry;
+    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
+  }
+  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count+' celdas'); }
 }
 
 // ── INTERACCIÓN ──
-// Gestos: SPOT=tap · ANGULO=P1(down)→P2(up) luego P3 opcional(tap)
-// Estado del gesto en curso
-const gesto = {
-  fase: 0,      // 0=esperando, 1=P1 fijo esperando P2, 2=P1+P2 fijos esperando P3
-  p1:null, p2:null, p3:null,
-  moviendo:null, // posición actual del dedo mientras arrastra
-  tapMoved:false,
-};
-
 function getCanvasPos(e) {
   const rect=overlayCanvas.getBoundingClientRect();
-  const t=(e.touches&&e.touches.length>0)?e.touches[0]:(e.changedTouches&&e.changedTouches.length>0)?e.changedTouches[0]:e;
-  return {x:t.clientX-rect.left, y:t.clientY-rect.top};
+  const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;
+  return {x:t.clientX-rect.left,y:t.clientY-rect.top};
 }
 
 function onPointerDown(e) {
-  if(!state.running) return;
-  e.preventDefault();
+  if(!state.running) return; e.preventDefault();
   gesto.tapMoved=false;
   const p=getCanvasPos(e);
-
-  if(state.primActivo==='SPOT'){ gesto.moviendo=p; return; }
-  if(!state.primActivo){ showNotif('Selecciona un primitivo'); return; }
-
-  if(gesto.fase===0){
-    gesto.p1=p; gesto.moviendo=p; gesto.fase=1;
-    mostrarGestoBar('P1 fijo · arrastra P2');
-    previewCanvas.style.display='block';
-  } else if(gesto.fase===2){
-    gesto.p3=p; gesto.moviendo=p;
-    mostrarGestoBar('P3 · ✓ OK para confirmar');
-  }
-}
-
-function onPointerMove(e) {
-  e.preventDefault();
-  if(!gesto.moviendo) return;
-  const p=getCanvasPos(e);
-  if(gesto.p1){
-    const dx=p.x-gesto.p1.x, dy=p.y-gesto.p1.y;
-    if(Math.sqrt(dx*dx+dy*dy)>6) gesto.tapMoved=true;
-  }
   gesto.moviendo=p;
+  if(state.primActivo==='SPOT'){ gesto.p1=p; return; }
+  if(!state.primActivo){ showNotif('Selecciona un primitivo'); return; }
+  if(gesto.fase===0){ gesto.p1=p; gesto.fase=1; mostrarGestoBar('P1 · arrastra P2'); previewCanvas.style.display='block'; }
+  else if(gesto.fase===2){ gesto.p3=p; mostrarGestoBar('P3 · ✓ OK para confirmar'); }
 }
-
+function onPointerMove(e) {
+  e.preventDefault(); if(!gesto.p1) return;
+  const p=getCanvasPos(e); gesto.moviendo=p;
+  const dx=p.x-gesto.p1.x,dy=p.y-gesto.p1.y;
+  if(Math.sqrt(dx*dx+dy*dy)>6) gesto.tapMoved=true;
+}
 function onPointerUp(e) {
-  e.preventDefault();
-  const p=getCanvasPos(e);
-
-  // SPOT: tap simple
+  e.preventDefault(); const p=getCanvasPos(e);
   if(state.primActivo==='SPOT'){
     if(!gesto.tapMoved) marcarSpot(p.x,p.y);
-    gesto.moviendo=null; gesto.tapMoved=false; return;
+    gesto.p1=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
-
-  if(gesto.fase===1){
-    gesto.p2=p; gesto.moviendo=null; gesto.fase=2;
-    mostrarGestoBar('P2 fijo · P3 opcional o ✓ OK');
-    gesto._timer=setTimeout(()=>{ if(gesto.fase===2){ ejecutarGesto(); ocultarGestoBar(); } }, 2500);
-  } else if(gesto.fase===2 && gesto.p3){
-    // P3 recibido, ejecutar
-    clearTimeout(gesto._timer);
-    ejecutarGesto();
-  }
+  if(gesto.fase===1){ gesto.p2=p; gesto.moviendo=null; gesto.fase=2; mostrarGestoBar('P2 fijo · P3 opcional o ✓ OK'); gesto._timer=setTimeout(()=>{ if(gesto.fase===2) ejecutarGesto(); },2500); }
+  else if(gesto.fase===2&&gesto.p3){ clearTimeout(gesto._timer); ejecutarGesto(); }
 }
 
 function ejecutarGesto() {
   if(!gesto.p1||!gesto.p2) return;
-  if(state.primActivo==='ANGULO') etiquetarAngulo(gesto.p1, gesto.p2, gesto.p3);
-  else etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
-  // Reset gesto
-  gesto.fase=0; gesto.p1=gesto.p2=gesto.p3=gesto.moviendo=null; gesto.tapMoved=false;
-  ocultarGestoBar();
+  if(state.primActivo==='ANGULO') etiquetarAngulo(gesto.p1,gesto.p2,gesto.p3);
+  else etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y},state.primActivo);
+  resetGesto();
+}
+function resetGesto() { gesto.fase=0; gesto.p1=gesto.p2=gesto.p3=gesto.moviendo=null; gesto.tapMoved=false; ocultarGestoBar(); }
+function confirmarGesto() { if(gesto.fase>=1&&gesto.p1){if(!gesto.p2)gesto.p2=gesto.moviendo; clearTimeout(gesto._timer); ejecutarGesto();} else resetGesto(); }
+function cancelarGesto() { clearTimeout(gesto._timer); resetGesto(); }
+
+function mostrarGestoBar(label) {
+  const dz=document.getElementById('decisionZone');
+  dz.style.display='flex';
+  document.getElementById('tagStrip').classList.add('operando');
+  actualizarBotonesEtiq();
+}
+function ocultarGestoBar() {
+  document.getElementById('decisionZone').style.display='none';
+  previewCanvas.style.display='none';
+  if(pCtx) pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
+  document.getElementById('tagStrip').classList.remove('operando');
+  actualizarBotonesEtiq();
+}
+function seleccionarRefEtiq() {
+  document.getElementById('tagStrip').classList.remove('operando');
 }
 
-overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
-overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
-overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
-overlayCanvas.addEventListener('mousedown', onPointerDown);
-overlayCanvas.addEventListener('mousemove', onPointerMove);
-overlayCanvas.addEventListener('mouseup',   onPointerUp);
-
-// ── ETIQUETAR ELIPSE ──
-function etiquetarElipse(elipse,prim) {
-  const s=viewCanvas.width, cs=s/RES;
-  const cx=(elipse.x1+elipse.x2)/2, cy=(elipse.y1+elipse.y2)/2;
-  const rx=Math.max(cs/2,Math.abs(elipse.x2-elipse.x1)/2);
-  const ry=Math.max(cs/2,Math.abs(elipse.y2-elipse.y1)/2);
-  let count=0;
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2, py=r*cs+cs/2;
-    const dx=(px-cx)/rx, dy=(py-cy)/ry;
-    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
-  }
-  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim.replace('_',' ')+' · '+count+' celdas'); }
-}
-
-// ── ETIQUETAR ÁNGULO ──
-// Ley: intensidad siempre decae desde P1
-// P1+P2 = foco con decaimiento estándar (cono desde P1 hacia P2)
-// P3 sobre eje = modifica concentración (cerca P1=duro, lejos=suave)
-// P3 fuera del eje = ángulo real, P1 es vértice entre vector P1→P2 y vector P1→P3
-function etiquetarAngulo(p1, p2, p3) {
-  const s=viewCanvas.width, cs=s/RES;
-  const dx=p2.x-p1.x, dy=p2.y-p1.y;
-  const longEje=Math.sqrt(dx*dx+dy*dy);
-  if(longEje<4) return;
-
-  let count=0;
-
-  if(!p3) {
-    // Solo P1+P2: decaimiento estándar tipo foco desde P1
-    // Cada celda recibe intensidad según distancia perpendicular al eje y proyección
-    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-      const px=c*cs+cs/2, py=r*cs+cs/2;
-      // Proyección sobre el eje P1→P2
-      const t=((px-p1.x)*dx+(py-p1.y)*dy)/(longEje*longEje);
-      if(t<0||t>1.2) continue; // solo hacia adelante
-      // Distancia perpendicular al eje
-      const perpX=px-(p1.x+t*dx), perpY=py-(p1.y+t*dy);
-      const distPerp=Math.sqrt(perpX*perpX+perpY*perpY);
-      // Apertura del cono crece con t (más lejos = más ancho)
-      const radioMax=longEje*0.35*(0.3+t);
-      if(distPerp>radioMax) continue;
-      // Intensidad: dura cerca de P1, suave lejos — ley universal
-      const intensidad=Math.round((1-t)*8)+1;
-      state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
-      count++; state.totalEtiquetas++;
-    }
-  } else {
-    // Con P3: determinar si está sobre el eje o fuera
-    const t3=((p3.x-p1.x)*dx+(p3.y-p1.y)*dy)/(longEje*longEje);
-    const perpX3=p3.x-(p1.x+t3*dx), perpY3=p3.y-(p1.y+t3*dy);
-    const distPerp3=Math.sqrt(perpX3*perpX3+perpY3*perpY3);
-    const sobreEje=distPerp3<longEje*0.25;
-
-    if(sobreEje) {
-      // P3 sobre el eje: modifica concentración
-      // t3 cercano a 0 (cerca P1) = muy concentrado · t3 > 1 = muy repartido
-      const concentracion=Math.max(0.1, Math.min(2.0, t3));
-      for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-        const px=c*cs+cs/2, py=r*cs+cs/2;
-        const t=((px-p1.x)*dx+(py-p1.y)*dy)/(longEje*longEje);
-        if(t<0||t>1.2) continue;
-        const perpX=px-(p1.x+t*dx), perpY=py-(p1.y+t*dy);
-        const distPerp=Math.sqrt(perpX*perpX+perpY*perpY);
-        const radioMax=longEje*0.35*(0.3+t)*concentracion;
-        if(distPerp>radioMax) continue;
-        const intensidad=Math.round((1-t)*8)+1;
-        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
-        count++; state.totalEtiquetas++;
-      }
-    } else {
-      // P3 fuera del eje: ángulo real — P1 es vértice
-      const dx2=p3.x-p1.x, dy2=p3.y-p1.y;
-      const long2=Math.sqrt(dx2*dx2+dy2*dy2);
-      for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-        const px=c*cs+cs/2, py=r*cs+cs/2;
-        const vx=px-p1.x, vy=py-p1.y;
-        const distP1=Math.sqrt(vx*vx+vy*vy);
-        if(distP1<1) continue;
-        // Ángulo del punto respecto a P1
-        const t1=((vx)*dx+(vy)*dy)/(longEje*distP1);   // cos con eje1
-        const t2=((vx)*dx2+(vy)*dy2)/(long2*distP1);   // cos con eje2
-        // El punto está dentro del ángulo si está del lado de ambos ejes
-        if(t1<0.3||t2<0.3) continue;
-        // Intensidad decae con distancia desde P1
-        const maxDist=Math.max(longEje,long2);
-        const intensidad=Math.max(1,Math.round((1-distP1/maxDist)*8));
-        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intensidad;
-        count++; state.totalEtiquetas++;
-      }
-    }
-  }
-
-  if(count>0){ actualizarTagStrip('ANGULO'); updateFrameCount(); showNotif('ÁNGULO · '+count+' celdas'); }
+function actualizarTopStrip() {
+  // MARCO
+  const sm=document.getElementById('slotMarco');
+  const vm=document.getElementById('valMarco');
+  if(state.marcoActivo){ vm.textContent=state.marcoActivo; sm.classList.add('activo'); }
+  else { vm.textContent='—'; sm.classList.remove('activo'); }
+  // OPERACIÓN
+  const so=document.getElementById('slotOp');
+  const vo=document.getElementById('valOp');
+  if(state.primActivo&&state.primActivo!==state.marcoActivo){ vo.textContent=state.primActivo; so.classList.add('activo'); }
+  else { vo.textContent='—'; so.classList.remove('activo'); }
+  // SEÑALAR — muestra total etiquetas activas
+  const ss=document.getElementById('slotSenal');
+  const vs=document.getElementById('valSenal');
+  const activas=Object.entries(state.evidencia).filter(([k,v])=>v>=UMBRAL_GRIS).length;
+  if(activas>0){ vs.textContent=activas+' activa'+(activas>1?'s':''); ss.classList.add('activo'); }
+  else { vs.textContent='—'; ss.classList.remove('activo'); }
 }
 
 // ── PRIMITIVOS ──
@@ -698,97 +569,79 @@ function selectPrim(btn) {
   const prim=btn.dataset.prim;
   state.primActivo=(state.primActivo===prim)?null:prim;
   if(state.primActivo) btn.classList.add('selected');
-  actualizarBotonesEtiq();
+  actualizarBotonesEtiq(); actualizarTopStrip();
 }
 
-// ── TAG STRIP ──
+// ── MODOS ──
+function setModo(btn) {
+  document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); state.modo=btn.dataset.modo;
+}
+
+// ── ETIQUETAS BASE ──
+const ETIQUETAS_BASE = ['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
 const tagCounts={};
 
-// ── STARTER PACK nivel 0 ──
-const ETIQUETAS_BASE = [
-  { id:'LUZ',     color:'#fffbe6' },
-  { id:'SOMBRA',  color:'#1a1a2e' },
-  { id:'ROJO',    color:'#ff2d2d' },
-  { id:'VERDE',   color:'#00ff41' },
-  { id:'AZUL',    color:'#0088ff' },
-  { id:'AMARILLO',color:'#ffb800' },
-  { id:'MARRÓN',  color:'#8b5c2a' },
-  { id:'CARNE',   color:'#e8a87c' },
-];
-
-function iniciarEtiquetasBase() {
-  ETIQUETAS_BASE.forEach(e => {
-    tagCounts[e.id] = 0;
-    if(!document.querySelector(`.etiqueta[data-prim="${e.id}"]`))
-      crearEtiquetaEl(e.id);
-  });
-}
+function iniciarEtiquetasBase() { ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); }); }
 
 function crearEtiquetaEl(id) {
-  const el = document.createElement('div');
-  el.className = 'etiqueta';
-  el.dataset.prim = id;
-  const dot = document.createElement('span');
-  dot.className = 'estado';
-  el.appendChild(dot);
+  if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
+  const el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=id;
+  const dot=document.createElement('span'); dot.className='estado'; el.appendChild(dot);
   el.appendChild(document.createTextNode(id));
-  const cnt = document.createElement('span');
-  cnt.className = 'cnt';
-  cnt.textContent = '0';
-  el.appendChild(cnt);
-  el.addEventListener('click', () => {
-    const wasActive = el.classList.contains('active');
+  const cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent='0'; el.appendChild(cnt);
+  el.addEventListener('click',()=>{
+    const was=el.classList.contains('active');
     document.querySelectorAll('.etiqueta').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-    if(!wasActive){
-      el.classList.add('active');
-      state.primActivo = id;
-    } else {
-      state.primActivo = null;
-    }
+    if(!was){ el.classList.add('active'); state.primActivo=id; } else state.primActivo=null;
+    actualizarBotonesEtiq();
   });
   document.getElementById('tagStrip').appendChild(el);
-  return el;
 }
 
 function actualizarTagStrip(prim) {
   tagCounts[prim]=(tagCounts[prim]||0)+1;
-  let el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
-  if(!el) el=crearEtiquetaEl(prim);
-  el.querySelector('.cnt').textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
-  sumarEvidencia(prim, 1);
+  if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
+  document.querySelector(`.etiqueta[data-prim="${prim}"] .cnt`).textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
+  sumarEvidencia(prim,1);
 }
 
-function sumarEvidencia(id, cantidad) {
-  state.evidencia[id] = (state.evidencia[id]||0) + cantidad;
-  const ev = state.evidencia[id];
-  const el = document.querySelector(`.etiqueta[data-prim="${id}"]`);
-  if(!el) return;
-
-  const eraAmarillo = el.classList.contains('amarillo');
-  const eraGris     = el.classList.contains('gris');
-
+function sumarEvidencia(id,n) {
+  state.evidencia[id]=(state.evidencia[id]||0)+n;
+  const ev=state.evidencia[id];
+  const el=document.querySelector(`.etiqueta[data-prim="${id}"]`); if(!el) return;
+  const eraA=el.classList.contains('amarillo'), eraG=el.classList.contains('gris');
   el.classList.remove('gris','amarillo');
+  if(ev>=UMBRAL_AMARILLO){ el.classList.add('amarillo'); if(!eraA) showNotif(id+' · ⚡ UMBRAL',3000); }
+  else if(ev>=UMBRAL_GRIS){ el.classList.add('gris'); if(!eraG) showNotif(id+' · señal activa'); }
+}
 
-  if(ev >= UMBRAL_AMARILLO) {
-    el.classList.add('amarillo');
-    if(!eraAmarillo) activarSenal(id); // primer disparo
-  } else if(ev >= UMBRAL_GRIS) {
-    el.classList.add('gris');
-    if(!eraGris) activarFondo(id);
+// ── MARCO / IDENTIFICAR ──
+function actualizarBotonesEtiq() {
+  const btnM=document.getElementById('btnMarco');
+  const btnI=document.getElementById('btnIdentificar');
+  const hayGesto=gesto.fase>0;
+  // Actualizar referencia en zona decisión
+  if(state.marcoActivo){
+    const ref=document.getElementById('refEtiq');
+    if(ref) ref.textContent=state.marcoActivo;
   }
+  if(btnM) btnM.style.display=(state.primActivo&&!hayGesto)?'block':'none';
+  if(btnI) btnI.style.display=(hayGesto&&gesto.fase>=2)?'block':'none';
+  // Mostrar decisionZone si hay etiqueta seleccionada o gesto
+  const dz=document.getElementById('decisionZone');
+  if(dz&&!hayGesto) dz.style.display=(state.primActivo)?'flex':'none';
 }
-
-function activarFondo(id) {
-  // Señal de fondo: captura el estado actual del grid para esta etiqueta
-  // Se queda fija — foto del momento de activación
-  showNotif(id + ' · señal activa');
+function usarComoMarco() {
+  if(!state.primActivo) return;
+  state.marcoActivo=state.primActivo;
+  document.querySelectorAll('.etiqueta').forEach(el=>el.classList.remove('es-marco'));
+  const el=document.querySelector(`.etiqueta[data-prim="${state.marcoActivo}"]`);
+  if(el) el.classList.add('es-marco');
+  actualizarBotonesEtiq(); actualizarTopStrip(); showNotif('Marco: '+state.marcoActivo);
 }
-
-function activarSenal(id) {
-  showNotif(id + ' · ⚡ UMBRAL', 3000);
-}
-function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiquetas'; }
+function identificar() { showNotif('IDENTIFICAR — próximamente'); }
 
 // ── RECONSTRUCCIÓN ──
 function verReconstruccion() {
@@ -799,23 +652,17 @@ function verReconstruccion() {
   cvs.width=cvs.height=size; cvs.style.width=cvs.style.height=size+'px';
   const ctx=cvs.getContext('2d'); ctx.imageSmoothingEnabled=false;
   const cs=size/RES;
-  const colores={SPOT:[0,255,65],BORDE_BRUSCO:[255,255,255],HORIZONTAL:[0,200,255],VERTICAL:[255,100,0],MASA_OSCURA:[20,20,40],MASA_CLARA:[220,220,200],MOVIMIENTO:[255,0,200],FOCO:[255,220,0]};
+  const col_={SPOT:[0,255,65],ANGULO:[255,184,0],AREA:[0,200,255],GRADIENTE:[180,180,255],RUIDO:[200,100,200],VERTICE:[255,255,100],PATRON:[100,255,200],FIGURA:[255,150,100]};
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const cell=state.grid[r][c], total=Object.values(cell).reduce((a,v)=>a+v,0);
-    if(total===0){ctx.fillStyle='rgb(40,40,40)';ctx.fillRect(c*cs,r*cs,cs,cs);continue;}
+    const cell=state.grid[r][c],total=Object.values(cell).reduce((a,v)=>a+v,0);
+    if(total===0){ctx.fillStyle='rgb(30,30,30)';ctx.fillRect(c*cs,r*cs,cs,cs);continue;}
     const dom=Object.entries(cell).sort((a,b)=>b[1]-a[1])[0][0];
-    const int=Math.min(1,total/10), [r1,g1,b1]=colores[dom]||[128,128,128], base=40;
-    ctx.fillStyle=`rgb(${Math.round(base+r1*int*0.85)},${Math.round(base+g1*int*0.85)},${Math.round(base+b1*int*0.85)})`;
+    const int=Math.min(1,total/10),[r1,g1,b1]=col_[dom]||[128,128,128];
+    ctx.fillStyle=`rgb(${Math.round(40+r1*int*0.85)},${Math.round(40+g1*int*0.85)},${Math.round(40+b1*int*0.85)})`;
     ctx.fillRect(c*cs,r*cs,cs,cs);
   }
-  // Marcar spots en reconstrucción
-  state.spots.forEach(sp=>{
-    const sx=sp.col*cs+cs/2, sy=sp.row*cs+cs/2;
-    ctx.beginPath(); ctx.arc(sx,sy,cs*0.8,0,Math.PI*2);
-    ctx.fillStyle='rgba(0,255,65,0.7)'; ctx.fill();
-  });
-  const desc=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>k.replace('_',' ')+'×'+v).join(' · ');
-  document.getElementById('recLabel').textContent=Object.keys(tagCounts).length+' PRIMITIVOS · '+state.totalEtiquetas+' MARCAS\n'+desc;
+  state.spots.forEach(sp=>{ const sx=sp.col*cs+cs/2,sy=sp.row*cs+cs/2; ctx.beginPath(); ctx.arc(sx,sy,cs*0.8,0,Math.PI*2); ctx.fillStyle='rgba(0,255,65,0.7)'; ctx.fill(); });
+  document.getElementById('recLabel').textContent=Object.keys(tagCounts).filter(k=>tagCounts[k]>0).length+' primitivos · '+state.totalEtiquetas+' marcas';
 }
 function cerrarRec(){ document.getElementById('recPanel').classList.remove('visible'); }
 
@@ -823,75 +670,17 @@ function cerrarRec(){ document.getElementById('recPanel').classList.remove('visi
 function exportarEtiquetas() {
   if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
   const celdas=[];
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length>0) celdas.push({r,c,etiquetas:state.grid[r][c]});
-  const cImgData=cCtx.getImageData(0,0,CRES,CRES), colorPixels=[];
-  for(let i=0;i<cImgData.data.length;i+=4) colorPixels.push([cImgData.data[i],cImgData.data[i+1],cImgData.data[i+2]]);
-  const data={
-    canal_brillo:{resolucion:RES,total_etiquetas:state.totalEtiquetas,primitivos:tagCounts,celdas},
-    canal_color:{resolucion:CRES,pixeles:colorPixels},
-    spots:state.spots.map(sp=>({id:sp.id,col:sp.col,row:sp.row})),
-    timestamp:new Date().toISOString()
-  };
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ver_'+Date.now()+'.json'; a.click();
-  showNotif('JSON exportado · '+celdas.length+' celdas');
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
+  const ci=cCtx.getImageData(0,0,CRES,CRES),cp=[];
+  for(let i=0;i<ci.data.length;i+=4) cp.push([ci.data[i],ci.data[i+1],ci.data[i+2]]);
+  const data={brillo:{res:RES,total:state.totalEtiquetas,prims:tagCounts,celdas},color:{res:CRES,px:cp},spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
+  showNotif('JSON · '+celdas.length+' celdas');
 }
-
-// ── MARCO ──
-state.marcoActivo = null; // etiqueta usada como marco
-
-function actualizarBotonesEtiq() {
-  const actions = document.getElementById('etiqActions');
-  const btnMarco = document.getElementById('btnMarco');
-  const btnId = document.getElementById('btnIdentificar');
-
-  const haySeleccion = !!state.primActivo;
-  const hayGesto = gesto.fase > 0;
-
-  // Mostrar panel si hay algo que mostrar
-  const mostrar = haySeleccion || hayGesto;
-  actions.style.display = mostrar ? 'flex' : 'none';
-
-  // USAR COMO MARCO: solo si hay etiqueta seleccionada y no hay gesto activo
-  btnMarco.style.display = (haySeleccion && !hayGesto) ? 'block' : 'none';
-
-  // IDENTIFICAR: solo durante gesto activo (fase 2+)
-  btnId.style.display = (hayGesto && gesto.fase >= 2) ? 'block' : 'none';
-
-  // Si hay marco activo, resaltar columna
-  const tagStrip = document.getElementById('tagStrip');
-  tagStrip.style.borderLeft = state.marcoActivo
-    ? '2px solid rgba(0,255,65,0.5)'
-    : 'none';
-}
-
-function usarComoMarco() {
-  if(!state.primActivo) return;
-  state.marcoActivo = state.primActivo;
-  // Añadir "joroba" visual a la etiqueta marco
-  document.querySelectorAll('.etiqueta').forEach(el => {
-    el.classList.remove('es-marco');
-  });
-  const elMarco = document.querySelector(`.etiqueta[data-prim="${state.marcoActivo}"]`);
-  if(elMarco) elMarco.classList.add('es-marco');
-  actualizarBotonesEtiq();
-  showNotif('Marco: ' + state.marcoActivo);
-}
-
-function identificar() {
-  // Asocia la operación actual a una etiqueta nueva o existente
-  // Por ahora: notif + reset marco
-  showNotif('IDENTIFICAR — próximamente');
-}
-
-// ── INIT ──
-iniciarEtiquetasBase();
 
 // ── UTIL ──
-function showNotif(msg,dur=2000){
-  const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show');
-  setTimeout(()=>n.classList.remove('show'),dur);
-}
+function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq'; }
+function showNotif(msg,dur=2000){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
 </script>
 </body>
 </html>
