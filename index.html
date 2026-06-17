@@ -124,15 +124,14 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   cursor:pointer; text-align:center; transition:all 0.1s;
   border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
 }
-.prim-btn img { width:32px; height:32px; filter:invert(0.5); display:block; }
-.prim-btn.selected { background:var(--dim); color:#fff; border-color:#555; }
-.prim-btn.selected img { filter:invert(1) brightness(2); }
+.prim-btn img { width:32px; height:32px; opacity:0.4; display:block; }
+.prim-btn.selected img { opacity:1; }
 .prim-btn:active { background:var(--border); }
 
 /* BOTTOM BAR */
 #bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
 #bottomBar .inner { display:flex; width:100%; max-width:420px; }
-.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:#555; padding:14px 4px; font-family:'Courier New',monospace; font-size:10px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.15s; }
+.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:#555; padding:8px 4px; font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.15s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
 .b-btn:last-child { border-right:none; }
 .b-btn:active { background:var(--border); color:var(--white); }
 .b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
@@ -151,17 +150,20 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="header">
     <div id="logo">EP·ST // VER</div>
     <div id="modosBar">
-      <button class="modo-btn active" data-modo="DEPURAR" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="D">
+      <button class="modo-btn active" data-modo="SIGNAL" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/SIGNAL_MODE.png" alt="S">
       </button>
-      <button class="modo-btn" data-modo="HERRAMIENTAS" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="H">
+      <button class="modo-btn" data-modo="CARE" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/CAREMODE.png" alt="C">
       </button>
-      <button class="modo-btn" data-modo="GENERACION" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="G">
+      <button class="modo-btn" data-modo="BUILD" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/BUILD_MODE.png" alt="B">
+      </button>
+      <button class="modo-btn" data-modo="GENETIC" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENETIC_MODE.png" alt="G">
       </button>
       <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="Z">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN_MODE.png" alt="Z">
       </button>
     </div>
     <div id="frameCount">0 etiq</div>
@@ -186,13 +188,13 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="toolsWrapper">
     <div id="primitivosPanel">
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="·">SPOT
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSITION.png" alt="·">SPOT
       </button>
       <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/FUZZY_AREA.png" alt="◯">ÁREA
       </button>
       <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/NOISE.png" alt="≋">RUIDO
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/MOISE.png" alt="≋">RUIDO
       </button>
       <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/PATTERN.png" alt="⊞">PATRÓN
@@ -207,16 +209,25 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="◆">VÉRTICE
       </button>
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="▣">FIGURA
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/SILUETA.png" alt="▣">FIGURA
       </button>
     </div>
   </div>
 
   <div id="bottomBar">
     <div class="inner">
-      <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">📷 CAM</button>
-      <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
-      <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
+      <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">
+        <img id="iconCam" src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">CAM
+      </button>
+      <button class="b-btn" onclick="freezeFrame()">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FREEZE.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">PAUSA
+      </button>
+      <button class="b-btn" onclick="verReconstruccion()">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_IRIS.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">VER
+      </button>
+      <button class="b-btn" onclick="exportarEtiquetas()">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/JSON.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">JSON
+      </button>
     </div>
   </div>
 
@@ -317,8 +328,14 @@ function stopCamera() {
 
 function actualizarBtnCam() {
   const btn=document.getElementById('btnCam');
-  if(state.running){ btn.textContent='■ CAM'; btn.classList.add('encendido'); btn.classList.remove('invitar'); }
-  else { btn.textContent='📷 CAM'; btn.classList.remove('encendido'); btn.classList.add('invitar'); }
+  const icon=document.getElementById('iconCam');
+  if(state.running){
+    btn.classList.add('encendido'); btn.classList.remove('invitar');
+    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PAUSE.png'; icon.style.opacity='1'; }
+  } else {
+    btn.classList.remove('encendido'); btn.classList.add('invitar');
+    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png'; icon.style.opacity='0.5'; }
+  }
 }
 
 function freezeFrame() {
