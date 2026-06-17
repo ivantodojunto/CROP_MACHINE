@@ -339,8 +339,18 @@ function actualizarBtnCam() {
 }
 
 function freezeFrame() {
-  state.frozen=!state.frozen;
-  showNotif(state.frozen?'⏸ CONGELADO':'▶ EN VIVO');
+  if(!state.running) return;
+  if(!state.frozen){
+    // Congelar: capturar frame actual y pausar tracks
+    state.frozen=true;
+    state.stream.getTracks().forEach(t=>t.enabled=false);
+    showNotif('⏸ CONGELADO');
+  } else {
+    // Descongelar: reactivar tracks
+    state.frozen=false;
+    state.stream.getTracks().forEach(t=>t.enabled=true);
+    showNotif('▶ EN VIVO');
+  }
 }
 
 // ── RENDER ──
