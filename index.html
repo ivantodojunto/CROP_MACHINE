@@ -10,7 +10,7 @@
   --black:#000; --near:#0a0a0a; --dim:#111; --border:#222;
   --mid:#555; --light:#999; --white:#fff;
   --green:#00ff41; --amber:#ffb800; --red:#ff2d2d;
-  --r-op:3px; --r-etiq:20px; --r-modo:50%;
+  --r-op:8px; --r-etiq:20px; --r-modo:50%;
 }
 html,body { height:100dvh; background:var(--black); color:var(--white); font-family:'Courier New',monospace; overflow:hidden; touch-action:none; }
 #app { display:flex; flex-direction:column; height:100dvh; }
@@ -19,9 +19,9 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
 #logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; }
 #modosBar { display:flex; gap:6px; align-items:center; }
-.modo-btn { width:32px; height:32px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
-.modo-btn img { width:18px; height:18px; filter:invert(0.4); display:block; }
-.modo-btn.active { border-color:var(--green); background:rgba(0,255,65,0.1); }
+.modo-btn { width:40px; height:40px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
+.modo-btn img { width:22px; height:22px; filter:invert(0.4); display:block; }
+.modo-btn.active { border-color:#ccc; background:rgba(255,255,255,0.08); }
 .modo-btn.active img { filter:invert(0.9); }
 #frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
 
@@ -49,15 +49,17 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #tagStrip.operando { opacity:0; pointer-events:none; }
 
 .etiqueta {
-  flex-shrink:0; padding:9px 8px 9px 10px;
+  flex-shrink:0; padding:9px 8px 9px 14px;
   border:1px solid #3a3a3a;
   font-size:11px; font-weight:700; letter-spacing:0.06em;
-  cursor:pointer; transition:all 0.2s;
+  cursor:pointer; transition:all 0.2s, margin-left 0.15s;
   background:#000; color:#666;
   display:flex; align-items:center; gap:6px;
   border-radius:var(--r-etiq);
-  margin-left:-14px; /* corta la curva izquierda */
-  padding-left:18px;
+  margin-left:-18px;
+}
+.etiqueta.activa {
+  margin-left:-8px; /* adelanta +10px al seleccionar */
 }
 .etiqueta .led {
   width:9px; height:9px; border-radius:50%; flex-shrink:0;
@@ -73,8 +75,8 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   background:#000;
   color:#f0f0f0;
   border-color:#ccc;
+  margin-left:-8px;
 }
-.etiqueta.activa .cnt { color:#999; }
 
 /* Salud de señal — LED independiente */
 .etiqueta .led.debil  { background:#444; border-color:#666; }
@@ -96,8 +98,8 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
 }
 .prim-btn img { width:32px; height:32px; filter:invert(0.5); display:block; }
-.prim-btn.selected { background:#0a0a0a; color:#fff; border-color:#fff; box-shadow:inset 0 0 0 1px #fff; }
-.prim-btn.selected img { filter:invert(1) brightness(1.2); }
+.prim-btn.selected { background:#0d0d0d; color:#fff; border-color:#ddd; }
+.prim-btn.selected img { filter:invert(1); }
 .prim-btn:active { background:var(--border); }
 
 /* BOTTOM BAR */
@@ -107,6 +109,7 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .b-btn:last-child { border-right:none; }
 .b-btn:active { background:var(--border); color:var(--white); }
 .b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
+.b-btn.invitar { color:var(--green); border-top:2px solid var(--green); background:rgba(0,255,65,0.08); font-weight:700; }
 
 /* MODO ZEN — solo LED */
 #tagStrip.zen .etiqueta { 
@@ -226,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
   colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
   resizeCanvases();
   iniciarEtiquetasBase();
+  actualizarBtnCam();
   document.getElementById('cameraOff').addEventListener('click', startCamera);
   overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
   overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
@@ -279,8 +283,15 @@ function stopCamera() {
 
 function actualizarBtnCam() {
   const btn=document.getElementById('btnCam');
-  if(state.running){ btn.textContent='■ CAM'; btn.classList.add('encendido'); }
-  else { btn.textContent='📷 CAM'; btn.classList.remove('encendido'); }
+  if(state.running){ 
+    btn.textContent='■ CAM'; 
+    btn.classList.add('encendido'); 
+    btn.classList.remove('invitar');
+  } else { 
+    btn.textContent='📷 CAM'; 
+    btn.classList.remove('encendido'); 
+    btn.classList.add('invitar');
+  }
 }
 
 function freezeFrame() {
