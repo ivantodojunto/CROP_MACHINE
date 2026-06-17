@@ -21,8 +21,8 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #modosBar { display:flex; gap:6px; align-items:center; }
 .modo-btn { width:40px; height:40px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
 .modo-btn img { width:22px; height:22px; filter:invert(0.4); display:block; }
-.modo-btn.active { border-color:#ccc; background:rgba(255,255,255,0.08); }
-.modo-btn.active img { filter:invert(0.9); }
+.modo-btn.active { border-color:#fff; background:#fff; }
+.modo-btn.active img { filter:invert(0); }
 #frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
 
 /* ZONA CÁMARA */
@@ -107,21 +107,25 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
 
 /* HERRAMIENTAS */
-#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; background:var(--black); }
+#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); background:var(--black); display:flex; justify-content:center; }
 #primitivosPanel {
-  display:grid; grid-template-rows:repeat(2,68px); grid-auto-flow:column; grid-auto-columns:68px;
-  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; gap:4px; padding:5px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:3px; padding:4px;
+  width:100%;
+  max-width:420px;
 }
-#primitivosPanel::-webkit-scrollbar { display:none; }
 .prim-btn {
-  width:68px; height:68px;
+  height:68px;      /* alto fijo */
+  width:100%;       /* ancho flexible */
   background:var(--dim); border:1px solid var(--border); color:#666;
   font-family:'Courier New',monospace; font-size:8px; font-weight:700; letter-spacing:0.04em;
   cursor:pointer; text-align:center; transition:all 0.1s;
   border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
 }
 .prim-btn img { width:32px; height:32px; filter:invert(0.5); display:block; }
-.prim-btn.selected { background:#0d0d0d; color:#fff; border-color:#ddd; }
+.prim-btn.selected { background:var(--dim); color:#fff; border-color:#777; }
 .prim-btn.selected img { filter:invert(1); }
 .prim-btn:active { background:var(--border); }
 
