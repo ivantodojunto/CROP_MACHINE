@@ -43,26 +43,30 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #tagStrip {
   position:absolute; left:0; top:0; bottom:0; width:108px;
   overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
-  gap:4px; padding:8px 6px; scrollbar-width:none; z-index:10;
+  gap:4px; padding:8px 6px 8px 0; scrollbar-width:none; z-index:10;
 }
 #tagStrip::-webkit-scrollbar { display:none; }
 #tagStrip.operando { opacity:0; pointer-events:none; }
 
 .etiqueta {
-  flex-shrink:0; padding:9px 10px 9px 8px;
+  flex-shrink:0; padding:9px 8px 9px 10px;
   border:1px solid #3a3a3a;
   font-size:11px; font-weight:700; letter-spacing:0.06em;
   cursor:pointer; transition:all 0.2s;
   background:#000; color:#666;
   display:flex; align-items:center; gap:6px;
   border-radius:var(--r-etiq);
+  margin-left:-14px; /* corta la curva izquierda */
+  padding-left:18px;
 }
 .etiqueta .led {
-  width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  width:9px; height:9px; border-radius:50%; flex-shrink:0;
   background:#1a1a1a; border:1px solid #333;
   transition:all 0.4s;
+  margin-left:auto; /* LED a la derecha */
+  flex-shrink:0;
 }
-.etiqueta .cnt { margin-left:auto; font-size:8px; color:#444; font-weight:400; }
+.etiqueta .cnt { display:none; }
 
 /* Estado: activa */
 .etiqueta.activa {
@@ -92,8 +96,8 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
 }
 .prim-btn img { width:32px; height:32px; filter:invert(0.5); display:block; }
-.prim-btn.selected { background:rgba(255,255,255,0.06); color:#fff; border-color:rgba(255,255,255,0.7); }
-.prim-btn.selected img { filter:invert(0.9); }
+.prim-btn.selected { background:#0a0a0a; color:#fff; border-color:#fff; box-shadow:inset 0 0 0 1px #fff; }
+.prim-btn.selected img { filter:invert(1) brightness(1.2); }
 .prim-btn:active { background:var(--border); }
 
 /* BOTTOM BAR */
@@ -103,6 +107,17 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .b-btn:last-child { border-right:none; }
 .b-btn:active { background:var(--border); color:var(--white); }
 .b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
+
+/* MODO ZEN — solo LED */
+#tagStrip.zen .etiqueta { 
+  background:transparent; border-color:transparent; 
+  color:transparent; padding-left:4px; margin-left:0;
+  pointer-events:none;
+}
+#tagStrip.zen .etiqueta .led { 
+  opacity:1; margin-left:2px;
+}
+#tagStrip.zen { width:24px; background:transparent; }
 
 /* NOTIF */
 #notif { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
@@ -305,7 +320,7 @@ function renderAcumulacion() {
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
     const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
     if(t<1) continue;
-    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.3,t/maxA*0.3)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
+    vCtx.fillStyle=`rgba(60,120,255,${Math.min(0.28,t/maxA*0.28)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
   }
   vCtx.restore();
 }
@@ -314,9 +329,9 @@ function renderOverlay() {
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
   state.spots.forEach(sp=>{
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
-    oCtx.fillStyle='rgba(0,255,65,0.85)'; oCtx.fill();
+    oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(0,255,65,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
+    oCtx.strokeStyle='rgba(60,120,255,0.2)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
   const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
@@ -417,6 +432,8 @@ function selectPrim(btn) {
 function setModo(btn) {
   document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); state.modo=btn.dataset.modo;
+  const strip=document.getElementById('tagStrip');
+  strip.classList.toggle('zen', state.modo==='ZEN');
   showNotif(btn.dataset.modo);
 }
 
@@ -430,9 +447,8 @@ function crearEtiquetaEl(id) {
   if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
   const el=document.createElement('div');
   el.className='etiqueta'; el.dataset.prim=id;
-  const led=document.createElement('span'); led.className='led'; el.appendChild(led);
   el.appendChild(document.createTextNode(id));
-  const cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent='0'; el.appendChild(cnt);
+  const led=document.createElement('span'); led.className='led'; el.appendChild(led);
   el.addEventListener('click',()=>{
     el.classList.toggle('activa');
     state.primActivo=el.classList.contains('activa')?id:null;
@@ -446,7 +462,6 @@ function actualizarTagStrip(prim) {
   tagCounts[prim]=(tagCounts[prim]||0)+1;
   if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
   const el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
-  el.querySelector('.cnt').textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
   // Actualizar LED según evidencia
   const ev=tagCounts[prim];
   const led=el.querySelector('.led');
