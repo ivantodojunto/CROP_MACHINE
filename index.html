@@ -62,28 +62,36 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .etiq-row { display:flex; flex-shrink:0; }
 
 .etiqueta {
-  padding:10px 10px 10px 12px;
-  border:1px solid #2a2a2a;
+  width:130px;
+  min-width:130px;
+  max-width:130px;
+  padding:10px 10px 10px 10px;
+  border:1px solid #666;
   border-radius:var(--r-etiq);
   background:#000;
-  color:#555;
+  color:#888;
   font-size:11px;
   font-weight:700;
   letter-spacing:0.06em;
   white-space:nowrap;
+  overflow:hidden;
   cursor:pointer;
   display:flex;
   align-items:center;
+  justify-content:flex-end; /* texto alineado a la derecha */
   gap:8px;
-  transition:border-color 0.18s, color 0.18s;
+  transform:translateX(-70px);
+  transition:transform 0.18s ease, border-color 0.18s, color 0.18s;
+  box-sizing:border-box;
 }
 
 .etiqueta.activa {
-  color:#f0f0f0;
-  border-color:#bbb;
+  color:#fff;
+  border-color:#fff;
+  transform:translateX(-40px);
 }
 
-/* LED — dentro de la píldora, a la derecha del texto */
+/* LED — extremo derecho (lado imagen) */
 .led {
   width:9px;
   height:9px;
@@ -91,7 +99,7 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   flex-shrink:0;
   background:#1a1a1a;
   border:1px solid #333;
-  margin-left:auto;
+  flex-shrink:0;
   transition:all 0.4s;
 }
 .led.debil  { background:#444; border-color:#666; }
@@ -466,7 +474,7 @@ function crearEtiquetaEl(id) {
   const el = document.createElement('div');
   el.className = 'etiqueta';
   el.dataset.prim = id;
-  el.appendChild(document.createTextNode(id));
+  el.appendChild(document.createTextNode(id.substring(0,7)));
 
   const led = document.createElement('span');
   led.className = 'led';
