@@ -16,119 +16,97 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #app { display:flex; flex-direction:column; height:100dvh; }
 
 /* HEADER */
-#header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; gap:8px; }
-#modosBar { margin-left:auto; }
-#logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; flex-shrink:0; }
-#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; flex-shrink:0; }
+#header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+#logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; }
 #modosBar { display:flex; gap:6px; align-items:center; }
 .modo-btn { width:32px; height:32px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
-.modo-btn img { width:18px; height:18px; filter:invert(0.5); display:block; }
+.modo-btn img { width:18px; height:18px; filter:invert(0.4); display:block; }
 .modo-btn.active { border-color:var(--green); background:rgba(0,255,65,0.1); }
-.modo-btn.active img { filter:invert(1) sepia(1) saturate(3) hue-rotate(90deg); }
-
-/* TOP STRIP */
-.top-slot { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px 4px; min-height:36px; cursor:pointer; transition:background 0.15s; }
-.top-slot:active { background:var(--dim); }
-.top-slot.activo { background:rgba(0,255,65,0.08); }
-.slot-label { font-size:6px; color:var(--mid); letter-spacing:0.12em; font-weight:700; }
-.slot-val { font-size:9px; color:var(--light); letter-spacing:0.08em; font-weight:700; margin-top:2px; }
-.top-slot.activo .slot-val { color:var(--green); }
+.modo-btn.active img { filter:invert(0.9); }
+#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
 
 /* ZONA CÁMARA */
 #cameraZone { flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:var(--near); overflow:hidden; }
 #viewCanvas { image-rendering:pixelated; display:block; pointer-events:none; }
 #overlayCanvas { position:absolute; top:0; left:0; cursor:crosshair; }
-#previewCanvas { position:absolute; top:0; left:0; pointer-events:none; opacity:0.6; display:none; }
 #video { display:none; }
-#cameraOff { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--mid); }
-#cameraOff .icon { font-size:40px; opacity:0.3; }
-#cameraOff p { font-size:9px; letter-spacing:0.12em; text-align:center; line-height:2; }
+#cameraOff { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:var(--mid); cursor:pointer; }
+#cameraOff .eye { font-size:52px; opacity:0.2; }
+#cameraOff p { font-size:10px; letter-spacing:0.18em; }
 
 /* COLOR CHANNEL */
 #colorChannel { position:absolute; bottom:8px; right:8px; display:none; }
-#colorCanvas { width:64px; height:64px; image-rendering:pixelated; border:1px solid rgba(255,255,255,0.15); display:block; }
+#colorCanvas { width:56px; height:56px; image-rendering:pixelated; border:1px solid rgba(255,255,255,0.12); display:block; }
+#colorLabel { font-size:6px; color:var(--mid); text-align:center; margin-top:2px; letter-spacing:0.08em; }
 
-/* SPOT INFO */
-#spotInfo { position:absolute; bottom:8px; left:96px; font-size:8px; color:var(--green); letter-spacing:0.1em; pointer-events:none; opacity:0; transition:opacity 0.3s; }
-#spotInfo.show { opacity:1; }
-
-/* ETIQUETAS — columna izquierda flotante */
+/* ETIQUETAS — columna izquierda */
 #tagStrip {
-  position:absolute; left:0; top:0; bottom:0; width:88px;
-  overflow-x:hidden; overflow-y:auto; display:flex; flex-direction:column;
-  gap:3px; padding:40px 5px 6px; scrollbar-width:none; z-index:10;
-  background:linear-gradient(to right,rgba(0,0,0,0.78) 75%,transparent);
-  transition:opacity 0.2s;
+  position:absolute; left:0; top:0; bottom:0; width:90px;
+  overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
+  gap:3px; padding:6px 5px; scrollbar-width:none; z-index:10;
+  background:linear-gradient(to right,rgba(0,0,0,0.82) 72%,transparent);
 }
-#tagStrip.operando { opacity:0; pointer-events:none; }
 #tagStrip::-webkit-scrollbar { display:none; }
+#tagStrip.operando { opacity:0; pointer-events:none; }
+
 .etiqueta {
-  flex-shrink:0; padding:5px 8px; border:1px solid var(--border);
+  flex-shrink:0; padding:5px 8px 5px 6px;
+  border:1px solid #2a2a2a;
   font-size:8px; font-weight:700; letter-spacing:0.07em;
-  cursor:pointer; transition:all 0.15s;
-  background:rgba(0,0,0,0.6); color:var(--mid);
+  cursor:pointer; transition:all 0.2s;
+  background:rgba(0,0,0,0.5); color:#3a3a3a; /* inactiva: gris oscuro */
   display:flex; align-items:center; gap:5px;
-  pointer-events:all; border-radius:var(--r-etiq);
+  border-radius:var(--r-etiq);
 }
-.etiqueta .estado { width:8px; height:8px; border-radius:50%; flex-shrink:0; border:1px solid var(--mid); background:transparent; transition:all 0.3s; }
-.etiqueta .cnt { margin-left:auto; font-size:7px; color:var(--mid); font-weight:400; }
-.etiqueta.gris .estado { background:var(--mid); border-color:var(--mid); }
-.etiqueta.gris { color:var(--light); border-color:var(--mid); }
-.etiqueta.amarillo .estado { background:var(--amber); border-color:var(--amber); box-shadow:0 0 5px var(--amber); }
-.etiqueta.amarillo { color:var(--amber); border-color:var(--amber); }
-.etiqueta.active { outline:1px solid var(--green); color:var(--green); }
-.etiqueta.es-marco { border-color:rgba(0,255,65,0.5); border-width:2px; }
-.etiqueta.es-marco::after { content:attr(data-prim); position:absolute; top:-13px; left:6px; font-size:6px; color:rgba(0,255,65,0.45); letter-spacing:0.1em; white-space:nowrap; pointer-events:none; }
-
-/* BOTONES CONTEXTUALES sobre columna */
-#etiqActions {
-  position:absolute; left:0; top:0; width:88px;
-  display:none; flex-direction:column; gap:3px;
-  padding:5px; z-index:11; pointer-events:all;
-  background:rgba(0,0,0,0.88); border-bottom:1px solid var(--border);
+.etiqueta .led {
+  width:7px; height:7px; border-radius:50%; flex-shrink:0;
+  background:#1a1a1a; border:1px solid #333;
+  transition:all 0.4s;
 }
-.ctx-btn { background:transparent; border:1px solid var(--border); color:var(--mid); font-family:'Courier New',monospace; font-size:7px; font-weight:700; letter-spacing:0.07em; padding:5px 6px; cursor:pointer; text-align:left; border-radius:var(--r-op); transition:all 0.1s; }
-.ctx-btn:active { background:var(--dim); color:var(--white); }
+.etiqueta .cnt { margin-left:auto; font-size:6px; color:#333; font-weight:400; }
 
-/* ZONA DECISIÓN */
-.gesto-ok  { background:var(--green); color:var(--black); border:none; font-family:'Courier New',monospace; font-size:14px; font-weight:700; cursor:pointer; border-radius:var(--r-op); flex-shrink:0; }
-.gesto-cancel { background:rgba(0,0,0,0.85); color:var(--red); border:1px solid var(--red); font-family:'Courier New',monospace; font-size:14px; font-weight:700; cursor:pointer; border-radius:var(--r-op); flex-shrink:0; }
+/* Estado: activa (usuario la encendió) */
+.etiqueta.activa {
+  background:rgba(180,180,180,0.08);
+  color:#aaa; /* gris claro */
+  border-color:#444;
+}
+.etiqueta.activa .cnt { color:#666; }
 
-/* REC PANEL */
-#recPanel { display:none; position:absolute; inset:0; background:var(--black); z-index:50; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
-#recPanel.visible { display:flex; }
-#recCanvas { image-rendering:pixelated; border:1px solid var(--border); }
-#recLabel { font-size:9px; color:var(--mid); letter-spacing:0.1em; text-align:center; line-height:1.8; }
-#btnCerrarRec { padding:8px 20px; background:var(--dim); border:1px solid var(--border); color:var(--white); font-family:'Courier New',monospace; font-size:10px; cursor:pointer; border-radius:var(--r-op); }
+/* Salud de señal — LED independiente */
+.etiqueta .led.debil  { background:#333; border-color:#555; }
+.etiqueta .led.media  { background:#888; border-color:#aaa; box-shadow:0 0 3px #888; }
+.etiqueta .led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 5px var(--amber); }
 
 /* HERRAMIENTAS */
-#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
+#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; background:var(--black); }
 #primitivosPanel {
-  display:grid; grid-template-rows:repeat(2,54px); grid-auto-flow:column; grid-auto-columns:54px;
-  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; gap:3px; padding:5px;
+  display:grid; grid-template-rows:repeat(2,52px); grid-auto-flow:column; grid-auto-columns:52px;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:none; gap:3px; padding:4px;
 }
 #primitivosPanel::-webkit-scrollbar { display:none; }
 .prim-btn {
-  background:var(--dim); border:1px solid var(--border); color:var(--light);
-  padding:4px 2px; font-family:'Courier New',monospace; font-size:7px; font-weight:700;
-  letter-spacing:0.05em; cursor:pointer; text-align:center; transition:all 0.1s;
+  width:52px; height:52px;
+  background:var(--dim); border:1px solid var(--border); color:#555;
+  font-family:'Courier New',monospace; font-size:7px; font-weight:700; letter-spacing:0.04em;
+  cursor:pointer; text-align:center; transition:all 0.1s;
   border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-  width:54px; height:54px;
 }
-.prim-btn img { width:24px; height:24px; filter:invert(0.6); display:block; }
-.prim-btn:active, .prim-btn.selected { background:var(--white); color:var(--black); border-color:var(--white); }
+.prim-btn img { width:22px; height:22px; filter:invert(0.4); display:block; }
+.prim-btn.selected { background:rgba(255,255,255,0.9); color:#000; border-color:#fff; }
 .prim-btn.selected img { filter:invert(0); }
+.prim-btn:active { background:var(--border); }
 
-/* BOTTOM BAR — ancho fijo centrado */
+/* BOTTOM BAR */
 #bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
-#bottomBar .inner { display:flex; width:100%; max-width:480px; }
-.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:var(--mid); padding:9px 4px; font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.1s; border-radius:0; min-width:0; }
+#bottomBar .inner { display:flex; width:100%; max-width:420px; }
+.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:#444; padding:10px 4px; font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.15s; }
 .b-btn:last-child { border-right:none; }
 .b-btn:active { background:var(--border); color:var(--white); }
-.b-btn.primary { background:var(--white); color:var(--black); font-weight:700; }
+.b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
 
 /* NOTIF */
-#notif { position:fixed; bottom:120px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
+#notif { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
 #notif.show { opacity:1; }
 </style>
 </head>
@@ -138,74 +116,29 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="header">
     <div id="logo">EP·ST // VER</div>
     <div id="modosBar">
-      <button class="modo-btn active" data-modo="DETECTING" onclick="setModo(this)">
+      <button class="modo-btn active" data-modo="DEPURAR" onclick="setModo(this)" title="Depurar">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/DETECTING MODE.png" alt="D">
       </button>
-      <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/ZEN MODE.png" alt="Z">
-      </button>
-      <button class="modo-btn" data-modo="TOOLS" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/TOOLS MODE.png" alt="T">
-      </button>
-      <button class="modo-btn" data-modo="GENERATE" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GENERATE MODE.png" alt="G">
+      <button class="modo-btn" data-modo="CAZAR" onclick="setModo(this)" title="Cazar">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GENERATE MODE.png" alt="C">
       </button>
     </div>
     <div id="frameCount">0 etiq</div>
   </div>
 
-  <!-- TIRA SUPERIOR: MARCO · OPERACIÓN · SEÑALAR -->
-  <div id="topStrip" style="flex-shrink:0;display:flex;gap:0;border-bottom:1px solid var(--border);">
-    <div class="top-slot" id="slotMarco" style="border-right:1px solid var(--border);">
-      <span class="slot-label">MARCO</span>
-      <span class="slot-val" id="valMarco">—</span>
-    </div>
-    <div class="top-slot" id="slotOp" style="border-right:1px solid var(--border);">
-      <span class="slot-label">OPERACIÓN</span>
-      <span class="slot-val" id="valOp">—</span>
-    </div>
-    <div class="top-slot" id="slotSenal">
-      <span class="slot-label">SEÑALAR</span>
-      <span class="slot-val" id="valSenal">—</span>
-    </div>
-  </div>
-
   <div id="cameraZone">
-    <div id="cameraOff" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--mid);cursor:pointer;">
-      <div style="font-size:48px;opacity:0.25;">👁</div>
-      <p style="font-size:11px;letter-spacing:0.15em;text-align:center;">TOCA PARA EMPEZAR</p>
+    <div id="cameraOff">
+      <div class="eye">👁</div>
+      <p>TOCA PARA EMPEZAR</p>
     </div>
     <canvas id="viewCanvas"></canvas>
     <canvas id="overlayCanvas"></canvas>
-    <canvas id="previewCanvas"></canvas>
     <video id="video" autoplay playsinline muted></video>
     <div id="colorChannel">
       <canvas id="colorCanvas" width="16" height="16"></canvas>
-      <div style="font-size:6px;color:var(--mid);text-align:center;margin-top:2px">COLOR 16²</div>
+      <div id="colorLabel">COLOR 16²</div>
     </div>
-    <div id="spotInfo"></div>
-    <!-- ZONA DE DECISIÓN: siempre visible durante operación -->
-    <div id="decisionZone" style="display:none;position:absolute;top:8px;left:8px;z-index:15;display:none;flex-direction:column;gap:4px;">
-      <!-- Fila principal: referencia + OK + Cancel -->
-      <div style="display:flex;gap:4px;align-items:stretch;">
-        <div id="refEtiq" style="width:80px;height:36px;border:1px solid var(--border);background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--mid);border-radius:var(--r-op);cursor:pointer;" onclick="seleccionarRefEtiq()">—</div>
-        <button class="gesto-ok" onclick="confirmarGesto()" style="width:36px;height:36px;">✓</button>
-        <button class="gesto-cancel" onclick="cancelarGesto()" style="width:36px;height:36px;">✕</button>
-      </div>
-      <!-- Botones contextuales debajo -->
-      <div id="ctxBtns" style="display:flex;flex-direction:column;gap:3px;">
-        <button id="btnMarco" class="ctx-btn" onclick="usarComoMarco()" style="display:none">⬚ MARCO</button>
-        <button id="btnIdentificar" class="ctx-btn" onclick="identificar()" style="display:none">? IDENTIFICAR</button>
-      </div>
-    </div>
-    <div id="etiqActions" style="display:none"></div>
     <div id="tagStrip"></div>
-
-    <div id="recPanel">
-      <canvas id="recCanvas"></canvas>
-      <div id="recLabel"></div>
-      <button id="btnCerrarRec" onclick="cerrarRec()">✕ VOLVER</button>
-    </div>
   </div>
 
   <div id="toolsWrapper">
@@ -213,23 +146,23 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/POSSITION.png" alt="·">SPOT
       </button>
-      <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/ANGLE.png" alt="∠">ÁNGULO
-      </button>
       <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/FUZZY_AREA.png" alt="◯">ÁREA
-      </button>
-      <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GRADIENT.png" alt="▒">GRAD
       </button>
       <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/NOISE.png" alt="≋">RUIDO
       </button>
-      <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/VERTEX.png" alt="◆">VÉRTICE
-      </button>
       <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/PATTERN.png" alt="⊞">PATRÓN
+      </button>
+      <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/ANGLE.png" alt="∠">ÁNGULO
+      </button>
+      <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/GRADIENT.png" alt="▒">GRAD
+      </button>
+      <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/VERTEX.png" alt="◆">VÉRTICE
       </button>
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/assets/FIGURE.png" alt="▣">FIGURA
@@ -240,7 +173,6 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="bottomBar">
     <div class="inner">
       <button class="b-btn" id="btnCam" onclick="toggleCamera()">📷 CAM</button>
-      <button class="b-btn" id="btnFreeze" onclick="freezeFrame()" disabled>⏸</button>
       <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
       <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
     </div>
@@ -251,33 +183,28 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 
 <script>
 const RES=64, CRES=16;
-const BASE_ASSETS='https://ivantodojunto.github.io/CROP_MACHINE/assets/';
-const UMBRAL_GRIS=1, UMBRAL_AMARILLO=8;
+const ASSETS='https://ivantodojunto.github.io/CROP_MACHINE/assets/';
+const UMBRAL_MEDIA=3, UMBRAL_FUERTE=10;
 
 const state = {
-  stream:null, running:false, frozen:false, primActivo:null, modo:'DETECTING',
-  marcoActivo:null,
+  stream:null, running:false, frozen:false,
+  primActivo:null, modo:'DEPURAR',
   grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
-  spots:[],
-  totalEtiquetas:0, spotSeq:0,
+  spots:[], totalEtiquetas:0, spotSeq:0,
   evidencia:{},
 };
 
-const gesto = { fase:0, p1:null, p2:null, p3:null, moviendo:null, tapMoved:false, _timer:null };
+const gesto = { fase:0, p1:null, p2:null, downPos:null, moviendo:null, tapMoved:false, _timer:null };
 
-// Canvas refs
 let viewCanvas, overlayCanvas, vCtx, oCtx;
 let video, workCanvas, wCtx, colorCanvas, cCtx, colorWork, cwCtx;
-let previewCanvas, pCtx, animFrame=null;
+let animFrame=null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('cameraOff').addEventListener('click', startCamera);
   viewCanvas    = document.getElementById('viewCanvas');
   overlayCanvas = document.getElementById('overlayCanvas');
-  previewCanvas = document.getElementById('previewCanvas');
   vCtx = viewCanvas.getContext('2d');
   oCtx = overlayCanvas.getContext('2d');
-  pCtx = previewCanvas.getContext('2d');
   video = document.getElementById('video');
   colorCanvas = document.getElementById('colorCanvas');
   cCtx = colorCanvas.getContext('2d');
@@ -285,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
   resizeCanvases();
   iniciarEtiquetasBase();
-  // Eventos touch/mouse
+  document.getElementById('cameraOff').addEventListener('click', startCamera);
   overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
   overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
   overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
@@ -299,42 +226,52 @@ window.addEventListener('resize', resizeCanvases);
 function resizeCanvases() {
   if(!viewCanvas) return;
   const zone=document.getElementById('cameraZone');
-  const size=Math.min(zone.clientWidth,zone.clientHeight)*0.92;
-  [viewCanvas,overlayCanvas,previewCanvas].forEach(c=>{
+  const size=Math.min(zone.clientWidth,zone.clientHeight)*0.95;
+  [viewCanvas,overlayCanvas].forEach(c=>{
     c.style.width=c.style.height=size+'px'; c.width=c.height=size;
     c.style.position='absolute';
+    c.style.left=((zone.clientWidth-size)/2)+'px';
+    c.style.top=((zone.clientHeight-size)/2)+'px';
   });
-  const offX=(zone.clientWidth-size)/2, offY=(zone.clientHeight-size)/2;
-  [viewCanvas,overlayCanvas,previewCanvas].forEach(c=>{ c.style.left=offX+'px'; c.style.top=offY+'px'; });
 }
 
 // ── CÁMARA ──
 async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
+
 async function startCamera() {
   try {
-    state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false});
+    state.stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false
+    });
     video.srcObject=state.stream; await video.play();
     state.running=true; state.frozen=false;
     document.getElementById('cameraOff').style.display='none';
     document.getElementById('colorChannel').style.display='block';
     viewCanvas.style.display='block'; overlayCanvas.style.display='block';
-    document.getElementById('btnCam').textContent='■ PARAR';
-    document.getElementById('btnFreeze').disabled=false;
+    actualizarBtnCam();
     renderLoop();
   } catch(e){ showNotif('Sin permiso de cámara'); }
 }
+
 function stopCamera() {
   if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
-  state.running=false; if(animFrame) cancelAnimationFrame(animFrame);
-  document.getElementById('btnCam').textContent='📷 CAM';
-  document.getElementById('btnFreeze').disabled=true;
+  state.running=false;
+  if(animFrame) cancelAnimationFrame(animFrame);
   document.getElementById('cameraOff').style.display='flex';
   viewCanvas.style.display='none'; overlayCanvas.style.display='none';
+  document.getElementById('colorChannel').style.display='none';
+  actualizarBtnCam();
 }
+
+function actualizarBtnCam() {
+  const btn=document.getElementById('btnCam');
+  if(state.running){ btn.textContent='■ CAM'; btn.classList.add('encendido'); }
+  else { btn.textContent='📷 CAM'; btn.classList.remove('encendido'); }
+}
+
 function freezeFrame() {
   state.frozen=!state.frozen;
-  document.getElementById('btnFreeze').textContent=state.frozen?'▶ REANUDAR':'⏸ CONGELAR';
-  document.getElementById('btnFreeze').classList.toggle('primary',state.frozen);
+  showNotif(state.frozen?'⏸ CONGELADO':'▶ EN VIVO');
 }
 
 // ── RENDER ──
@@ -363,12 +300,13 @@ function renderLoop() {
 }
 
 function renderAcumulacion() {
-  const s=viewCanvas.width,cs=s/RES,maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
+  const s=viewCanvas.width, cs=s/RES;
+  const maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
   vCtx.save();
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
     const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
     if(t<1) continue;
-    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.35,t/maxA*0.35)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
+    vCtx.fillStyle=`rgba(0,255,65,${Math.min(0.3,t/maxA*0.3)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
   }
   vCtx.restore();
 }
@@ -376,191 +314,96 @@ function renderAcumulacion() {
 function renderOverlay() {
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
   state.spots.forEach(sp=>{
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.9)'; oCtx.fill();
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2); oCtx.strokeStyle='rgba(0,255,65,0.3)'; oCtx.lineWidth=1.5; oCtx.stroke();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
+    oCtx.fillStyle='rgba(0,255,65,0.85)'; oCtx.fill();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
+    oCtx.strokeStyle='rgba(0,255,65,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
   const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
-  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2); oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
+  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
+  oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
   if(p2){
     oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
-    oCtx.strokeStyle='rgba(0,255,65,0.7)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.8)'; oCtx.fill();
-    if(state.primActivo==='ANGULO') renderIntensidadPreview(p1,p2,gesto.p3||(gesto.fase===2?gesto.moviendo:null));
+    oCtx.strokeStyle='rgba(0,255,65,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
+    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.7)'; oCtx.fill();
   }
-  const p3=gesto.p3||(gesto.fase===2&&gesto.moviendo&&gesto.p2?gesto.moviendo:null);
-  if(p3){
-    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p3.x,p3.y);
-    oCtx.strokeStyle='rgba(0,212,255,0.6)'; oCtx.lineWidth=1.2; oCtx.setLineDash([3,4]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p3.x,p3.y,4,0,Math.PI*2); oCtx.fillStyle='rgba(0,212,255,0.8)'; oCtx.fill();
-  }
-}
-
-function renderIntensidadPreview(p1,p2,p3) {
-  const s=previewCanvas.width; pCtx.clearRect(0,0,s,s);
-  const dx=p2.x-p1.x,dy=p2.y-p1.y,L=Math.sqrt(dx*dx+dy*dy); if(L<4) return;
-  const angEje=Math.atan2(dy,dx);
-  let apertura=Math.PI*0.18, alcance=L;
-  if(p3){
-    const dx3=p3.x-p1.x,dy3=p3.y-p1.y,L3=Math.sqrt(dx3*dx3+dy3*dy3);
-    const t3=((dx3)*dx+(dy3)*dy)/(L*L);
-    const perpX=p3.x-(p1.x+t3*dx),perpY=p3.y-(p1.y+t3*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
-    if(dp<L*0.25){ apertura=Math.max(0.05,Math.min(Math.PI*0.8,(1-Math.min(1,t3))*Math.PI*0.5+0.05)); alcance=L; }
-    else { const a3=Math.atan2(dy3,dx3); let diff=Math.abs(a3-angEje); if(diff>Math.PI) diff=Math.PI*2-diff; apertura=diff/2; alcance=Math.max(L,L3); }
-  }
-  pCtx.save();
-  pCtx.beginPath(); pCtx.moveTo(p1.x,p1.y);
-  pCtx.arc(p1.x,p1.y,alcance*1.3,angEje-apertura,angEje+apertura); pCtx.closePath(); pCtx.clip();
-  const grad=pCtx.createRadialGradient(p1.x,p1.y,0,p1.x,p1.y,alcance*1.1);
-  grad.addColorStop(0,'rgba(255,220,80,0.92)'); grad.addColorStop(0.15,'rgba(255,184,0,0.75)');
-  grad.addColorStop(0.45,'rgba(255,140,0,0.35)'); grad.addColorStop(1,'rgba(255,80,0,0.0)');
-  pCtx.fillStyle=grad; pCtx.fillRect(0,0,s,s); pCtx.restore();
-}
-
-// ── SPOTS ──
-function marcarSpot(x,y) {
-  const s=viewCanvas.width;
-  const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
-  const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
-  const id=++state.spotSeq;
-  state.spots.push({id,col,row,x,y});
-  state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
-  state.totalEtiquetas++;
-  actualizarTagStrip('SPOT'); updateFrameCount();
-  const el=document.getElementById('spotInfo');
-  el.textContent=`SPOT ${id} · (${col},${row})`; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),1400);
-}
-
-// ── ÁNGULO ──
-function etiquetarAngulo(p1,p2,p3) {
-  const s=viewCanvas.width,cs=s/RES;
-  const dx=p2.x-p1.x,dy=p2.y-p1.y,L=Math.sqrt(dx*dx+dy*dy); if(L<4) return;
-  let count=0;
-  if(!p3){
-    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-      const px=c*cs+cs/2,py=r*cs+cs/2;
-      const t=((px-p1.x)*dx+(py-p1.y)*dy)/(L*L); if(t<0||t>1.2) continue;
-      const perpX=px-(p1.x+t*dx),perpY=py-(p1.y+t*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
-      if(dp>L*0.35*(0.3+t)) continue;
-      const intens=Math.round((1-t)*8)+1;
-      state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intens; count++; state.totalEtiquetas++;
-    }
-  } else {
-    const dx3=p3.x-p1.x,dy3=p3.y-p1.y,L3=Math.sqrt(dx3*dx3+dy3*dy3);
-    const t3=((dx3)*dx+(dy3)*dy)/(L*L);
-    const perpX=p3.x-(p1.x+t3*dx),perpY=p3.y-(p1.y+t3*dy),dp=Math.sqrt(perpX*perpX+perpY*perpY);
-    const sobreEje=dp<L*0.25;
-    for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-      const px=c*cs+cs/2,py=r*cs+cs/2;
-      if(sobreEje){
-        const t=((px-p1.x)*dx+(py-p1.y)*dy)/(L*L); if(t<0||t>1.2) continue;
-        const pX=px-(p1.x+t*dx),pY=py-(p1.y+t*dy),d=Math.sqrt(pX*pX+pY*pY);
-        const conc=Math.max(0.1,Math.min(2,t3));
-        if(d>L*0.35*(0.3+t)*conc) continue;
-        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+Math.round((1-t)*8)+1; count++; state.totalEtiquetas++;
-      } else {
-        const vx=px-p1.x,vy=py-p1.y,dP1=Math.sqrt(vx*vx+vy*vy); if(dP1<1) continue;
-        const t1=((vx)*dx+(vy)*dy)/(L*dP1),t2=((vx)*dx3+(vy)*dy3)/(L3*dP1);
-        if(t1<0.3||t2<0.3) continue;
-        const intens=Math.max(1,Math.round((1-dP1/Math.max(L,L3))*8));
-        state.grid[r][c]['ANGULO']=(state.grid[r][c]['ANGULO']||0)+intens; count++; state.totalEtiquetas++;
-      }
-    }
-  }
-  if(count>0){ actualizarTagStrip('ANGULO'); updateFrameCount(); showNotif('ÁNGULO · '+count+' celdas'); }
-}
-
-// ── ÁREA (elipse) ──
-function etiquetarElipse(elipse,prim) {
-  const s=viewCanvas.width,cs=s/RES;
-  const cx=(elipse.x1+elipse.x2)/2,cy=(elipse.y1+elipse.y2)/2;
-  const rx=Math.max(cs/2,Math.abs(elipse.x2-elipse.x1)/2),ry=Math.max(cs/2,Math.abs(elipse.y2-elipse.y1)/2);
-  let count=0;
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2,py=r*cs+cs/2,dx=(px-cx)/rx,dy=(py-cy)/ry;
-    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
-  }
-  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count+' celdas'); }
 }
 
 // ── INTERACCIÓN ──
 function getCanvasPos(e) {
   const rect=overlayCanvas.getBoundingClientRect();
   const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;
-  return {x:t.clientX-rect.left,y:t.clientY-rect.top};
+  return {x:t.clientX-rect.left, y:t.clientY-rect.top};
 }
 
 function onPointerDown(e) {
   if(!state.running) return; e.preventDefault();
   gesto.tapMoved=false;
   const p=getCanvasPos(e);
-  gesto.moviendo=p;
+  gesto.downPos=p; gesto.moviendo=p;
   if(state.primActivo==='SPOT'){ gesto.p1=p; return; }
-  if(!state.primActivo){ showNotif('Selecciona un primitivo'); return; }
-  if(gesto.fase===0){ gesto.p1=p; gesto.fase=1; mostrarGestoBar('P1 · arrastra P2'); previewCanvas.style.display='block'; }
-  else if(gesto.fase===2){ gesto.p3=p; mostrarGestoBar('P3 · ✓ OK para confirmar'); }
+  if(!state.primActivo){ return; }
+  if(gesto.fase===0){ gesto.p1=p; gesto.fase=1; }
 }
+
 function onPointerMove(e) {
-  e.preventDefault(); if(!gesto.p1) return;
+  e.preventDefault();
   const p=getCanvasPos(e); gesto.moviendo=p;
-  const dx=p.x-gesto.p1.x,dy=p.y-gesto.p1.y;
-  if(Math.sqrt(dx*dx+dy*dy)>6) gesto.tapMoved=true;
+  const ref=gesto.p1||gesto.downPos; if(!ref) return;
+  const dx=p.x-ref.x, dy=p.y-ref.y;
+  if(Math.sqrt(dx*dx+dy*dy)>8) gesto.tapMoved=true;
 }
+
 function onPointerUp(e) {
   e.preventDefault(); const p=getCanvasPos(e);
   if(state.primActivo==='SPOT'){
     if(!gesto.tapMoved) marcarSpot(p.x,p.y);
-    gesto.p1=null; gesto.moviendo=null; gesto.tapMoved=false; return;
+    gesto.p1=null; gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
-  if(gesto.fase===1){ gesto.p2=p; gesto.moviendo=null; gesto.fase=2; mostrarGestoBar('P2 fijo · P3 opcional o ✓ OK'); gesto._timer=setTimeout(()=>{ if(gesto.fase===2) ejecutarGesto(); },2500); }
-  else if(gesto.fase===2&&gesto.p3){ clearTimeout(gesto._timer); ejecutarGesto(); }
+  if(!state.primActivo){
+    if(!gesto.tapMoved) freezeFrame();
+    gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
+  }
+  if(gesto.fase===1){
+    gesto.p2=p; gesto.fase=2;
+    // Auto-ejecutar tras 3s si no hay más input
+    clearTimeout(gesto._timer);
+    gesto._timer=setTimeout(()=>{ if(gesto.fase===2) ejecutarGesto(); }, 3000);
+    ejecutarGesto(); // ejecutar inmediatamente con P1+P2
+  }
 }
 
 function ejecutarGesto() {
+  clearTimeout(gesto._timer);
   if(!gesto.p1||!gesto.p2) return;
-  if(state.primActivo==='ANGULO') etiquetarAngulo(gesto.p1,gesto.p2,gesto.p3);
-  else etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y},state.primActivo);
-  resetGesto();
-}
-function resetGesto() { gesto.fase=0; gesto.p1=gesto.p2=gesto.p3=gesto.moviendo=null; gesto.tapMoved=false; ocultarGestoBar(); }
-function confirmarGesto() { if(gesto.fase>=1&&gesto.p1){if(!gesto.p2)gesto.p2=gesto.moviendo; clearTimeout(gesto._timer); ejecutarGesto();} else resetGesto(); }
-function cancelarGesto() { clearTimeout(gesto._timer); resetGesto(); }
-
-function mostrarGestoBar(label) {
-  const dz=document.getElementById('decisionZone');
-  dz.style.display='flex';
-  document.getElementById('tagStrip').classList.add('operando');
-  actualizarBotonesEtiq();
-}
-function ocultarGestoBar() {
-  document.getElementById('decisionZone').style.display='none';
-  previewCanvas.style.display='none';
-  if(pCtx) pCtx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
-  document.getElementById('tagStrip').classList.remove('operando');
-  actualizarBotonesEtiq();
-}
-function seleccionarRefEtiq() {
-  document.getElementById('tagStrip').classList.remove('operando');
+  etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
+  gesto.fase=0; gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
 }
 
-function actualizarTopStrip() {
-  // MARCO
-  const sm=document.getElementById('slotMarco');
-  const vm=document.getElementById('valMarco');
-  if(state.marcoActivo){ vm.textContent=state.marcoActivo; sm.classList.add('activo'); }
-  else { vm.textContent='—'; sm.classList.remove('activo'); }
-  // OPERACIÓN
-  const so=document.getElementById('slotOp');
-  const vo=document.getElementById('valOp');
-  if(state.primActivo&&state.primActivo!==state.marcoActivo){ vo.textContent=state.primActivo; so.classList.add('activo'); }
-  else { vo.textContent='—'; so.classList.remove('activo'); }
-  // SEÑALAR — muestra total etiquetas activas
-  const ss=document.getElementById('slotSenal');
-  const vs=document.getElementById('valSenal');
-  const activas=Object.entries(state.evidencia).filter(([k,v])=>v>=UMBRAL_GRIS).length;
-  if(activas>0){ vs.textContent=activas+' activa'+(activas>1?'s':''); ss.classList.add('activo'); }
-  else { vs.textContent='—'; ss.classList.remove('activo'); }
+// ── SPOT ──
+function marcarSpot(x,y) {
+  const s=viewCanvas.width;
+  const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
+  const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
+  state.spots.push({id:++state.spotSeq,col,row,x,y});
+  state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
+  state.totalEtiquetas++;
+  actualizarTagStrip('SPOT'); updateFrameCount();
+}
+
+// ── ELIPSE ──
+function etiquetarElipse(e,prim) {
+  const s=viewCanvas.width, cs=s/RES;
+  const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
+  const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2), ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);
+  let count=0;
+  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
+    const px=c*cs+cs/2, py=r*cs+cs/2;
+    const dx=(px-cx)/rx, dy=(py-cy)/ry;
+    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
+  }
+  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count+' celdas'); }
 }
 
 // ── PRIMITIVOS ──
@@ -569,33 +412,33 @@ function selectPrim(btn) {
   const prim=btn.dataset.prim;
   state.primActivo=(state.primActivo===prim)?null:prim;
   if(state.primActivo) btn.classList.add('selected');
-  actualizarBotonesEtiq(); actualizarTopStrip();
 }
 
 // ── MODOS ──
 function setModo(btn) {
   document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); state.modo=btn.dataset.modo;
+  showNotif(btn.dataset.modo);
 }
 
-// ── ETIQUETAS BASE ──
-const ETIQUETAS_BASE = ['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
+// ── ETIQUETAS ──
+const ETIQUETAS_BASE=['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
 const tagCounts={};
 
 function iniciarEtiquetasBase() { ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); }); }
 
 function crearEtiquetaEl(id) {
   if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
-  const el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=id;
-  const dot=document.createElement('span'); dot.className='estado'; el.appendChild(dot);
+  const el=document.createElement('div');
+  el.className='etiqueta'; el.dataset.prim=id;
+  const led=document.createElement('span'); led.className='led'; el.appendChild(led);
   el.appendChild(document.createTextNode(id));
   const cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent='0'; el.appendChild(cnt);
   el.addEventListener('click',()=>{
-    const was=el.classList.contains('active');
-    document.querySelectorAll('.etiqueta').forEach(b=>b.classList.remove('active'));
+    el.classList.toggle('activa');
+    state.primActivo=el.classList.contains('activa')?id:null;
     document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-    if(!was){ el.classList.add('active'); state.primActivo=id; } else state.primActivo=null;
-    actualizarBotonesEtiq();
+    document.querySelectorAll('.etiqueta').forEach(b=>{ if(b!==el) b.classList.remove('activa'); });
   });
   document.getElementById('tagStrip').appendChild(el);
 }
@@ -603,75 +446,29 @@ function crearEtiquetaEl(id) {
 function actualizarTagStrip(prim) {
   tagCounts[prim]=(tagCounts[prim]||0)+1;
   if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
-  document.querySelector(`.etiqueta[data-prim="${prim}"] .cnt`).textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
-  sumarEvidencia(prim,1);
+  const el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
+  el.querySelector('.cnt').textContent=tagCounts[prim]>99?'99+':tagCounts[prim];
+  // Actualizar LED según evidencia
+  const ev=tagCounts[prim];
+  const led=el.querySelector('.led');
+  led.className='led';
+  if(ev>=UMBRAL_FUERTE) led.classList.add('fuerte');
+  else if(ev>=UMBRAL_MEDIA) led.classList.add('media');
+  else if(ev>=1) led.classList.add('debil');
 }
-
-function sumarEvidencia(id,n) {
-  state.evidencia[id]=(state.evidencia[id]||0)+n;
-  const ev=state.evidencia[id];
-  const el=document.querySelector(`.etiqueta[data-prim="${id}"]`); if(!el) return;
-  const eraA=el.classList.contains('amarillo'), eraG=el.classList.contains('gris');
-  el.classList.remove('gris','amarillo');
-  if(ev>=UMBRAL_AMARILLO){ el.classList.add('amarillo'); if(!eraA) showNotif(id+' · ⚡ UMBRAL',3000); }
-  else if(ev>=UMBRAL_GRIS){ el.classList.add('gris'); if(!eraG) showNotif(id+' · señal activa'); }
-}
-
-// ── MARCO / IDENTIFICAR ──
-function actualizarBotonesEtiq() {
-  const btnM=document.getElementById('btnMarco');
-  const btnI=document.getElementById('btnIdentificar');
-  const hayGesto=gesto.fase>0;
-  // Actualizar referencia en zona decisión
-  if(state.marcoActivo){
-    const ref=document.getElementById('refEtiq');
-    if(ref) ref.textContent=state.marcoActivo;
-  }
-  if(btnM) btnM.style.display=(state.primActivo&&!hayGesto)?'block':'none';
-  if(btnI) btnI.style.display=(hayGesto&&gesto.fase>=2)?'block':'none';
-  // Mostrar decisionZone si hay etiqueta seleccionada o gesto
-  const dz=document.getElementById('decisionZone');
-  if(dz&&!hayGesto) dz.style.display=(state.primActivo)?'flex':'none';
-}
-function usarComoMarco() {
-  if(!state.primActivo) return;
-  state.marcoActivo=state.primActivo;
-  document.querySelectorAll('.etiqueta').forEach(el=>el.classList.remove('es-marco'));
-  const el=document.querySelector(`.etiqueta[data-prim="${state.marcoActivo}"]`);
-  if(el) el.classList.add('es-marco');
-  actualizarBotonesEtiq(); actualizarTopStrip(); showNotif('Marco: '+state.marcoActivo);
-}
-function identificar() { showNotif('IDENTIFICAR — próximamente'); }
 
 // ── RECONSTRUCCIÓN ──
 function verReconstruccion() {
   if(state.totalEtiquetas===0){showNotif('Etiqueta algo primero');return;}
-  const panel=document.getElementById('recPanel'); panel.classList.add('visible');
-  const cvs=document.getElementById('recCanvas');
-  const size=Math.min(window.innerWidth,window.innerHeight)*0.7;
-  cvs.width=cvs.height=size; cvs.style.width=cvs.style.height=size+'px';
-  const ctx=cvs.getContext('2d'); ctx.imageSmoothingEnabled=false;
-  const cs=size/RES;
-  const col_={SPOT:[0,255,65],ANGULO:[255,184,0],AREA:[0,200,255],GRADIENTE:[180,180,255],RUIDO:[200,100,200],VERTICE:[255,255,100],PATRON:[100,255,200],FIGURA:[255,150,100]};
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const cell=state.grid[r][c],total=Object.values(cell).reduce((a,v)=>a+v,0);
-    if(total===0){ctx.fillStyle='rgb(30,30,30)';ctx.fillRect(c*cs,r*cs,cs,cs);continue;}
-    const dom=Object.entries(cell).sort((a,b)=>b[1]-a[1])[0][0];
-    const int=Math.min(1,total/10),[r1,g1,b1]=col_[dom]||[128,128,128];
-    ctx.fillStyle=`rgb(${Math.round(40+r1*int*0.85)},${Math.round(40+g1*int*0.85)},${Math.round(40+b1*int*0.85)})`;
-    ctx.fillRect(c*cs,r*cs,cs,cs);
-  }
-  state.spots.forEach(sp=>{ const sx=sp.col*cs+cs/2,sy=sp.row*cs+cs/2; ctx.beginPath(); ctx.arc(sx,sy,cs*0.8,0,Math.PI*2); ctx.fillStyle='rgba(0,255,65,0.7)'; ctx.fill(); });
-  document.getElementById('recLabel').textContent=Object.keys(tagCounts).filter(k=>tagCounts[k]>0).length+' primitivos · '+state.totalEtiquetas+' marcas';
+  showNotif('VER — próximamente');
 }
-function cerrarRec(){ document.getElementById('recPanel').classList.remove('visible'); }
 
 // ── EXPORT ──
 function exportarEtiquetas() {
   if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
   const celdas=[];
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
-  const ci=cCtx.getImageData(0,0,CRES,CRES),cp=[];
+  const ci=cCtx.getImageData(0,0,CRES,CRES), cp=[];
   for(let i=0;i<ci.data.length;i+=4) cp.push([ci.data[i],ci.data[i+1],ci.data[i+2]]);
   const data={brillo:{res:RES,total:state.totalEtiquetas,prims:tagCounts,celdas},color:{res:CRES,px:cp},spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
@@ -680,7 +477,7 @@ function exportarEtiquetas() {
 
 // ── UTIL ──
 function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq'; }
-function showNotif(msg,dur=2000){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
+function showNotif(msg,dur=1800){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
 </script>
 </body>
 </html>
