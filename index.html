@@ -247,6 +247,7 @@ const UMBRAL_MEDIA=3, UMBRAL_FUERTE=10;
 const state = {
   stream:null, running:false, frozen:false,
   primActivo:null, modo:'DEPURAR',
+  vistaIdx:0,
   grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
   spots:[], totalEtiquetas:0, spotSeq:0,
   evidencia:{},
@@ -292,6 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
   overlayCanvas.addEventListener('mousemove', onPointerMove);
   overlayCanvas.addEventListener('mouseup',   onPointerUp);
   window.addEventListener('resize', ()=>{ resizeCanvases(); posicionarTagStrip(); });
+  // Cerrar stream al salir de la página
+  window.addEventListener('beforeunload', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
+  window.addEventListener('pagehide', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=false); else if(!document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=true); });
   resizeCanvases();
 });
 
@@ -324,15 +329,7 @@ async function startCamera() {
       video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false
     });
     video.srcObject=state.stream;
-    video.load();
-    await video.play().catch(()=>{});
-    // Esperar hasta que el video tenga datos reales
-    if(video.readyState < 2){
-      await new Promise(res=>{
-        video.addEventListener('loadeddata', res, {once:true});
-        setTimeout(res, 3000); // timeout de seguridad
-      });
-    }
+    await video.play();
     state.running=true; state.frozen=false;
     document.getElementById('cameraOff').style.display='none';
     document.getElementById('colorChannel').style.display='block';
