@@ -13,7 +13,7 @@
   --r-op:8px; --r-etiq:20px; --r-modo:50%;
 }
 html,body { height:100dvh; background:var(--black); color:var(--white); font-family:'Courier New',monospace; overflow:hidden; touch-action:none; }
-#app { display:flex; flex-direction:column; height:100dvh; }
+#app { display:flex; flex-direction:column; height:100dvh; position:relative; }
 
 /* HEADER */
 #header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
@@ -37,51 +37,66 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 /* COLOR CHANNEL */
 #colorChannel { position:absolute; bottom:8px; right:8px; display:none; }
 #colorCanvas { width:56px; height:56px; image-rendering:pixelated; border:1px solid rgba(255,255,255,0.12); display:block; }
-#colorLabel { font-size:6px; color:var(--mid); text-align:center; margin-top:2px; letter-spacing:0.08em; }
 
-/* ETIQUETAS — columna izquierda */
+/* ── ETIQUETAS ──
+   El tagStrip es fixed, se posiciona sobre la cameraZone via JS.
+   Cada fila = .etiq-row: [píldora] [led]
+   La píldora tiene padding-left generoso para ocultar la curva izquierda.
+   Al activar, la píldora hace translateX(+24px). El led NO se mueve.
+*/
 #tagStrip {
-  position:absolute; left:0; top:0; bottom:0; width:108px;
-  overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
-  gap:4px; padding:8px 6px 8px 0; scrollbar-width:none; z-index:10;
+  position:fixed;
+  left:6px;
+  overflow-y:auto;
+  overflow-x:visible;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding:8px 0;
+  scrollbar-width:none;
+  z-index:100;
+  width:160px;
 }
 #tagStrip::-webkit-scrollbar { display:none; }
-#tagStrip.operando { opacity:0; pointer-events:none; }
+
+.etiq-row { display:flex; flex-shrink:0; }
 
 .etiqueta {
-  flex-shrink:0; padding:9px 8px 9px 14px;
-  border:1px solid #3a3a3a;
-  font-size:11px; font-weight:700; letter-spacing:0.06em;
-  cursor:pointer; transition:all 0.2s, margin-left 0.15s;
-  background:#000; color:#666;
-  display:flex; align-items:center; gap:6px;
+  padding:10px 10px 10px 12px;
+  border:1px solid #2a2a2a;
   border-radius:var(--r-etiq);
-  margin-left:-18px;
-}
-.etiqueta.activa {
-  margin-left:-8px; /* adelanta +10px al seleccionar */
-}
-.etiqueta .led {
-  width:9px; height:9px; border-radius:50%; flex-shrink:0;
-  background:#1a1a1a; border:1px solid #333;
-  transition:all 0.4s;
-  margin-left:auto; /* LED a la derecha */
-  flex-shrink:0;
-}
-.etiqueta .cnt { display:none; }
-
-/* Estado: activa */
-.etiqueta.activa {
   background:#000;
-  color:#f0f0f0;
-  border-color:#ccc;
-  margin-left:-8px;
+  color:#555;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  white-space:nowrap;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  transition:border-color 0.18s, color 0.18s;
 }
 
-/* Salud de señal — LED independiente */
-.etiqueta .led.debil  { background:#444; border-color:#666; }
-.etiqueta .led.media  { background:#999; border-color:#bbb; box-shadow:0 0 4px #888; }
-.etiqueta .led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
+.etiqueta.activa {
+  color:#f0f0f0;
+  border-color:#bbb;
+}
+
+/* LED — dentro de la píldora, a la derecha del texto */
+.led {
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  flex-shrink:0;
+  background:#1a1a1a;
+  border:1px solid #333;
+  margin-left:auto;
+  transition:all 0.4s;
+}
+.led.debil  { background:#444; border-color:#666; }
+.led.media  { background:#999; border-color:#bbb; box-shadow:0 0 4px #888; }
+.led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
 
 /* HERRAMIENTAS */
 #toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; background:var(--black); }
@@ -111,17 +126,6 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
 .b-btn.invitar { color:var(--green); border-top:2px solid var(--green); background:rgba(0,255,65,0.08); font-weight:700; }
 
-/* MODO ZEN — solo LED */
-#tagStrip.zen .etiqueta { 
-  background:transparent; border-color:transparent; 
-  color:transparent; padding-left:4px; margin-left:0;
-  pointer-events:none;
-}
-#tagStrip.zen .etiqueta .led { 
-  opacity:1; margin-left:2px;
-}
-#tagStrip.zen { width:24px; background:transparent; }
-
 /* NOTIF */
 #notif { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
 #notif.show { opacity:1; }
@@ -133,11 +137,17 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="header">
     <div id="logo">EP·ST // VER</div>
     <div id="modosBar">
-      <button class="modo-btn active" data-modo="DEPURAR" onclick="setModo(this)" title="Depurar">
+      <button class="modo-btn active" data-modo="DEPURAR" onclick="setModo(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="D">
       </button>
-      <button class="modo-btn" data-modo="CAZAR" onclick="setModo(this)" title="Cazar">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="C">
+      <button class="modo-btn" data-modo="HERRAMIENTAS" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="H">
+      </button>
+      <button class="modo-btn" data-modo="GENERACION" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="G">
+      </button>
+      <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="Z">
       </button>
     </div>
     <div id="frameCount">0 etiq</div>
@@ -153,10 +163,11 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
     <video id="video" autoplay playsinline muted></video>
     <div id="colorChannel">
       <canvas id="colorCanvas" width="16" height="16"></canvas>
-      <div id="colorLabel">COLOR 16²</div>
     </div>
-    <div id="tagStrip"></div>
   </div>
+
+  <!-- tagStrip fuera del cameraZone para que translateX no se corte -->
+  <div id="tagStrip"></div>
 
   <div id="toolsWrapper">
     <div id="primitivosPanel">
@@ -189,7 +200,7 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 
   <div id="bottomBar">
     <div class="inner">
-      <button class="b-btn" id="btnCam" onclick="toggleCamera()">📷 CAM</button>
+      <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">📷 CAM</button>
       <button class="b-btn" onclick="verReconstruccion()">🔮 VER</button>
       <button class="b-btn" onclick="exportarEtiquetas()">↓ JSON</button>
     </div>
@@ -200,7 +211,6 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 
 <script>
 const RES=64, CRES=16;
-const ASSETS='https://ivantodojunto.github.io/CROP_MACHINE/';
 const UMBRAL_MEDIA=3, UMBRAL_FUERTE=10;
 
 const state = {
@@ -227,9 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
   cCtx = colorCanvas.getContext('2d');
   workCanvas = document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d');
   colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
-  resizeCanvases();
+
+  posicionarTagStrip();
   iniciarEtiquetasBase();
   actualizarBtnCam();
+
   document.getElementById('cameraOff').addEventListener('click', startCamera);
   overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
   overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
@@ -237,9 +249,17 @@ document.addEventListener('DOMContentLoaded', () => {
   overlayCanvas.addEventListener('mousedown', onPointerDown);
   overlayCanvas.addEventListener('mousemove', onPointerMove);
   overlayCanvas.addEventListener('mouseup',   onPointerUp);
+  window.addEventListener('resize', ()=>{ resizeCanvases(); posicionarTagStrip(); });
+  resizeCanvases();
 });
 
-window.addEventListener('resize', resizeCanvases);
+function posicionarTagStrip() {
+  const zone = document.getElementById('cameraZone');
+  const strip = document.getElementById('tagStrip');
+  const rect = zone.getBoundingClientRect();
+  strip.style.top = rect.top + 'px';
+  strip.style.height = rect.height + 'px';
+}
 
 function resizeCanvases() {
   if(!viewCanvas) return;
@@ -283,15 +303,8 @@ function stopCamera() {
 
 function actualizarBtnCam() {
   const btn=document.getElementById('btnCam');
-  if(state.running){ 
-    btn.textContent='■ CAM'; 
-    btn.classList.add('encendido'); 
-    btn.classList.remove('invitar');
-  } else { 
-    btn.textContent='📷 CAM'; 
-    btn.classList.remove('encendido'); 
-    btn.classList.add('invitar');
-  }
+  if(state.running){ btn.textContent='■ CAM'; btn.classList.add('encendido'); btn.classList.remove('invitar'); }
+  else { btn.textContent='📷 CAM'; btn.classList.remove('encendido'); btn.classList.add('invitar'); }
 }
 
 function freezeFrame() {
@@ -342,7 +355,7 @@ function renderOverlay() {
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
     oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(60,120,255,0.2)'; oCtx.lineWidth=1.5; oCtx.stroke();
+    oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
   const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
@@ -350,8 +363,8 @@ function renderOverlay() {
   oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
   if(p2){
     oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
-    oCtx.strokeStyle='rgba(0,255,65,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(0,255,65,0.7)'; oCtx.fill();
+    oCtx.strokeStyle='rgba(60,120,255,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
+    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.7)'; oCtx.fill();
   }
 }
 
@@ -391,22 +404,12 @@ function onPointerUp(e) {
     gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
   if(gesto.fase===1){
-    gesto.p2=p; gesto.fase=2;
-    // Auto-ejecutar tras 3s si no hay más input
-    clearTimeout(gesto._timer);
-    gesto._timer=setTimeout(()=>{ if(gesto.fase===2) ejecutarGesto(); }, 3000);
-    ejecutarGesto(); // ejecutar inmediatamente con P1+P2
+    gesto.p2=p; gesto.fase=0;
+    etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
+    gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
   }
 }
 
-function ejecutarGesto() {
-  clearTimeout(gesto._timer);
-  if(!gesto.p1||!gesto.p2) return;
-  etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
-  gesto.fase=0; gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
-}
-
-// ── SPOT ──
 function marcarSpot(x,y) {
   const s=viewCanvas.width;
   const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
@@ -417,7 +420,6 @@ function marcarSpot(x,y) {
   actualizarTagStrip('SPOT'); updateFrameCount();
 }
 
-// ── ELIPSE ──
 function etiquetarElipse(e,prim) {
   const s=viewCanvas.width, cs=s/RES;
   const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
@@ -428,7 +430,7 @@ function etiquetarElipse(e,prim) {
     const dx=(px-cx)/rx, dy=(py-cy)/ry;
     if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
   }
-  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count+' celdas'); }
+  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count); }
 }
 
 // ── PRIMITIVOS ──
@@ -443,8 +445,6 @@ function selectPrim(btn) {
 function setModo(btn) {
   document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); state.modo=btn.dataset.modo;
-  const strip=document.getElementById('tagStrip');
-  strip.classList.toggle('zen', state.modo==='ZEN');
   showNotif(btn.dataset.modo);
 }
 
@@ -452,55 +452,65 @@ function setModo(btn) {
 const ETIQUETAS_BASE=['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
 const tagCounts={};
 
-function iniciarEtiquetasBase() { ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); }); }
+function iniciarEtiquetasBase() {
+  ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); });
+}
 
 function crearEtiquetaEl(id) {
   if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
-  const el=document.createElement('div');
-  el.className='etiqueta'; el.dataset.prim=id;
+
+  // Fila: [píldora] [led]
+  const row = document.createElement('div');
+  row.className = 'etiq-row';
+
+  const el = document.createElement('div');
+  el.className = 'etiqueta';
+  el.dataset.prim = id;
   el.appendChild(document.createTextNode(id));
-  const led=document.createElement('span'); led.className='led'; el.appendChild(led);
-  el.addEventListener('click',()=>{
-    el.classList.toggle('activa');
-    state.primActivo=el.classList.contains('activa')?id:null;
+
+  const led = document.createElement('span');
+  led.className = 'led';
+  led.dataset.ledPrim = id;
+  el.appendChild(led);
+
+  row.appendChild(el);
+
+  el.addEventListener('click', () => {
+    const was = el.classList.contains('activa');
+    document.querySelectorAll('.etiqueta').forEach(b=>b.classList.remove('activa'));
     document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-    document.querySelectorAll('.etiqueta').forEach(b=>{ if(b!==el) b.classList.remove('activa'); });
+    state.primActivo = was ? null : id;
+    if(!was) el.classList.add('activa');
   });
-  document.getElementById('tagStrip').appendChild(el);
+
+  document.getElementById('tagStrip').appendChild(row);
 }
 
 function actualizarTagStrip(prim) {
   tagCounts[prim]=(tagCounts[prim]||0)+1;
   if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
-  const el=document.querySelector(`.etiqueta[data-prim="${prim}"]`);
-  // Actualizar LED según evidencia
+  const led=document.querySelector(`.led[data-led-prim="${prim}"]`);
+  if(!led) return;
   const ev=tagCounts[prim];
-  const led=el.querySelector('.led');
   led.className='led';
   if(ev>=UMBRAL_FUERTE) led.classList.add('fuerte');
   else if(ev>=UMBRAL_MEDIA) led.classList.add('media');
   else if(ev>=1) led.classList.add('debil');
 }
 
-// ── RECONSTRUCCIÓN ──
-function verReconstruccion() {
-  if(state.totalEtiquetas===0){showNotif('Etiqueta algo primero');return;}
-  showNotif('VER — próximamente');
-}
+function verReconstruccion() { showNotif('VER — próximamente'); }
 
-// ── EXPORT ──
 function exportarEtiquetas() {
   if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
   const celdas=[];
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
   const ci=cCtx.getImageData(0,0,CRES,CRES), cp=[];
   for(let i=0;i<ci.data.length;i+=4) cp.push([ci.data[i],ci.data[i+1],ci.data[i+2]]);
-  const data={brillo:{res:RES,total:state.totalEtiquetas,prims:tagCounts,celdas},color:{res:CRES,px:cp},spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
+  const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
-  showNotif('JSON · '+celdas.length+' celdas');
+  showNotif('JSON exportado');
 }
 
-// ── UTIL ──
 function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq'; }
 function showNotif(msg,dur=1800){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
 </script>
