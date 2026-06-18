@@ -249,6 +249,7 @@ const state = {
   primActivo:null, modo:'DEPURAR',
   vistaIdx:0,
   etiquetasActivas: new Set(), // selección múltiple
+  zonas: [], // zonas atrapadas [{x,y,radio,particulas,etiquetas}]
   grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
   spots:[], totalEtiquetas:0, spotSeq:0,
   evidencia:{},
@@ -442,6 +443,51 @@ function renderLoop() {
   animFrame=requestAnimationFrame(renderLoop);
 }
 
+function atraparZona(cx, cy) {
+  const s = overlayCanvas.width; // usar overlayCanvas que es donde se detecta el tap
+  const nx = cx/s, ny = cy/s;
+  const radio = 0.12; // radio de captura normalizado
+
+  // Partículas dentro del radio
+  const capturadas = particulas.filter(p=>{
+    const dx=p.x-nx, dy=p.y-ny;
+    return Math.sqrt(dx*dx+dy*dy) < radio;
+  });
+
+  if(capturadas.length < 3) { showNotif('Zona vacía — toca donde hay hadas'); return; }
+
+  const zona = {
+    x:nx, y:ny, radio,
+    particulas: capturadas.length,
+    etiquetas: [...state.etiquetasActivas],
+    id: state.zonas.length + 1
+  };
+  state.zonas.push(zona);
+
+  // Si hay 2+ zonas, calcular relación
+  if(state.zonas.length >= 2){
+    const z1 = state.zonas[state.zonas.length-2];
+    const z2 = state.zonas[state.zonas.length-1];
+    mostrarRelacion(z1, z2);
+  } else {
+    showNotif('ZONA '+zona.id+' · '+capturadas.length+' hadas · toca otra zona');
+  }
+}
+
+function mostrarRelacion(z1, z2) {
+  // Distancia normalizada entre zonas
+  const dx=z2.x-z1.x, dy=z2.y-z1.y;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const etqs1=new Set(z1.etiquetas), etqs2=new Set(z2.etiquetas);
+  const comunes=[...etqs1].filter(e=>etqs2.has(e));
+  const diferentes=[...etqs1,...etqs2].filter(e=>!comunes.includes(e));
+
+  let rel = dist < 0.25 ? 'CERCA' : dist < 0.5 ? 'MEDIA' : 'LEJOS';
+  let msg = `Z${z1.id}↔Z${z2.id} · ${rel}`;
+  if(comunes.length) msg += ' · '+comunes.join('+');
+  showNotif(msg, 4000);
+}
+
 function getCampoEtiqueta(ex, ey, id) {
   // Retorna fuerza del campo en posición normalizada (ex,ey) para etiqueta id
   if(!workCanvas) return 0;
@@ -586,6 +632,42 @@ function renderOverlay() {
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
     oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
+  // Dibujar zonas atrapadas
+  state.zonas.forEach(z=>{
+    const s=overlayCanvas.width;
+    const px=z.x*s, py=z.y*s, r=z.radio*s;
+    oCtx.beginPath(); oCtx.arc(px,py,r,0,Math.PI*2);
+    oCtx.strokeStyle='rgba(255,255,255,0.5)'; oCtx.lineWidth=1;
+    oCtx.setLineDash([3,3]); oCtx.stroke(); oCtx.setLineDash([]);
+    // Nombres en cascada hacia la derecha (baraja oblicua)
+    oCtx.font='bold 10px monospace';
+    if(z.etiquetas.length===0){
+      oCtx.fillStyle='rgba(255,255,255,0.5)';
+      oCtx.fillText('?', px+r+6, py);
+    } else {
+      z.etiquetas.forEach((e,i)=>{
+        const tx = Math.min(px+r+6 + i*14, overlayCanvas.width-55);
+        const ty = py + i*8;
+        // Sombra para contraste
+        oCtx.fillStyle='rgba(0,0,0,0.8)';
+        oCtx.fillText(e.substring(0,6), tx+1, ty+1);
+        oCtx.fillStyle='rgba(255,255,255,1)';
+        oCtx.fillText(e.substring(0,6), tx, ty);
+      });
+    }
+    // Número de zona
+    oCtx.fillStyle='rgba(255,184,0,0.8)';
+    oCtx.font='bold 10px monospace';
+    oCtx.fillText('Z'+z.id, px-8, py+4);
+    // Línea entre zonas
+    if(z.id>1){
+      const zp=state.zonas[z.id-2];
+      oCtx.beginPath(); oCtx.moveTo(zp.x*s,zp.y*s); oCtx.lineTo(px,py);
+      oCtx.strokeStyle='rgba(255,184,0,0.3)'; oCtx.lineWidth=1;
+      oCtx.setLineDash([2,4]); oCtx.stroke(); oCtx.setLineDash([]);
+    }
+  });
+
   const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
   oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
@@ -630,7 +712,14 @@ function onPointerUp(e) {
     gesto.p1=null; gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
   if(!state.primActivo){
-    if(!gesto.tapMoved) freezeFrame();
+    if(!gesto.tapMoved){
+      if(state.etiquetasActivas.size > 0){
+        // Atrapar hadas en esa zona
+        atraparZona(p.x, p.y);
+      } else {
+        freezeFrame();
+      }
+    }
     gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
   if(gesto.fase===1){
