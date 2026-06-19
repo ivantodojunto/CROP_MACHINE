@@ -16,14 +16,24 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #app { display:flex; flex-direction:column; height:100dvh; position:relative; }
 
 /* HEADER */
-#header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
-#logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; }
-#modosBar { display:flex; gap:6px; align-items:center; }
-.modo-btn { width:40px; height:40px; border-radius:var(--r-modo); background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.15s; }
-.modo-btn img { width:22px; height:22px; filter:invert(0.4); display:block; }
-.modo-btn.active { border-color:#fff; background:#fff; }
-.modo-btn.active img { filter:invert(0) brightness(0); }
-#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; }
+#header { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-bottom:1px solid var(--border); flex-shrink:0; gap:8px; }
+#logo { font-size:9px; font-weight:700; letter-spacing:0.2em; border:1px solid var(--border); padding:4px 7px; flex-shrink:0; }
+#modoActivo { font-size:9px; font-weight:700; letter-spacing:0.15em; color:var(--mid); cursor:pointer; padding:4px 8px; border:1px solid var(--border); border-radius:4px; transition:color 0.2s; flex-shrink:0; }
+#modoActivo:hover { color:var(--white); border-color:#555; }
+#frameCount { font-size:9px; color:var(--mid); letter-spacing:0.1em; flex:1; text-align:center; }
+#btnOjo { width:36px; height:36px; border-radius:50%; background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; transition:all 0.2s; opacity:0.4; }
+#btnOjo:hover { opacity:1; border-color:#555; }
+#btnCanal { background:transparent; border:1px solid #444; color:#666; font-family:'Courier New',monospace; font-size:9px; font-weight:700; letter-spacing:0.1em; padding:4px 8px; cursor:pointer; border-radius:3px; transition:all 0.2s; flex-shrink:0; }
+
+/* PANEL MODOS — overlay pantalla completa */
+#modosPanel { position:fixed; inset:0; z-index:500; display:none; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.94); gap:14px; }
+#modosPanel.visible { display:flex; }
+.modo-opt { width:220px; padding:14px 20px; border-radius:40px; background:var(--dim); border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; gap:14px; color:var(--mid); font-family:'Courier New',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; transition:all 0.15s; }
+.modo-opt:hover { border-color:var(--light); color:var(--white); }
+.modo-opt.active { border-color:var(--green); color:var(--green); }
+.modo-opt img { width:24px; height:24px; filter:invert(0.4); flex-shrink:0; }
+.modo-opt.active img { filter:invert(1) sepia(1) saturate(3) hue-rotate(80deg); }
+#modosCerrar { margin-top:8px; font-size:9px; letter-spacing:0.15em; color:var(--mid); cursor:pointer; padding:8px 20px; }
 
 /* ZONA CÁMARA */
 #cameraZone { flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:var(--near); overflow:hidden; }
@@ -38,92 +48,30 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 #colorChannel { position:absolute; bottom:8px; right:8px; display:none; }
 #colorCanvas { width:56px; height:56px; image-rendering:pixelated; border:1px solid rgba(255,255,255,0.12); display:block; }
 
-/* ── ETIQUETAS ──
-   El tagStrip es fixed, se posiciona sobre la cameraZone via JS.
-   Cada fila = .etiq-row: [píldora] [led]
-   La píldora tiene padding-left generoso para ocultar la curva izquierda.
-   Al activar, la píldora hace translateX(+24px). El led NO se mueve.
-*/
-#tagStrip {
-  position:fixed;
-  left:6px;
-  overflow-y:auto;
-  overflow-x:visible;
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-  padding:8px 0;
-  scrollbar-width:none;
-  z-index:100;
-  width:160px;
-}
+/* ETIQUETAS */
+#tagStrip { position:fixed; left:6px; overflow-y:auto; overflow-x:visible; display:flex; flex-direction:column; gap:5px; padding:8px 0; scrollbar-width:none; z-index:100; width:160px; }
 #tagStrip::-webkit-scrollbar { display:none; }
-
 .etiq-row { display:flex; flex-shrink:0; }
+.etiqueta { width:130px; min-width:130px; max-width:130px; padding:10px; border:1px solid #666; border-radius:var(--r-etiq); background:#000; color:#888; font-size:11px; font-weight:700; letter-spacing:0.06em; white-space:nowrap; overflow:hidden; cursor:pointer; display:flex; align-items:center; justify-content:flex-end; gap:8px; transform:translateX(-70px); transition:transform 0.18s ease, border-color 0.18s, color 0.18s, opacity 0.3s; box-sizing:border-box; }
+.etiqueta.activa { color:#fff; border-color:#fff; transform:translateX(-40px); }
+.etiqueta.atenuada { opacity:0.25; }
 
-.etiqueta {
-  width:130px;
-  min-width:130px;
-  max-width:130px;
-  padding:10px 10px 10px 10px;
-  border:1px solid #666;
-  border-radius:var(--r-etiq);
-  background:#000;
-  color:#888;
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:0.06em;
-  white-space:nowrap;
-  overflow:hidden;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end; /* texto alineado a la derecha */
-  gap:8px;
-  transform:translateX(-70px);
-  transition:transform 0.18s ease, border-color 0.18s, color 0.18s;
-  box-sizing:border-box;
-}
-
-.etiqueta.activa {
-  color:#fff;
-  border-color:#fff;
-  transform:translateX(-40px);
-}
-
-/* LED — extremo derecho (lado imagen) */
-.led {
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  flex-shrink:0;
-  background:#1a1a1a;
-  border:1px solid #333;
-  flex-shrink:0;
-  transition:all 0.4s;
-}
+/* LED */
+.led { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:#1a1a1a; border:1px solid #333; transition:background 0.4s, border-color 0.4s; }
 .led.debil  { background:#444; border-color:#666; }
-.led.media  { background:#999; border-color:#bbb; box-shadow:0 0 4px #888; }
-.led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
+.led.media  { background:#999; border-color:#bbb; }
+.led.fuerte { background:var(--amber); border-color:var(--amber); }
+
+/* PULSO SONAR */
+@keyframes sonar { 0%{box-shadow:0 0 0 0 rgba(255,184,0,0.8)} 70%{box-shadow:0 0 0 12px rgba(255,184,0,0)} 100%{box-shadow:0 0 0 0 rgba(255,184,0,0)} }
+@keyframes sonar-media { 0%{box-shadow:0 0 0 0 rgba(180,180,180,0.5)} 70%{box-shadow:0 0 0 8px rgba(180,180,180,0)} 100%{box-shadow:0 0 0 0 rgba(180,180,180,0)} }
+.led.pulso-fuerte { animation:sonar 0.5s ease-out; }
+.led.pulso-media  { animation:sonar-media 0.7s ease-out; }
 
 /* HERRAMIENTAS */
 #toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); background:var(--black); display:flex; justify-content:center; }
-#primitivosPanel {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  grid-template-rows:repeat(2,1fr);
-  gap:3px; padding:4px;
-  width:100%;
-  max-width:420px;
-}
-.prim-btn {
-  height:68px;      /* alto fijo */
-  width:100%;       /* ancho flexible */
-  background:var(--dim); border:1px solid var(--border); color:#666;
-  font-family:'Courier New',monospace; font-size:8px; font-weight:700; letter-spacing:0.04em;
-  cursor:pointer; text-align:center; transition:all 0.1s;
-  border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-}
+#primitivosPanel { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(2,1fr); gap:3px; padding:4px; width:100%; max-width:420px; }
+.prim-btn { height:68px; width:100%; background:var(--dim); border:1px solid var(--border); color:#666; font-family:'Courier New',monospace; font-size:8px; font-weight:700; letter-spacing:0.04em; cursor:pointer; text-align:center; transition:all 0.1s; border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
 .prim-btn img { width:32px; height:32px; opacity:0.4; display:block; }
 .prim-btn.selected img { opacity:1; }
 .prim-btn:active { background:var(--border); }
@@ -136,8 +84,7 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 .b-btn:active { background:var(--border); color:var(--white); }
 .b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
 .b-btn.invitar { color:var(--green); border-top:2px solid var(--green); background:rgba(0,255,65,0.08); font-weight:700; }
-
-
+.b-btn.senal-on { color:var(--green); border-top:2px solid var(--green); }
 
 /* NOTIF */
 #notif { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
@@ -149,30 +96,27 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
 
   <div id="header">
     <div id="logo">EP·ST // VER</div>
-    <div id="modosBar">
-      <button class="modo-btn active" data-modo="SIGNAL" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="S">
-      </button>
-      <button class="modo-btn" data-modo="CARE" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/INFLUENCE.png" alt="C">
-      </button>
-      <button class="modo-btn" data-modo="BUILD" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="B">
-      </button>
-      <button class="modo-btn" data-modo="GENETIC" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="G">
-      </button>
-      <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="Z">
-      </button>
-    </div>
+    <div id="modoActivo" onclick="abrirModos()">SIGNAL</div>
     <div id="frameCount">0 etiq</div>
-    <button id="btnCanal" onclick="toggleCanal()" style="
-      background:transparent; border:1px solid #444; color:#666;
-      font-family:'Courier New',monospace; font-size:9px; font-weight:700;
-      letter-spacing:0.1em; padding:4px 8px; cursor:pointer;
-      border-radius:3px; transition:all 0.2s;
-    ">B/N</button>
+    <button id="btnOjo" onclick="abrirModos()">👁</button>
+    <button id="btnCanal" onclick="toggleCanal()">B/N</button>
+  </div>
+
+  <!-- PANEL MODOS -->
+  <div id="modosPanel">
+    <button class="modo-opt active" data-modo="SIGNAL" onclick="setModo(this)">
+      <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="">SIGNAL
+    </button>
+    <button class="modo-opt" data-modo="CARE" onclick="setModo(this)">
+      <img src="https://ivantodojunto.github.io/CROP_MACHINE/INFLUENCE.png" alt="">CARE
+    </button>
+    <button class="modo-opt" data-modo="BUILD" onclick="setModo(this)">
+      <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="">BUILD
+    </button>
+    <button class="modo-opt" data-modo="ZEN" onclick="setModo(this)">
+      <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="">ZEN
+    </button>
+    <div id="modosCerrar" onclick="cerrarModos()">— CERRAR —</div>
   </div>
 
   <div id="cameraZone">
@@ -188,69 +132,44 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
     </div>
   </div>
 
-  <!-- tagStrip fuera del cameraZone para que translateX no se corte -->
   <div id="tagStrip"></div>
 
   <div id="toolsWrapper">
     <div id="primitivosPanel">
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="·">SPOT
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="">SPOT
       </button>
       <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FUZZY_AREA.png" alt="◯">ÁREA
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FUZZY_AREA.png" alt="">ÁREA
       </button>
       <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/NOISE.png" alt="≋">RUIDO
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/NOISE.png" alt="">RUIDO
       </button>
       <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/PATTERN.png" alt="⊞">PATRÓN
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/PATTERN.png" alt="">PATRÓN
       </button>
       <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ANGLE.png" alt="∠">ÁNGULO
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ANGLE.png" alt="">ÁNGULO
       </button>
       <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GRADIENT.png" alt="▒">GRAD
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GRADIENT.png" alt="">GRAD
       </button>
       <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="◆">VÉRTICE
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="">VÉRTICE
       </button>
-
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="▣">FIGURA
-      </button>
-      <button class="prim-btn" data-prim="MARIPOSAS" onclick="selectPrim(this); abrirPrismaticos()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/MARIPOSA.png" alt="🦋">MARIPOSAS
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="">FIGURA
       </button>
     </div>
-  </div>
-
-  <!-- PANEL PRISMÁTICOS -->
-  <div id="prismaticosPanel" style="display:none; position:fixed; inset:0; z-index:600; background:#000; flex-direction:column; align-items:center; justify-content:center;">
-    <div id="prismaticosVisor" style="position:relative; width:90vmin; height:90vmin;">
-      <!-- Mira de prismáticos: dos lentes fusionadas -->
-      <svg id="miraSVG" viewBox="0 0 200 100" style="position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none;">
-        <circle cx="50" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
-        <circle cx="150" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
-        <line x1="98" y1="50" x2="102" y2="50" stroke="#00ff41" stroke-width="1"/>
-        <line x1="100" y1="2" x2="100" y2="98" stroke="#00ff41" stroke-width="0.5" opacity="0.4"/>
-      </svg>
-      <!-- Canvas ampliado de la zona -->
-      <canvas id="prismaticosCanvas" style="width:100%; height:100%; image-rendering:pixelated; border-radius:50%;"></canvas>
-      <!-- Mariposas (ejemplares) flotando -->
-      <div id="mariposasList" style="position:absolute; inset:0; z-index:3; pointer-events:none;"></div>
-    </div>
-    <!-- Anotación de campo -->
-    <div id="anotacionCampo" style="margin-top:20px; font-size:10px; letter-spacing:0.12em; color:#555; text-align:center; max-width:80vw;"></div>
-    <button onclick="cerrarPrismaticos()" style="margin-top:24px; background:none; border:1px solid #333; color:#555; font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.15em; padding:8px 20px; cursor:pointer;">— CERRAR —</button>
   </div>
 
   <div id="bottomBar">
     <div class="inner">
+      <button class="b-btn" id="btnSenal" onclick="toggleSoloSenal()">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/THRESHOLD.png" id="iconSenal" style="width:22px;height:22px;filter:invert(0.4);display:block;margin:0 auto 2px;">SEÑAL
+      </button>
       <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">
         <img id="iconCam" src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">CAM
-      </button>
-      <button class="b-btn" onclick="freezeFrame()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FREEZE.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">PAUSA
       </button>
       <button class="b-btn" onclick="verReconstruccion()">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_IRIS.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">VER
@@ -270,78 +189,60 @@ const UMBRAL_MEDIA=3, UMBRAL_FUERTE=10;
 
 const state = {
   stream:null, running:false, frozen:false,
-  primActivo:null, modo:'DEPURAR',
-  vistaIdx:0,
-  etiquetasActivas: new Set(), // selección múltiple
-  zonas: [], // zonas atrapadas [{x,y,radio,particulas,etiquetas}]
+  primActivo:null, modo:'SIGNAL',
+  vistaIdx:0, soloSenal:false,
+  etiquetasActivas: new Set(),
+  zonas:[],
   grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
   spots:[], totalEtiquetas:0, spotSeq:0,
-  evidencia:{},
 };
 
-const gesto = { fase:0, p1:null, p2:null, downPos:null, moviendo:null, tapMoved:false, _timer:null };
+const gesto = { fase:0, p1:null, p2:null, downPos:null, moviendo:null, tapMoved:false };
 
-// Array extensible de vistas — añade aquí sin tocar nada más
 const VISTAS = [
-  { id:'BN',       label:'B/N',      color:'#888'   },
-  { id:'COLOR',    label:'COLOR',    color:'#ffb800' },
-  { id:'ANALISIS', label:'ANÁLISIS', color:'#7ab'   },
-  { id:'UMBRAL1',  label:'UMBRAL 1', color:'#aaa',  umbral:60  },
-  { id:'UMBRAL2',  label:'UMBRAL 2', color:'#aaa',  umbral:100 },
-  { id:'UMBRAL3',  label:'UMBRAL 3', color:'#aaa',  umbral:140 },
-  { id:'UMBRAL4',  label:'UMBRAL 4', color:'#aaa',  umbral:180 },
-  { id:'UMBRAL5',  label:'UMBRAL 5', color:'#aaa',  umbral:220 },
+  { id:'BN',    label:'B/N',   color:'#888'   },
+  { id:'COLOR', label:'COLOR', color:'#ffb800'},
+  { id:'U60',   label:'U·60',  color:'#aaa', umbral:60  },
+  { id:'U100',  label:'U·100', color:'#aaa', umbral:100 },
+  { id:'U140',  label:'U·140', color:'#aaa', umbral:140 },
+  { id:'U180',  label:'U·180', color:'#aaa', umbral:180 },
 ];
 
-// ── SISTEMA DE PARTÍCULAS ──
-const N_PARTICULAS = 120;
-const particulas = Array.from({length:N_PARTICULAS}, ()=>({
-  x: Math.random(), y: Math.random(), // posición normalizada 0-1
-  vx:0, vy:0
-}));
+const N_PARTICULAS=120;
+const particulas=Array.from({length:N_PARTICULAS},()=>({x:Math.random(),y:Math.random(),vx:0,vy:0}));
 
-let viewCanvas, overlayCanvas, vCtx, oCtx;
-let video, workCanvas, wCtx, colorCanvas, cCtx, colorWork, cwCtx;
+let viewCanvas,overlayCanvas,vCtx,oCtx;
+let video,workCanvas,wCtx,colorCanvas,cCtx,colorWork,cwCtx;
 let animFrame=null;
 
-document.addEventListener('DOMContentLoaded', () => {
-  viewCanvas    = document.getElementById('viewCanvas');
-  overlayCanvas = document.getElementById('overlayCanvas');
-  vCtx = viewCanvas.getContext('2d');
-  oCtx = overlayCanvas.getContext('2d');
-  video = document.getElementById('video');
-  colorCanvas = document.getElementById('colorCanvas');
-  cCtx = colorCanvas.getContext('2d');
-  workCanvas = document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d');
-  colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
-
-  posicionarTagStrip();
-  iniciarEtiquetasBase();
-  actualizarBtnCam();
-
+document.addEventListener('DOMContentLoaded',()=>{
+  viewCanvas=document.getElementById('viewCanvas');
+  overlayCanvas=document.getElementById('overlayCanvas');
+  vCtx=viewCanvas.getContext('2d'); oCtx=overlayCanvas.getContext('2d');
+  video=document.getElementById('video');
+  colorCanvas=document.getElementById('colorCanvas'); cCtx=colorCanvas.getContext('2d');
+  workCanvas=document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d');
+  colorWork=document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
+  posicionarTagStrip(); iniciarEtiquetasBase(); actualizarBtnCam();
   overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
-  overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
-  overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
-  overlayCanvas.addEventListener('mousedown', onPointerDown);
-  overlayCanvas.addEventListener('mousemove', onPointerMove);
-  overlayCanvas.addEventListener('mouseup',   onPointerUp);
-  window.addEventListener('resize', ()=>{ resizeCanvases(); posicionarTagStrip(); });
-  // Cerrar stream al salir de la página
-  window.addEventListener('beforeunload', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
-  window.addEventListener('pagehide', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
-  document.addEventListener('visibilitychange', ()=>{ if(document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=false); else if(!document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=true); });
+  overlayCanvas.addEventListener('touchmove',onPointerMove,{passive:false});
+  overlayCanvas.addEventListener('touchend',onPointerUp,{passive:false});
+  overlayCanvas.addEventListener('mousedown',onPointerDown);
+  overlayCanvas.addEventListener('mousemove',onPointerMove);
+  overlayCanvas.addEventListener('mouseup',onPointerUp);
+  window.addEventListener('resize',()=>{ resizeCanvases(); posicionarTagStrip(); });
+  window.addEventListener('beforeunload',()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
+  document.addEventListener('visibilitychange',()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.enabled=!document.hidden); });
   resizeCanvases();
 });
 
-function posicionarTagStrip() {
-  const zone = document.getElementById('cameraZone');
-  const strip = document.getElementById('tagStrip');
-  const rect = zone.getBoundingClientRect();
-  strip.style.top = rect.top + 'px';
-  strip.style.height = rect.height + 'px';
+function posicionarTagStrip(){
+  const zone=document.getElementById('cameraZone'),strip=document.getElementById('tagStrip');
+  const rect=zone.getBoundingClientRect();
+  strip.style.top=rect.top+'px'; strip.style.height=rect.height+'px';
 }
 
-function resizeCanvases() {
+function resizeCanvases(){
   if(!viewCanvas) return;
   const zone=document.getElementById('cameraZone');
   const size=Math.min(zone.clientWidth,zone.clientHeight)*0.96;
@@ -353,27 +254,34 @@ function resizeCanvases() {
   });
 }
 
-// ── CÁMARA ──
-async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
+// ── MODOS (ojo) ──
+function abrirModos(){ document.getElementById('modosPanel').classList.add('visible'); }
+function cerrarModos(){ document.getElementById('modosPanel').classList.remove('visible'); }
+function setModo(btn){
+  document.querySelectorAll('.modo-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  state.modo=btn.dataset.modo;
+  document.getElementById('modoActivo').textContent=btn.dataset.modo;
+  cerrarModos();
+  showNotif(btn.dataset.modo);
+}
 
-async function startCamera() {
-  try {
-    state.stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false
-    });
-    video.srcObject=state.stream;
-    await video.play();
+// ── CÁMARA ──
+async function toggleCamera(){ if(state.running) stopCamera(); else await startCamera(); }
+
+async function startCamera(){
+  try{
+    state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false});
+    video.srcObject=state.stream; await video.play();
     state.running=true; state.frozen=false;
     document.getElementById('cameraOff').style.display='none';
     document.getElementById('colorChannel').style.display='block';
     viewCanvas.style.display='block'; overlayCanvas.style.display='block';
-    actualizarBtnCam();
-    renderLoop();
-
-  } catch(e){ showNotif('Sin permiso de cámara'); }
+    actualizarBtnCam(); renderLoop();
+  }catch(e){ showNotif('Sin permiso de cámara'); }
 }
 
-function stopCamera() {
+function stopCamera(){
   if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
   state.running=false;
   if(animFrame) cancelAnimationFrame(animFrame);
@@ -383,52 +291,43 @@ function stopCamera() {
   actualizarBtnCam();
 }
 
-function actualizarBtnCam() {
-  const btn=document.getElementById('btnCam');
-  const icon=document.getElementById('iconCam');
-  if(state.running){
-    btn.classList.add('encendido'); btn.classList.remove('invitar');
-    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PAUSE.png'; icon.style.opacity='1'; }
-  } else {
-    btn.classList.remove('encendido'); btn.classList.add('invitar');
-    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png'; icon.style.opacity='0.5'; }
-  }
+function actualizarBtnCam(){
+  const btn=document.getElementById('btnCam'),icon=document.getElementById('iconCam');
+  if(state.running){ btn.classList.add('encendido'); btn.classList.remove('invitar'); if(icon) icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PAUSE.png'; }
+  else{ btn.classList.remove('encendido'); btn.classList.add('invitar'); if(icon) icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png'; }
 }
 
-function toggleCanal() {
-  state.vistaIdx = (state.vistaIdx + 1) % VISTAS.length;
-  const v = VISTAS[state.vistaIdx];
-  const btn = document.getElementById('btnCanal');
-  btn.textContent = v.label;
-  btn.style.color = v.color;
-  btn.style.borderColor = v.color;
+function toggleCanal(){
+  state.vistaIdx=(state.vistaIdx+1)%VISTAS.length;
+  const v=VISTAS[state.vistaIdx];
+  const btn=document.getElementById('btnCanal');
+  btn.textContent=v.label; btn.style.color=v.color; btn.style.borderColor=v.color;
 }
 
-function freezeFrame() {
+function toggleSoloSenal(){
+  state.soloSenal=!state.soloSenal;
+  const btn=document.getElementById('btnSenal'),icon=document.getElementById('iconSenal');
+  if(state.soloSenal){ btn.classList.add('senal-on'); if(icon) icon.style.filter='invert(1) sepia(1) saturate(5) hue-rotate(80deg)'; showNotif('SOLO SEÑAL'); }
+  else{ btn.classList.remove('senal-on'); if(icon) icon.style.filter='invert(0.4)'; showNotif('CON IMAGEN'); }
+}
+
+function freezeFrame(){
   if(!state.running) return;
-  if(!state.frozen){
-    // Congelar: capturar frame actual y pausar tracks
-    state.frozen=true;
-    state.stream.getTracks().forEach(t=>t.enabled=false);
-    showNotif('⏸ CONGELADO');
-  } else {
-    // Descongelar: reactivar tracks
-    state.frozen=false;
-    state.stream.getTracks().forEach(t=>t.enabled=true);
-    showNotif('▶ EN VIVO');
-  }
+  state.frozen=!state.frozen;
+  state.stream.getTracks().forEach(t=>t.enabled=!state.frozen);
+  showNotif(state.frozen?'⏸ CONGELADO':'▶ EN VIVO');
 }
 
 // ── RENDER ──
-function renderLoop() {
+function renderLoop(){
   if(!state.running) return;
-  if(!state.frozen && video.readyState>=2) {
+  if(!state.frozen && video.readyState>=2){
     wCtx.drawImage(video,0,0,RES,RES);
-    const id=wCtx.getImageData(0,0,RES,RES), d=id.data;
+    const id=wCtx.getImageData(0,0,RES,RES),d=id.data;
     for(let i=0;i<d.length;i+=4){ const g=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]); d[i]=d[i+1]=d[i+2]=g; }
     wCtx.putImageData(id,0,0);
     cwCtx.drawImage(video,0,0,CRES,CRES);
-    const cd_=cwCtx.getImageData(0,0,CRES,CRES), cd=cd_.data;
+    const cd_=cwCtx.getImageData(0,0,CRES,CRES),cd=cd_.data;
     for(let i=0;i<cd.length;i+=4){
       const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2],s=2.2,m=128;
       cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));
@@ -438,206 +337,103 @@ function renderLoop() {
     cwCtx.putImageData(cd_,0,0);
     cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
     const sz=viewCanvas.width; vCtx.imageSmoothingEnabled=false;
-    const vista = VISTAS[state.vistaIdx];
-    if(vista.id==='BN'){
-      vCtx.drawImage(workCanvas,0,0,sz,sz);
-    } else if(vista.id==='COLOR'){
-      vCtx.drawImage(colorWork,0,0,sz,sz);
-    } else if(vista.id==='ANALISIS'){
+    if(state.soloSenal){
       vCtx.fillStyle='#000'; vCtx.fillRect(0,0,sz,sz);
-    } else if(vista.id.startsWith('UMBRAL')){
-      // Umbral: canvas temporal — NO tocar workCanvas
-      const imgU=wCtx.getImageData(0,0,RES,RES);
-      const du=new Uint8ClampedArray(imgU.data);
-      for(let i=0;i<du.length;i+=4){
-        const v2=du[i]>vista.umbral?255:0;
-        du[i]=du[i+1]=du[i+2]=v2; du[i+3]=255;
+    } else {
+      const vista=VISTAS[state.vistaIdx];
+      if(vista.id==='BN'){ vCtx.drawImage(workCanvas,0,0,sz,sz); }
+      else if(vista.id==='COLOR'){ vCtx.drawImage(colorWork,0,0,sz,sz); }
+      else{
+        const imgU=wCtx.getImageData(0,0,RES,RES),du=new Uint8ClampedArray(imgU.data);
+        for(let i=0;i<du.length;i+=4){ const v=du[i]>vista.umbral?255:0; du[i]=du[i+1]=du[i+2]=v; du[i+3]=255; }
+        const tmp=document.createElement('canvas'); tmp.width=tmp.height=RES;
+        tmp.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
+        vCtx.drawImage(tmp,0,0,sz,sz);
       }
-      const tmpCanvas=document.createElement('canvas');
-      tmpCanvas.width=tmpCanvas.height=RES;
-      tmpCanvas.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
-      vCtx.imageSmoothingEnabled=false;
-      vCtx.drawImage(tmpCanvas,0,0,sz,sz);
     }
     renderAcumulacion();
   }
-  if(state.etiquetasActivas.size > 0) renderParticulas();
+  if(state.etiquetasActivas.size>0) renderParticulas();
   else renderDeteccion();
   renderOverlay();
   animFrame=requestAnimationFrame(renderLoop);
 }
 
-function atraparZona(cx, cy) {
-  const s = overlayCanvas.width; // usar overlayCanvas que es donde se detecta el tap
-  const nx = cx/s, ny = cy/s;
-  const radio = 0.12; // radio de captura normalizado
-
-  // Partículas dentro del radio
-  const capturadas = particulas.filter(p=>{
-    const dx=p.x-nx, dy=p.y-ny;
-    return Math.sqrt(dx*dx+dy*dy) < radio;
-  });
-
-  if(capturadas.length < 3) { showNotif('Zona vacía — toca donde hay hadas'); return; }
-
-  const zona = {
-    x:nx, y:ny, radio,
-    particulas: capturadas.length,
-    etiquetas: [...state.etiquetasActivas],
-    id: state.zonas.length + 1
-  };
-  state.zonas.push(zona);
-
-  // Si hay 2+ zonas, calcular relación
-  if(state.zonas.length >= 2){
-    const z1 = state.zonas[state.zonas.length-2];
-    const z2 = state.zonas[state.zonas.length-1];
-    mostrarRelacion(z1, z2);
-  } else {
-    showNotif('ZONA '+zona.id+' · '+capturadas.length+' hadas · toca otra zona');
-  }
-}
-
-function mostrarRelacion(z1, z2) {
-  // Distancia normalizada entre zonas
-  const dx=z2.x-z1.x, dy=z2.y-z1.y;
-  const dist=Math.sqrt(dx*dx+dy*dy);
-  const etqs1=new Set(z1.etiquetas), etqs2=new Set(z2.etiquetas);
-  const comunes=[...etqs1].filter(e=>etqs2.has(e));
-  const diferentes=[...etqs1,...etqs2].filter(e=>!comunes.includes(e));
-
-  let rel = dist < 0.25 ? 'CERCA' : dist < 0.5 ? 'MEDIA' : 'LEJOS';
-  let msg = `Z${z1.id}↔Z${z2.id} · ${rel}`;
-  if(comunes.length) msg += ' · '+comunes.join('+');
-  showNotif(msg, 4000);
-}
-
-function getCampoEtiqueta(ex, ey, id) {
-  // Retorna fuerza del campo en posición normalizada (ex,ey) para etiqueta id
+function getCampoEtiqueta(ex,ey,id){
   if(!workCanvas) return 0;
-  const c = Math.floor(ex*RES), r = Math.floor(ey*RES);
+  const c=Math.floor(ex*RES),r=Math.floor(ey*RES);
   if(c<0||c>=RES||r<0||r>=RES) return 0;
-  const imgData = wCtx.getImageData(c,r,1,1).data;
-  const brillo = imgData[0]/255;
-  if(id==='LUZ')    return brillo;
+  const brillo=wCtx.getImageData(c,r,1,1).data[0]/255;
+  if(id==='LUZ') return brillo;
   if(id==='SOMBRA') return 1-brillo;
   if(id==='ROJO'||id==='VERDE'||id==='AZUL'){
-    const sc=Math.floor(ex*CRES), sr=Math.floor(ey*CRES);
-    const cd=cwCtx.getImageData(sc,sr,1,1).data;
-    if(id==='ROJO')  return cd[0]/255;
+    const sc=Math.floor(ex*CRES),sr=Math.floor(ey*CRES),cd=cwCtx.getImageData(sc,sr,1,1).data;
+    if(id==='ROJO') return cd[0]/255;
     if(id==='VERDE') return cd[1]/255;
-    if(id==='AZUL')  return cd[2]/255;
+    if(id==='AZUL') return cd[2]/255;
   }
-  // Para otras etiquetas: usar gradiente como campo
-  const c2=Math.min(RES-1,c+1), r2=Math.min(RES-1,r+1);
-  const d=wCtx.getImageData(0,0,RES,RES).data;
+  const c2=Math.min(RES-1,c+1),r2=Math.min(RES-1,r+1),d=wCtx.getImageData(0,0,RES,RES).data;
   const dx=(d[(r*RES+c2)*4]-d[(r*RES+Math.max(0,c-1))*4])/255;
   const dy=(d[(r2*RES+c)*4]-d[(Math.max(0,r-1)*RES+c)*4])/255;
   return Math.sqrt(dx*dx+dy*dy);
 }
 
-function renderParticulas() {
+function renderParticulas(){
   if(!viewCanvas) return;
   const s=viewCanvas.width;
-  const etqs=[...state.etiquetasActivas];
-
-  // Actualizar posición de partículas
   particulas.forEach(p=>{
-    let fx=0, fy=0;
-    etqs.forEach((id,i)=>{
-      // Campo de fuerza: gradiente del campo de la etiqueta
-      const eps=0.02;
-      const v0=getCampoEtiqueta(p.x,p.y,id);
+    let fx=0,fy=0;
+    [...state.etiquetasActivas].forEach(id=>{
+      const eps=0.02,v0=getCampoEtiqueta(p.x,p.y,id);
       const vx=getCampoEtiqueta(Math.min(1,p.x+eps),p.y,id);
       const vy=getCampoEtiqueta(p.x,Math.min(1,p.y+eps),id);
-      // Fuerza hacia zonas de mayor valor
-      fx += (vx-v0)/eps * 0.0008;
-      fy += (vy-v0)/eps * 0.0008;
+      fx+=(vx-v0)/eps*0.0008; fy+=(vy-v0)/eps*0.0008;
     });
-
-    // Turbulencia suave
-    fx += (Math.random()-0.5)*0.002;
-    fy += (Math.random()-0.5)*0.002;
-
-    p.vx = p.vx*0.92 + fx;
-    p.vy = p.vy*0.92 + fy;
-
-    // Limitar velocidad
+    fx+=(Math.random()-0.5)*0.002; fy+=(Math.random()-0.5)*0.002;
+    p.vx=p.vx*0.92+fx; p.vy=p.vy*0.92+fy;
     const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    if(spd>0.008){ p.vx=p.vx/spd*0.008; p.vy=p.vy/spd*0.008; }
-
-    p.x = Math.max(0,Math.min(1, p.x+p.vx));
-    p.y = Math.max(0,Math.min(1, p.y+p.vy));
-
-    // Reset si sale del borde
-    if(p.x<=0||p.x>=1||p.y<=0||p.y>=1){
-      p.x=Math.random(); p.y=Math.random(); p.vx=0; p.vy=0;
-    }
+    if(spd>0.008){p.vx=p.vx/spd*0.008;p.vy=p.vy/spd*0.008;}
+    p.x=Math.max(0,Math.min(1,p.x+p.vx)); p.y=Math.max(0,Math.min(1,p.y+p.vy));
+    if(p.x<=0||p.x>=1||p.y<=0||p.y>=1){p.x=Math.random();p.y=Math.random();p.vx=0;p.vy=0;}
   });
-
-  // Dibujar partículas
   vCtx.save();
   particulas.forEach(p=>{
-    const px=p.x*s, py=p.y*s;
-    const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    const alpha=Math.min(0.9, spd/0.008*0.7+0.2);
-    const radio=Math.min(4, spd/0.008*3+1);
-    vCtx.beginPath();
-    vCtx.arc(px,py,radio,0,Math.PI*2);
-    vCtx.fillStyle=`rgba(255,255,255,${alpha.toFixed(2)})`;
-    vCtx.fill();
+    const px=p.x*s,py=p.y*s,spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+    const alpha=Math.min(0.9,spd/0.008*0.7+0.2),radio=Math.min(4,spd/0.008*3+1);
+    vCtx.beginPath(); vCtx.arc(px,py,radio,0,Math.PI*2);
+    vCtx.fillStyle=`rgba(255,255,255,${alpha.toFixed(2)})`; vCtx.fill();
   });
   vCtx.restore();
 }
 
-function renderDeteccion() {
-  if(!viewCanvas || !state.primActivo) return;
-  const s=viewCanvas.width, cs=s/RES;
-  const imgData=wCtx.getImageData(0,0,RES,RES), d=imgData.data;
-
-  function brillo(r,c){ return d[((r*RES)+c)*4]; }
-
-  vCtx.save();
-  vCtx.strokeStyle='rgba(255,255,255,0.7)';
-  vCtx.lineWidth=1;
-
-  // Cada 2 celdas para no saturar
+function renderDeteccion(){
+  if(!viewCanvas||!state.primActivo) return;
+  const s=viewCanvas.width,cs=s/RES;
+  const imgData=wCtx.getImageData(0,0,RES,RES),d=imgData.data;
+  function brillo(r,c){return d[((r*RES)+c)*4];}
+  const color=state.soloSenal?'rgba(0,255,65,0.9)':'rgba(255,255,255,0.7)';
+  const umbralMag=state.soloSenal?8:18;
+  vCtx.save(); vCtx.strokeStyle=color; vCtx.lineWidth=state.soloSenal?1.5:1;
   for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
-    const dx = brillo(r,c+1) - brillo(r,c-1); // gradiente X
-    const dy = brillo(r+1,c) - brillo(r-1,c); // gradiente Y
-    const mag = Math.sqrt(dx*dx+dy*dy);
-
-    // Solo donde hay cambio significativo
-    if(mag < 18) continue;
-
-    // Filtrar según etiqueta activa
-    const b = brillo(r,c);
-    let mostrar = false;
-    if(state.primActivo==='LUZ')    mostrar = b > 150;
-    else if(state.primActivo==='SOMBRA') mostrar = b < 100;
-    else mostrar = true; // resto de etiquetas: mostrar todo
-
+    const dx=brillo(r,c+1)-brillo(r,c-1),dy=brillo(r+1,c)-brillo(r-1,c);
+    const mag=Math.sqrt(dx*dx+dy*dy);
+    if(mag<umbralMag) continue;
+    const b=brillo(r,c);
+    let mostrar=false;
+    if(state.primActivo==='LUZ') mostrar=b>150;
+    else if(state.primActivo==='SOMBRA') mostrar=b<100;
+    else mostrar=true;
     if(!mostrar) continue;
-
-    // Centro de la celda
-    const cx = c*cs + cs/2;
-    const cy = r*cs + cs/2;
-
-    // Vector normalizado, largo proporcional a magnitud
-    const len = Math.min(cs*0.9, mag/255*cs*2);
-    const nx = dx/mag, ny = dy/mag;
-
-    vCtx.beginPath();
-    vCtx.moveTo(cx - nx*len/2, cy - ny*len/2);
-    vCtx.lineTo(cx + nx*len/2, cy + ny*len/2);
-    vCtx.stroke();
+    const cx=c*cs+cs/2,cy=r*cs+cs/2;
+    const len=Math.min(cs*1.4,mag/255*cs*5);
+    const nx=dx/mag,ny=dy/mag;
+    vCtx.beginPath(); vCtx.moveTo(cx-nx*len/2,cy-ny*len/2); vCtx.lineTo(cx+nx*len/2,cy+ny*len/2); vCtx.stroke();
   }
-
   vCtx.restore();
 }
 
-function renderAcumulacion() {
-  const s=viewCanvas.width, cs=s/RES;
+function renderAcumulacion(){
+  const s=viewCanvas.width,cs=s/RES;
   const maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
   vCtx.save();
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
@@ -648,922 +444,51 @@ function renderAcumulacion() {
   vCtx.restore();
 }
 
-function renderOverlay() {
-  oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-  state.spots.forEach(sp=>{
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
-    oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
-  });
-  // Dibujar zonas atrapadas
-  state.zonas.forEach(z=>{
-    const s=overlayCanvas.width;
-    const px=z.x*s, py=z.y*s, r=z.radio*s;
-    oCtx.beginPath(); oCtx.arc(px,py,r,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(255,255,255,0.5)'; oCtx.lineWidth=1;
-    oCtx.setLineDash([3,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    // Nombres en cascada hacia la derecha (baraja oblicua)
-    oCtx.font='bold 10px monospace';
-    if(z.etiquetas.length===0){
-      oCtx.fillStyle='rgba(255,255,255,0.5)';
-      oCtx.fillText('?', px+r+6, py);
-    } else {
-      z.etiquetas.forEach((e,i)=>{
-        const tx = Math.min(px+r+6 + i*14, overlayCanvas.width-55);
-        const ty = py + i*8;
-        // Sombra para contraste
-        oCtx.fillStyle='rgba(0,0,0,0.8)';
-        oCtx.fillText(e.substring(0,6), tx+1, ty+1);
-        oCtx.fillStyle='rgba(255,255,255,1)';
-        oCtx.fillText(e.substring(0,6), tx, ty);
-      });
-    }
-    // Número de zona
-    oCtx.fillStyle='rgba(255,184,0,0.8)';
-    oCtx.font='bold 10px monospace';
-    oCtx.fillText('Z'+z.id, px-8, py+4);
-    // Línea entre zonas
-    if(z.id>1){
-      const zp=state.zonas[z.id-2];
-      oCtx.beginPath(); oCtx.moveTo(zp.x*s,zp.y*s); oCtx.lineTo(px,py);
-      oCtx.strokeStyle='rgba(255,184,0,0.3)'; oCtx.lineWidth=1;
-      oCtx.setLineDash([2,4]); oCtx.stroke(); oCtx.setLineDash([]);
-    }
-  });
-
-  const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
-  if(!p1) return;
-  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
-  oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
-  if(p2){
-    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
-    oCtx.strokeStyle='rgba(60,120,255,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.7)'; oCtx.fill();
-  }
-}
-
-// ── INTERACCIÓN ──
-function getCanvasPos(e) {
-  const rect=overlayCanvas.getBoundingClientRect();
-  const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;
-  return {x:t.clientX-rect.left, y:t.clientY-rect.top};
-}
-
-function onPointerDown(e) {
-  if(!state.running){ showNotif('📷 CAM — botón verde abajo izquierda'); return; }
-  e.preventDefault();
-  gesto.tapMoved=false;
-  const p=getCanvasPos(e);
-  gesto.downPos=p; gesto.moviendo=p;
-  if(state.primActivo==='SPOT'){ gesto.p1=p; return; }
-  if(!state.primActivo){ return; }
-  if(gesto.fase===0){ gesto.p1=p; gesto.fase=1; }
-}
-
-function onPointerMove(e) {
-  e.preventDefault();
-  const p=getCanvasPos(e); gesto.moviendo=p;
-  const ref=gesto.p1||gesto.downPos; if(!ref) return;
-  const dx=p.x-ref.x, dy=p.y-ref.y;
-  if(Math.sqrt(dx*dx+dy*dy)>8) gesto.tapMoved=true;
-}
-
-function onPointerUp(e) {
-  e.preventDefault(); const p=getCanvasPos(e);
-  if(state.primActivo==='SPOT'){
-    if(!gesto.tapMoved) marcarSpot(p.x,p.y);
-    gesto.p1=null; gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
-  }
-  if(!state.primActivo){
-    if(!gesto.tapMoved){
-      if(state.etiquetasActivas.size > 0){
-        // Atrapar hadas en esa zona
-        atraparZona(p.x, p.y);
-      } else {
-        freezeFrame();
-      }
-    }
-    gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
-  }
-  if(gesto.fase===1){
-    gesto.p2=p; gesto.fase=0;
-    etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
-    gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
-  }
-}
-
-function marcarSpot(x,y) {
-  const s=viewCanvas.width;
-  const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
-  const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
-  state.spots.push({id:++state.spotSeq,col,row,x,y});
-  state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
-  state.totalEtiquetas++;
-  actualizarTagStrip('SPOT'); updateFrameCount();
-}
-
-function etiquetarElipse(e,prim) {
-  const s=viewCanvas.width, cs=s/RES;
-  const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
-  const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2), ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);
-  let count=0;
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2, py=r*cs+cs/2;
-    const dx=(px-cx)/rx, dy=(py-cy)/ry;
-    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
-  }
-  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count); }
-}
-
-
-// ── PRIMITIVOS ──
-function selectPrim(btn) {
-  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-  const prim=btn.dataset.prim;
-  state.primActivo=(state.primActivo===prim)?null:prim;
-  if(state.primActivo) btn.classList.add('selected');
-}
-
-// ── MODOS ──
-function setModo(btn) {
-  document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); state.modo=btn.dataset.modo;
-  showNotif(btn.dataset.modo);
-}
-
-// ── PRISMÁTICOS / MARIPOSAS ──
-function abrirPrismaticos() {
-  const panel = document.getElementById('prismaticosPanel');
-  panel.style.display = 'flex';
-
-  // Captura el frame actual del viewCanvas ampliado
-  const src = document.getElementById('viewCanvas');
-  const dst = document.getElementById('prismaticosCanvas');
-  if(src && src.width > 0) {
-    dst.width = src.width;
-    dst.height = src.height;
-    dst.getContext('2d').drawImage(src, 0, 0);
-  }
-
-  // Construye las mariposas con los tokens activos y sus conteos
-  const lista = document.getElementById('mariposasList');
-  const anotacion = document.getElementById('anotacionCampo');
-  lista.innerHTML = '';
-  anotacion.innerHTML = '';
-
-  const activas = Object.entries(tagCounts).filter(([k,v])=>v>0);
-  if(activas.length === 0) {
-    anotacion.textContent = 'sin ejemplares en esta zona';
-    return;
-  }
-
-  // Mariposas flotando — una por etiqueta activa, posición aleatoria dentro de los círculos
-  activas.forEach(([nombre, count]) => {
-    const m = document.createElement('div');
-    m.style.cssText = `position:absolute; font-size:${10+Math.min(count,8)*2}px; opacity:${0.4+Math.min(count,10)*0.06}; cursor:default; user-select:none;`;
-    // Posición dentro del área circular (lado izquierdo o derecho del prisma)
-    const lado = Math.random() > 0.5;
-    const cx = lado ? 25 : 75; // % del ancho
-    const angle = Math.random() * Math.PI * 2;
-    const r = Math.random() * 30;
-    m.style.left = (cx + r * Math.cos(angle)) + '%';
-    m.style.top  = (50 + r * Math.sin(angle) * 0.8) + '%';
-    m.style.transform = 'translate(-50%,-50%)';
-    m.textContent = '🦋';
-    m.title = `${nombre}: ${count}`;
-    lista.appendChild(m);
-  });
-
-  // Anotación de campo
-  anotacion.innerHTML = activas
-    .sort((a,b)=>b[1]-a[1])
-    .map(([k,v])=>`${v} ejemplar${v!==1?'es':''} de <strong style="color:#fff">${k}</strong>`)
-    .join('<br>');
-}
-
-function cerrarPrismaticos() {
-  document.getElementById('prismaticosPanel').style.display = 'none';
-  // Deseleccionar herramienta mariposas
-  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-  state.primActivo = null;
-}
-
-// ── ETIQUETAS ──
-const ETIQUETAS_BASE=['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
-const tagCounts={};
-
-function iniciarEtiquetasBase() {
-  ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); });
-}
-
-function crearEtiquetaEl(id) {
-  if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
-
-  // Fila: [píldora] [led]
-  const row = document.createElement('div');
-  row.className = 'etiq-row';
-
-  const el = document.createElement('div');
-  el.className = 'etiqueta';
-  el.dataset.prim = id;
-  el.appendChild(document.createTextNode(id.substring(0,7)));
-
-  const led = document.createElement('span');
-  led.className = 'led';
-  led.dataset.ledPrim = id;
-  el.appendChild(led);
-
-  row.appendChild(el);
-
-  el.addEventListener('click', () => {
-    const was = el.classList.contains('activa');
-    // Selección múltiple para etiquetas
-    el.classList.toggle('activa');
-    if(was) state.etiquetasActivas.delete(id);
-    else state.etiquetasActivas.add(id);
-    // Si hay etiqueta activa, desactiva herramienta
-    if(state.etiquetasActivas.size > 0){
-      document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-      state.primActivo = null;
-    }
-  });
-
-  document.getElementById('tagStrip').appendChild(row);
-}
-
-function actualizarTagStrip(prim) {
-  tagCounts[prim]=(tagCounts[prim]||0)+1;
-  if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
-  const led=document.querySelector(`.led[data-led-prim="${prim}"]`);
-  if(!led) return;
-  const ev=tagCounts[prim];
-  led.className='led';
-  if(ev>=UMBRAL_FUERTE) led.classList.add('fuerte');
-  else if(ev>=UMBRAL_MEDIA) led.classList.add('media');
-  else if(ev>=1) led.classList.add('debil');
-}
-
-function verReconstruccion() { showNotif('VER — próximamente'); }
-
-function exportarEtiquetas() {
-  if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
-  const celdas=[];
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
-  const ci=cCtx.getImageData(0,0,CRES,CRES), cp=[];
-  for(let i=0;i<ci.data.length;i+=4) cp.push([ci.data[i],ci.data[i+1],ci.data[i+2]]);
-  const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
-  showNotif('JSON exportado');
-}
-
-function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq'; }
-function showNotif(msg,dur=1800){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
-</script>
-</body>
-</html>  scrollbar-width:none;
-  z-index:100;
-  width:160px;
-}
-#tagStrip::-webkit-scrollbar { display:none; }
-
-.etiq-row { display:flex; flex-shrink:0; }
-
-.etiqueta {
-  width:130px;
-  min-width:130px;
-  max-width:130px;
-  padding:10px 10px 10px 10px;
-  border:1px solid #666;
-  border-radius:var(--r-etiq);
-  background:#000;
-  color:#888;
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:0.06em;
-  white-space:nowrap;
-  overflow:hidden;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end; /* texto alineado a la derecha */
-  gap:8px;
-  transform:translateX(-70px);
-  transition:transform 0.18s ease, border-color 0.18s, color 0.18s;
-  box-sizing:border-box;
-}
-
-.etiqueta.activa {
-  color:#fff;
-  border-color:#fff;
-  transform:translateX(-40px);
-}
-
-/* LED — extremo derecho (lado imagen) */
-.led {
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  flex-shrink:0;
-  background:#1a1a1a;
-  border:1px solid #333;
-  flex-shrink:0;
-  transition:all 0.4s;
-}
-.led.debil  { background:#444; border-color:#666; }
-.led.media  { background:#999; border-color:#bbb; box-shadow:0 0 4px #888; }
-.led.fuerte { background:var(--amber); border-color:var(--amber); box-shadow:0 0 6px var(--amber); }
-
-/* HERRAMIENTAS */
-#toolsWrapper { flex-shrink:0; border-top:1px solid var(--border); background:var(--black); display:flex; justify-content:center; }
-#primitivosPanel {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  grid-template-rows:repeat(2,1fr);
-  gap:3px; padding:4px;
-  width:100%;
-  max-width:420px;
-}
-.prim-btn {
-  height:68px;      /* alto fijo */
-  width:100%;       /* ancho flexible */
-  background:var(--dim); border:1px solid var(--border); color:#666;
-  font-family:'Courier New',monospace; font-size:8px; font-weight:700; letter-spacing:0.04em;
-  cursor:pointer; text-align:center; transition:all 0.1s;
-  border-radius:var(--r-op); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-}
-.prim-btn img { width:32px; height:32px; opacity:0.4; display:block; }
-.prim-btn.selected img { opacity:1; }
-.prim-btn:active { background:var(--border); }
-
-/* BOTTOM BAR */
-#bottomBar { flex-shrink:0; border-top:1px solid var(--border); display:flex; justify-content:center; }
-#bottomBar .inner { display:flex; width:100%; max-width:420px; }
-.b-btn { flex:1; background:var(--dim); border:none; border-right:1px solid var(--border); color:#555; padding:8px 4px; font-family:'Courier New',monospace; font-size:8px; letter-spacing:0.07em; cursor:pointer; text-align:center; transition:all 0.15s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
-.b-btn:last-child { border-right:none; }
-.b-btn:active { background:var(--border); color:var(--white); }
-.b-btn.encendido { color:var(--red); border-top:2px solid var(--red); background:rgba(255,45,45,0.08); }
-.b-btn.invitar { color:var(--green); border-top:2px solid var(--green); background:rgba(0,255,65,0.08); font-weight:700; }
-
-
-
-/* NOTIF */
-#notif { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--green); color:var(--black); padding:6px 14px; font-size:10px; font-weight:700; letter-spacing:0.1em; border-radius:2px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:999; white-space:nowrap; }
-#notif.show { opacity:1; }
-</style>
-</head>
-<body>
-<div id="app">
-
-  <div id="header">
-    <div id="logo">EP·ST // VER</div>
-    <div id="modosBar">
-      <button class="modo-btn active" data-modo="SIGNAL" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="S">
-      </button>
-      <button class="modo-btn" data-modo="CARE" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/INFLUENCE.png" alt="C">
-      </button>
-      <button class="modo-btn" data-modo="BUILD" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="B">
-      </button>
-      <button class="modo-btn" data-modo="GENETIC" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="G">
-      </button>
-      <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="Z">
-      </button>
-    </div>
-    <div id="frameCount">0 etiq</div>
-    <button id="btnCanal" onclick="toggleCanal()" style="
-      background:transparent; border:1px solid #444; color:#666;
-      font-family:'Courier New',monospace; font-size:9px; font-weight:700;
-      letter-spacing:0.1em; padding:4px 8px; cursor:pointer;
-      border-radius:3px; transition:all 0.2s;
-    ">B/N</button>
-  </div>
-
-  <div id="cameraZone">
-    <div id="cameraOff">
-      <div class="eye">👁</div>
-      <p>TOCA PARA EMPEZAR</p>
-    </div>
-    <canvas id="viewCanvas"></canvas>
-    <canvas id="overlayCanvas"></canvas>
-    <video id="video" autoplay playsinline muted></video>
-    <div id="colorChannel">
-      <canvas id="colorCanvas" width="16" height="16"></canvas>
-    </div>
-  </div>
-
-  <!-- tagStrip fuera del cameraZone para que translateX no se corte -->
-  <div id="tagStrip"></div>
-
-  <div id="toolsWrapper">
-    <div id="primitivosPanel">
-      <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="·">SPOT
-      </button>
-      <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FUZZY_AREA.png" alt="◯">ÁREA
-      </button>
-      <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/NOISE.png" alt="≋">RUIDO
-      </button>
-      <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/PATTERN.png" alt="⊞">PATRÓN
-      </button>
-      <button class="prim-btn" data-prim="ANGULO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ANGLE.png" alt="∠">ÁNGULO
-      </button>
-      <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GRADIENT.png" alt="▒">GRAD
-      </button>
-      <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="◆">VÉRTICE
-      </button>
-
-      <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="▣">FIGURA
-      </button>
-      <button class="prim-btn" data-prim="MARIPOSAS" onclick="selectPrim(this); abrirPrismaticos()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/MARIPOSAS.png" alt="🦋">MARIPOSAS
-      </button>
-    </div>
-  </div>
-
-  <!-- PANEL PRISMÁTICOS -->
-  <div id="prismaticosPanel" style="display:none; position:fixed; inset:0; z-index:600; background:#000; flex-direction:column; align-items:center; justify-content:center;">
-    <div id="prismaticosVisor" style="position:relative; width:90vmin; height:90vmin;">
-      <!-- Mira de prismáticos: dos lentes fusionadas -->
-      <svg id="miraSVG" viewBox="0 0 200 100" style="position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none;">
-        <circle cx="50" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
-        <circle cx="150" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
-        <line x1="98" y1="50" x2="102" y2="50" stroke="#00ff41" stroke-width="1"/>
-        <line x1="100" y1="2" x2="100" y2="98" stroke="#00ff41" stroke-width="0.5" opacity="0.4"/>
-      </svg>
-      <!-- Canvas ampliado de la zona -->
-      <canvas id="prismaticosCanvas" style="width:100%; height:100%; image-rendering:pixelated; border-radius:50%;"></canvas>
-      <!-- Mariposas (ejemplares) flotando -->
-      <div id="mariposasList" style="position:absolute; inset:0; z-index:3; pointer-events:none;"></div>
-    </div>
-    <!-- Anotación de campo -->
-    <div id="anotacionCampo" style="margin-top:20px; font-size:10px; letter-spacing:0.12em; color:#555; text-align:center; max-width:80vw;"></div>
-    <button onclick="cerrarPrismaticos()" style="margin-top:24px; background:none; border:1px solid #333; color:#555; font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.15em; padding:8px 20px; cursor:pointer;">— CERRAR —</button>
-  </div>
-
-  <div id="bottomBar">
-    <div class="inner">
-      <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">
-        <img id="iconCam" src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">CAM
-      </button>
-      <button class="b-btn" onclick="freezeFrame()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FREEZE.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">PAUSA
-      </button>
-      <button class="b-btn" onclick="verReconstruccion()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/EYE_IRIS.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">VER
-      </button>
-      <button class="b-btn" onclick="exportarEtiquetas()">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/JSON.png" style="width:22px;height:22px;filter:invert(1);opacity:0.5;display:block;margin:0 auto 2px;">JSON
-      </button>
-    </div>
-  </div>
-
-</div>
-<div id="notif"></div>
-
-<script>
-const RES=64, CRES=16;
-const UMBRAL_MEDIA=3, UMBRAL_FUERTE=10;
-
-const state = {
-  stream:null, running:false, frozen:false,
-  primActivo:null, modo:'DEPURAR',
-  vistaIdx:0,
-  etiquetasActivas: new Set(), // selección múltiple
-  zonas: [], // zonas atrapadas [{x,y,radio,particulas,etiquetas}]
-  grid: Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
-  spots:[], totalEtiquetas:0, spotSeq:0,
-  evidencia:{},
-};
-
-const gesto = { fase:0, p1:null, p2:null, downPos:null, moviendo:null, tapMoved:false, _timer:null };
-
-// Array extensible de vistas — añade aquí sin tocar nada más
-const VISTAS = [
-  { id:'BN',       label:'B/N',      color:'#888'   },
-  { id:'COLOR',    label:'COLOR',    color:'#ffb800' },
-  { id:'ANALISIS', label:'ANÁLISIS', color:'#7ab'   },
-  { id:'UMBRAL1',  label:'UMBRAL 1', color:'#aaa',  umbral:60  },
-  { id:'UMBRAL2',  label:'UMBRAL 2', color:'#aaa',  umbral:100 },
-  { id:'UMBRAL3',  label:'UMBRAL 3', color:'#aaa',  umbral:140 },
-  { id:'UMBRAL4',  label:'UMBRAL 4', color:'#aaa',  umbral:180 },
-  { id:'UMBRAL5',  label:'UMBRAL 5', color:'#aaa',  umbral:220 },
-];
-
-// ── SISTEMA DE PARTÍCULAS ──
-const N_PARTICULAS = 120;
-const particulas = Array.from({length:N_PARTICULAS}, ()=>({
-  x: Math.random(), y: Math.random(), // posición normalizada 0-1
-  vx:0, vy:0
-}));
-
-let viewCanvas, overlayCanvas, vCtx, oCtx;
-let video, workCanvas, wCtx, colorCanvas, cCtx, colorWork, cwCtx;
-let animFrame=null;
-
-document.addEventListener('DOMContentLoaded', () => {
-  viewCanvas    = document.getElementById('viewCanvas');
-  overlayCanvas = document.getElementById('overlayCanvas');
-  vCtx = viewCanvas.getContext('2d');
-  oCtx = overlayCanvas.getContext('2d');
-  video = document.getElementById('video');
-  colorCanvas = document.getElementById('colorCanvas');
-  cCtx = colorCanvas.getContext('2d');
-  workCanvas = document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d');
-  colorWork = document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d');
-
-  posicionarTagStrip();
-  iniciarEtiquetasBase();
-  actualizarBtnCam();
-
-  overlayCanvas.addEventListener('touchstart',onPointerDown,{passive:false});
-  overlayCanvas.addEventListener('touchmove', onPointerMove,{passive:false});
-  overlayCanvas.addEventListener('touchend',  onPointerUp,  {passive:false});
-  overlayCanvas.addEventListener('mousedown', onPointerDown);
-  overlayCanvas.addEventListener('mousemove', onPointerMove);
-  overlayCanvas.addEventListener('mouseup',   onPointerUp);
-  window.addEventListener('resize', ()=>{ resizeCanvases(); posicionarTagStrip(); });
-  // Cerrar stream al salir de la página
-  window.addEventListener('beforeunload', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
-  window.addEventListener('pagehide', ()=>{ if(state.stream) state.stream.getTracks().forEach(t=>t.stop()); });
-  document.addEventListener('visibilitychange', ()=>{ if(document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=false); else if(!document.hidden && state.stream) state.stream.getTracks().forEach(t=>t.enabled=true); });
-  resizeCanvases();
-});
-
-function posicionarTagStrip() {
-  const zone = document.getElementById('cameraZone');
-  const strip = document.getElementById('tagStrip');
-  const rect = zone.getBoundingClientRect();
-  strip.style.top = rect.top + 'px';
-  strip.style.height = rect.height + 'px';
-}
-
-function resizeCanvases() {
-  if(!viewCanvas) return;
-  const zone=document.getElementById('cameraZone');
-  const size=Math.min(zone.clientWidth,zone.clientHeight)*0.96;
-  [viewCanvas,overlayCanvas].forEach(c=>{
-    c.style.width=c.style.height=size+'px'; c.width=c.height=size;
-    c.style.position='absolute';
-    c.style.left=((zone.clientWidth-size)/2)+'px';
-    c.style.top=((zone.clientHeight-size)/2)+'px';
-  });
-}
-
-// ── CÁMARA ──
-async function toggleCamera() { if(state.running) stopCamera(); else await startCamera(); }
-
-async function startCamera() {
-  try {
-    state.stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'user',width:{ideal:320},height:{ideal:320}},audio:false
-    });
-    video.srcObject=state.stream;
-    await video.play();
-    state.running=true; state.frozen=false;
-    document.getElementById('cameraOff').style.display='none';
-    document.getElementById('colorChannel').style.display='block';
-    viewCanvas.style.display='block'; overlayCanvas.style.display='block';
-    actualizarBtnCam();
-    renderLoop();
-
-  } catch(e){ showNotif('Sin permiso de cámara'); }
-}
-
-function stopCamera() {
-  if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
-  state.running=false;
-  if(animFrame) cancelAnimationFrame(animFrame);
-  document.getElementById('cameraOff').style.display='flex';
-  viewCanvas.style.display='none'; overlayCanvas.style.display='none';
-  document.getElementById('colorChannel').style.display='none';
-  actualizarBtnCam();
-}
-
-function actualizarBtnCam() {
-  const btn=document.getElementById('btnCam');
-  const icon=document.getElementById('iconCam');
-  if(state.running){
-    btn.classList.add('encendido'); btn.classList.remove('invitar');
-    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PAUSE.png'; icon.style.opacity='1'; }
-  } else {
-    btn.classList.remove('encendido'); btn.classList.add('invitar');
-    if(icon){ icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png'; icon.style.opacity='0.5'; }
-  }
-}
-
-function toggleCanal() {
-  state.vistaIdx = (state.vistaIdx + 1) % VISTAS.length;
-  const v = VISTAS[state.vistaIdx];
-  const btn = document.getElementById('btnCanal');
-  btn.textContent = v.label;
-  btn.style.color = v.color;
-  btn.style.borderColor = v.color;
-}
-
-function freezeFrame() {
-  if(!state.running) return;
-  if(!state.frozen){
-    // Congelar: capturar frame actual y pausar tracks
-    state.frozen=true;
-    state.stream.getTracks().forEach(t=>t.enabled=false);
-    showNotif('⏸ CONGELADO');
-  } else {
-    // Descongelar: reactivar tracks
-    state.frozen=false;
-    state.stream.getTracks().forEach(t=>t.enabled=true);
-    showNotif('▶ EN VIVO');
-  }
-}
-
-// ── RENDER ──
-function renderLoop() {
-  if(!state.running) return;
-  if(!state.frozen && video.readyState>=2) {
-    wCtx.drawImage(video,0,0,RES,RES);
-    const id=wCtx.getImageData(0,0,RES,RES), d=id.data;
-    for(let i=0;i<d.length;i+=4){ const g=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]); d[i]=d[i+1]=d[i+2]=g; }
-    wCtx.putImageData(id,0,0);
-    cwCtx.drawImage(video,0,0,CRES,CRES);
-    const cd_=cwCtx.getImageData(0,0,CRES,CRES), cd=cd_.data;
-    for(let i=0;i<cd.length;i+=4){
-      const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2],s=2.2,m=128;
-      cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));
-      cd[i+1]=Math.min(255,Math.max(0,m+(cd[i+1]-br)*s+(br-m)*0.25));
-      cd[i+2]=Math.min(255,Math.max(0,m+(cd[i+2]-br)*s+(br-m)*0.25));
-    }
-    cwCtx.putImageData(cd_,0,0);
-    cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
-    const sz=viewCanvas.width; vCtx.imageSmoothingEnabled=false;
-    const vista = VISTAS[state.vistaIdx];
-    if(vista.id==='BN'){
-      vCtx.drawImage(workCanvas,0,0,sz,sz);
-    } else if(vista.id==='COLOR'){
-      vCtx.drawImage(colorWork,0,0,sz,sz);
-    } else if(vista.id==='ANALISIS'){
-      vCtx.fillStyle='#000'; vCtx.fillRect(0,0,sz,sz);
-    } else if(vista.id.startsWith('UMBRAL')){
-      // Umbral: canvas temporal — NO tocar workCanvas
-      const imgU=wCtx.getImageData(0,0,RES,RES);
-      const du=new Uint8ClampedArray(imgU.data);
-      for(let i=0;i<du.length;i+=4){
-        const v2=du[i]>vista.umbral?255:0;
-        du[i]=du[i+1]=du[i+2]=v2; du[i+3]=255;
-      }
-      const tmpCanvas=document.createElement('canvas');
-      tmpCanvas.width=tmpCanvas.height=RES;
-      tmpCanvas.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
-      vCtx.imageSmoothingEnabled=false;
-      vCtx.drawImage(tmpCanvas,0,0,sz,sz);
-    }
-    renderAcumulacion();
-  }
-  if(state.etiquetasActivas.size > 0) renderParticulas();
-  else renderDeteccion();
-  renderOverlay();
-  animFrame=requestAnimationFrame(renderLoop);
-}
-
-function atraparZona(cx, cy) {
-  const s = overlayCanvas.width; // usar overlayCanvas que es donde se detecta el tap
-  const nx = cx/s, ny = cy/s;
-  const radio = 0.12; // radio de captura normalizado
-
-  // Partículas dentro del radio
-  const capturadas = particulas.filter(p=>{
-    const dx=p.x-nx, dy=p.y-ny;
-    return Math.sqrt(dx*dx+dy*dy) < radio;
-  });
-
-  if(capturadas.length < 3) { showNotif('Zona vacía — toca donde hay hadas'); return; }
-
-  const zona = {
-    x:nx, y:ny, radio,
-    particulas: capturadas.length,
-    etiquetas: [...state.etiquetasActivas],
-    id: state.zonas.length + 1
-  };
+function atraparZona(cx,cy){
+  const s=overlayCanvas.width,nx=cx/s,ny=cy/s,radio=0.12;
+  const capturadas=particulas.filter(p=>{const dx=p.x-nx,dy=p.y-ny;return Math.sqrt(dx*dx+dy*dy)<radio;});
+  if(capturadas.length<3){showNotif('Zona vacía');return;}
+  const zona={x:nx,y:ny,radio,particulas:capturadas.length,etiquetas:[...state.etiquetasActivas],id:state.zonas.length+1};
   state.zonas.push(zona);
-
-  // Si hay 2+ zonas, calcular relación
-  if(state.zonas.length >= 2){
-    const z1 = state.zonas[state.zonas.length-2];
-    const z2 = state.zonas[state.zonas.length-1];
-    mostrarRelacion(z1, z2);
-  } else {
-    showNotif('ZONA '+zona.id+' · '+capturadas.length+' hadas · toca otra zona');
-  }
+  if(state.zonas.length>=2) mostrarRelacion(state.zonas[state.zonas.length-2],zona);
+  else showNotif('ZONA '+zona.id+' · '+capturadas.length+' · toca otra zona');
 }
 
-function mostrarRelacion(z1, z2) {
-  // Distancia normalizada entre zonas
-  const dx=z2.x-z1.x, dy=z2.y-z1.y;
-  const dist=Math.sqrt(dx*dx+dy*dy);
-  const etqs1=new Set(z1.etiquetas), etqs2=new Set(z2.etiquetas);
-  const comunes=[...etqs1].filter(e=>etqs2.has(e));
-  const diferentes=[...etqs1,...etqs2].filter(e=>!comunes.includes(e));
-
-  let rel = dist < 0.25 ? 'CERCA' : dist < 0.5 ? 'MEDIA' : 'LEJOS';
-  let msg = `Z${z1.id}↔Z${z2.id} · ${rel}`;
-  if(comunes.length) msg += ' · '+comunes.join('+');
-  showNotif(msg, 4000);
+function mostrarRelacion(z1,z2){
+  const dx=z2.x-z1.x,dy=z2.y-z1.y,dist=Math.sqrt(dx*dx+dy*dy);
+  const comunes=[...new Set(z1.etiquetas)].filter(e=>z2.etiquetas.includes(e));
+  let rel=dist<0.25?'CERCA':dist<0.5?'MEDIA':'LEJOS';
+  let msg=`Z${z1.id}↔Z${z2.id} · ${rel}`;
+  if(comunes.length) msg+=' · '+comunes.join('+');
+  showNotif(msg,4000);
 }
 
-function getCampoEtiqueta(ex, ey, id) {
-  // Retorna fuerza del campo en posición normalizada (ex,ey) para etiqueta id
-  if(!workCanvas) return 0;
-  const c = Math.floor(ex*RES), r = Math.floor(ey*RES);
-  if(c<0||c>=RES||r<0||r>=RES) return 0;
-  const imgData = wCtx.getImageData(c,r,1,1).data;
-  const brillo = imgData[0]/255;
-  if(id==='LUZ')    return brillo;
-  if(id==='SOMBRA') return 1-brillo;
-  if(id==='ROJO'||id==='VERDE'||id==='AZUL'){
-    const sc=Math.floor(ex*CRES), sr=Math.floor(ey*CRES);
-    const cd=cwCtx.getImageData(sc,sr,1,1).data;
-    if(id==='ROJO')  return cd[0]/255;
-    if(id==='VERDE') return cd[1]/255;
-    if(id==='AZUL')  return cd[2]/255;
-  }
-  // Para otras etiquetas: usar gradiente como campo
-  const c2=Math.min(RES-1,c+1), r2=Math.min(RES-1,r+1);
-  const d=wCtx.getImageData(0,0,RES,RES).data;
-  const dx=(d[(r*RES+c2)*4]-d[(r*RES+Math.max(0,c-1))*4])/255;
-  const dy=(d[(r2*RES+c)*4]-d[(Math.max(0,r-1)*RES+c)*4])/255;
-  return Math.sqrt(dx*dx+dy*dy);
-}
-
-function renderParticulas() {
-  if(!viewCanvas) return;
-  const s=viewCanvas.width;
-  const etqs=[...state.etiquetasActivas];
-
-  // Actualizar posición de partículas
-  particulas.forEach(p=>{
-    let fx=0, fy=0;
-    etqs.forEach((id,i)=>{
-      // Campo de fuerza: gradiente del campo de la etiqueta
-      const eps=0.02;
-      const v0=getCampoEtiqueta(p.x,p.y,id);
-      const vx=getCampoEtiqueta(Math.min(1,p.x+eps),p.y,id);
-      const vy=getCampoEtiqueta(p.x,Math.min(1,p.y+eps),id);
-      // Fuerza hacia zonas de mayor valor
-      fx += (vx-v0)/eps * 0.0008;
-      fy += (vy-v0)/eps * 0.0008;
-    });
-
-    // Turbulencia suave
-    fx += (Math.random()-0.5)*0.002;
-    fy += (Math.random()-0.5)*0.002;
-
-    p.vx = p.vx*0.92 + fx;
-    p.vy = p.vy*0.92 + fy;
-
-    // Limitar velocidad
-    const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    if(spd>0.008){ p.vx=p.vx/spd*0.008; p.vy=p.vy/spd*0.008; }
-
-    p.x = Math.max(0,Math.min(1, p.x+p.vx));
-    p.y = Math.max(0,Math.min(1, p.y+p.vy));
-
-    // Reset si sale del borde
-    if(p.x<=0||p.x>=1||p.y<=0||p.y>=1){
-      p.x=Math.random(); p.y=Math.random(); p.vx=0; p.vy=0;
-    }
-  });
-
-  // Dibujar partículas
-  vCtx.save();
-  particulas.forEach(p=>{
-    const px=p.x*s, py=p.y*s;
-    const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    const alpha=Math.min(0.9, spd/0.008*0.7+0.2);
-    const radio=Math.min(4, spd/0.008*3+1);
-    vCtx.beginPath();
-    vCtx.arc(px,py,radio,0,Math.PI*2);
-    vCtx.fillStyle=`rgba(255,255,255,${alpha.toFixed(2)})`;
-    vCtx.fill();
-  });
-  vCtx.restore();
-}
-
-function renderDeteccion() {
-  if(!viewCanvas || !state.primActivo) return;
-  const s=viewCanvas.width, cs=s/RES;
-  const imgData=wCtx.getImageData(0,0,RES,RES), d=imgData.data;
-
-  function brillo(r,c){ return d[((r*RES)+c)*4]; }
-
-  vCtx.save();
-  vCtx.strokeStyle='rgba(255,255,255,0.7)';
-  vCtx.lineWidth=1;
-
-  // Cada 2 celdas para no saturar
-  for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
-    const dx = brillo(r,c+1) - brillo(r,c-1); // gradiente X
-    const dy = brillo(r+1,c) - brillo(r-1,c); // gradiente Y
-    const mag = Math.sqrt(dx*dx+dy*dy);
-
-    // Solo donde hay cambio significativo
-    if(mag < 18) continue;
-
-    // Filtrar según etiqueta activa
-    const b = brillo(r,c);
-    let mostrar = false;
-    if(state.primActivo==='LUZ')    mostrar = b > 150;
-    else if(state.primActivo==='SOMBRA') mostrar = b < 100;
-    else mostrar = true; // resto de etiquetas: mostrar todo
-
-    if(!mostrar) continue;
-
-    // Centro de la celda
-    const cx = c*cs + cs/2;
-    const cy = r*cs + cs/2;
-
-    // Vector normalizado, largo proporcional a magnitud
-    const len = Math.min(cs*0.9, mag/255*cs*2);
-    const nx = dx/mag, ny = dy/mag;
-
-    vCtx.beginPath();
-    vCtx.moveTo(cx - nx*len/2, cy - ny*len/2);
-    vCtx.lineTo(cx + nx*len/2, cy + ny*len/2);
-    vCtx.stroke();
-  }
-
-  vCtx.restore();
-}
-
-function renderAcumulacion() {
-  const s=viewCanvas.width, cs=s/RES;
-  const maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
-  vCtx.save();
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
-    if(t<1) continue;
-    vCtx.fillStyle=`rgba(60,120,255,${Math.min(0.28,t/maxA*0.28)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
-  }
-  vCtx.restore();
-}
-
-function renderOverlay() {
+function renderOverlay(){
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
   state.spots.forEach(sp=>{
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);
-    oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
+    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2); oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
   });
-  // Dibujar zonas atrapadas
   state.zonas.forEach(z=>{
-    const s=overlayCanvas.width;
-    const px=z.x*s, py=z.y*s, r=z.radio*s;
+    const s=overlayCanvas.width,px=z.x*s,py=z.y*s,r=z.radio*s;
     oCtx.beginPath(); oCtx.arc(px,py,r,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(255,255,255,0.5)'; oCtx.lineWidth=1;
-    oCtx.setLineDash([3,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    // Nombres en cascada hacia la derecha (baraja oblicua)
+    oCtx.strokeStyle='rgba(255,255,255,0.5)'; oCtx.lineWidth=1; oCtx.setLineDash([3,3]); oCtx.stroke(); oCtx.setLineDash([]);
     oCtx.font='bold 10px monospace';
-    if(z.etiquetas.length===0){
-      oCtx.fillStyle='rgba(255,255,255,0.5)';
-      oCtx.fillText('?', px+r+6, py);
-    } else {
-      z.etiquetas.forEach((e,i)=>{
-        const tx = Math.min(px+r+6 + i*14, overlayCanvas.width-55);
-        const ty = py + i*8;
-        // Sombra para contraste
-        oCtx.fillStyle='rgba(0,0,0,0.8)';
-        oCtx.fillText(e.substring(0,6), tx+1, ty+1);
-        oCtx.fillStyle='rgba(255,255,255,1)';
-        oCtx.fillText(e.substring(0,6), tx, ty);
-      });
-    }
-    // Número de zona
-    oCtx.fillStyle='rgba(255,184,0,0.8)';
-    oCtx.font='bold 10px monospace';
-    oCtx.fillText('Z'+z.id, px-8, py+4);
-    // Línea entre zonas
+    z.etiquetas.forEach((e,i)=>{
+      const tx=Math.min(px+r+6+i*14,overlayCanvas.width-55),ty=py+i*8;
+      oCtx.fillStyle='rgba(0,0,0,0.8)'; oCtx.fillText(e.substring(0,6),tx+1,ty+1);
+      oCtx.fillStyle='rgba(255,255,255,1)'; oCtx.fillText(e.substring(0,6),tx,ty);
+    });
+    oCtx.fillStyle='rgba(255,184,0,0.8)'; oCtx.fillText('Z'+z.id,px-8,py+4);
     if(z.id>1){
       const zp=state.zonas[z.id-2];
       oCtx.beginPath(); oCtx.moveTo(zp.x*s,zp.y*s); oCtx.lineTo(px,py);
-      oCtx.strokeStyle='rgba(255,184,0,0.3)'; oCtx.lineWidth=1;
-      oCtx.setLineDash([2,4]); oCtx.stroke(); oCtx.setLineDash([]);
+      oCtx.strokeStyle='rgba(255,184,0,0.3)'; oCtx.lineWidth=1; oCtx.setLineDash([2,4]); oCtx.stroke(); oCtx.setLineDash([]);
     }
   });
-
-  const p1=gesto.p1, p2=gesto.p2||gesto.moviendo;
+  const p1=gesto.p1,p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
-  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);
-  oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
+  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2); oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
   if(p2){
     oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
     oCtx.strokeStyle='rgba(60,120,255,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
@@ -1572,32 +497,25 @@ function renderOverlay() {
 }
 
 // ── INTERACCIÓN ──
-function getCanvasPos(e) {
+function getCanvasPos(e){
   const rect=overlayCanvas.getBoundingClientRect();
   const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;
-  return {x:t.clientX-rect.left, y:t.clientY-rect.top};
+  return {x:t.clientX-rect.left,y:t.clientY-rect.top};
 }
-
-function onPointerDown(e) {
-  if(!state.running){ showNotif('📷 CAM — botón verde abajo izquierda'); return; }
-  e.preventDefault();
-  gesto.tapMoved=false;
-  const p=getCanvasPos(e);
-  gesto.downPos=p; gesto.moviendo=p;
-  if(state.primActivo==='SPOT'){ gesto.p1=p; return; }
-  if(!state.primActivo){ return; }
-  if(gesto.fase===0){ gesto.p1=p; gesto.fase=1; }
+function onPointerDown(e){
+  if(!state.running){showNotif('📷 CAM — botón verde');return;}
+  e.preventDefault(); gesto.tapMoved=false;
+  const p=getCanvasPos(e); gesto.downPos=p; gesto.moviendo=p;
+  if(state.primActivo==='SPOT'){gesto.p1=p;return;}
+  if(!state.primActivo) return;
+  if(gesto.fase===0){gesto.p1=p;gesto.fase=1;}
 }
-
-function onPointerMove(e) {
-  e.preventDefault();
-  const p=getCanvasPos(e); gesto.moviendo=p;
+function onPointerMove(e){
+  e.preventDefault(); const p=getCanvasPos(e); gesto.moviendo=p;
   const ref=gesto.p1||gesto.downPos; if(!ref) return;
-  const dx=p.x-ref.x, dy=p.y-ref.y;
-  if(Math.sqrt(dx*dx+dy*dy)>8) gesto.tapMoved=true;
+  if(Math.sqrt((p.x-ref.x)**2+(p.y-ref.y)**2)>8) gesto.tapMoved=true;
 }
-
-function onPointerUp(e) {
+function onPointerUp(e){
   e.preventDefault(); const p=getCanvasPos(e);
   if(state.primActivo==='SPOT'){
     if(!gesto.tapMoved) marcarSpot(p.x,p.y);
@@ -1605,23 +523,19 @@ function onPointerUp(e) {
   }
   if(!state.primActivo){
     if(!gesto.tapMoved){
-      if(state.etiquetasActivas.size > 0){
-        // Atrapar hadas en esa zona
-        atraparZona(p.x, p.y);
-      } else {
-        freezeFrame();
-      }
+      if(state.etiquetasActivas.size>0) atraparZona(p.x,p.y);
+      else freezeFrame();
     }
     gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
   }
   if(gesto.fase===1){
     gesto.p2=p; gesto.fase=0;
-    etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y}, state.primActivo);
+    etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y},state.primActivo);
     gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
   }
 }
 
-function marcarSpot(x,y) {
+function marcarSpot(x,y){
   const s=viewCanvas.width;
   const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
   const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
@@ -1631,162 +545,92 @@ function marcarSpot(x,y) {
   actualizarTagStrip('SPOT'); updateFrameCount();
 }
 
-function etiquetarElipse(e,prim) {
-  const s=viewCanvas.width, cs=s/RES;
-  const cx=(e.x1+e.x2)/2, cy=(e.y1+e.y2)/2;
-  const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2), ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);
+function etiquetarElipse(e,prim){
+  const s=viewCanvas.width,cs=s/RES;
+  const cx=(e.x1+e.x2)/2,cy=(e.y1+e.y2)/2;
+  const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2),ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);
   let count=0;
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2, py=r*cs+cs/2;
-    const dx=(px-cx)/rx, dy=(py-cy)/ry;
-    if(dx*dx+dy*dy<=1){ state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1; count++; state.totalEtiquetas++; }
+    const px=c*cs+cs/2,py=r*cs+cs/2;
+    const dx=(px-cx)/rx,dy=(py-cy)/ry;
+    if(dx*dx+dy*dy<=1){state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1;count++;state.totalEtiquetas++;}
   }
-  if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count); }
+  if(count>0){actualizarTagStrip(prim);updateFrameCount();showNotif(prim+' · '+count);}
 }
 
-
 // ── PRIMITIVOS ──
-function selectPrim(btn) {
+function selectPrim(btn){
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   const prim=btn.dataset.prim;
   state.primActivo=(state.primActivo===prim)?null:prim;
   if(state.primActivo) btn.classList.add('selected');
 }
 
-// ── MODOS ──
-function setModo(btn) {
-  document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); state.modo=btn.dataset.modo;
-  showNotif(btn.dataset.modo);
-}
-
-// ── PRISMÁTICOS / MARIPOSAS ──
-function abrirPrismaticos() {
-  const panel = document.getElementById('prismaticosPanel');
-  panel.style.display = 'flex';
-
-  // Captura el frame actual del viewCanvas ampliado
-  const src = document.getElementById('viewCanvas');
-  const dst = document.getElementById('prismaticosCanvas');
-  if(src && src.width > 0) {
-    dst.width = src.width;
-    dst.height = src.height;
-    dst.getContext('2d').drawImage(src, 0, 0);
-  }
-
-  // Construye las mariposas con los tokens activos y sus conteos
-  const lista = document.getElementById('mariposasList');
-  const anotacion = document.getElementById('anotacionCampo');
-  lista.innerHTML = '';
-  anotacion.innerHTML = '';
-
-  const activas = Object.entries(tagCounts).filter(([k,v])=>v>0);
-  if(activas.length === 0) {
-    anotacion.textContent = 'sin ejemplares en esta zona';
-    return;
-  }
-
-  // Mariposas flotando — una por etiqueta activa, posición aleatoria dentro de los círculos
-  activas.forEach(([nombre, count]) => {
-    const m = document.createElement('div');
-    m.style.cssText = `position:absolute; font-size:${10+Math.min(count,8)*2}px; opacity:${0.4+Math.min(count,10)*0.06}; cursor:default; user-select:none;`;
-    // Posición dentro del área circular (lado izquierdo o derecho del prisma)
-    const lado = Math.random() > 0.5;
-    const cx = lado ? 25 : 75; // % del ancho
-    const angle = Math.random() * Math.PI * 2;
-    const r = Math.random() * 30;
-    m.style.left = (cx + r * Math.cos(angle)) + '%';
-    m.style.top  = (50 + r * Math.sin(angle) * 0.8) + '%';
-    m.style.transform = 'translate(-50%,-50%)';
-    m.textContent = '🦋';
-    m.title = `${nombre}: ${count}`;
-    lista.appendChild(m);
-  });
-
-  // Anotación de campo
-  anotacion.innerHTML = activas
-    .sort((a,b)=>b[1]-a[1])
-    .map(([k,v])=>`${v} ejemplar${v!==1?'es':''} de <strong style="color:#fff">${k}</strong>`)
-    .join('<br>');
-}
-
-function cerrarPrismaticos() {
-  document.getElementById('prismaticosPanel').style.display = 'none';
-  // Deseleccionar herramienta mariposas
-  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-  state.primActivo = null;
-}
-
 // ── ETIQUETAS ──
 const ETIQUETAS_BASE=['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
 const tagCounts={};
 
-function iniciarEtiquetasBase() {
-  ETIQUETAS_BASE.forEach(id=>{ tagCounts[id]=0; crearEtiquetaEl(id); });
+function iniciarEtiquetasBase(){
+  ETIQUETAS_BASE.forEach(id=>{tagCounts[id]=0;crearEtiquetaEl(id);});
 }
 
-function crearEtiquetaEl(id) {
+function crearEtiquetaEl(id){
   if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
-
-  // Fila: [píldora] [led]
-  const row = document.createElement('div');
-  row.className = 'etiq-row';
-
-  const el = document.createElement('div');
-  el.className = 'etiqueta';
-  el.dataset.prim = id;
+  const row=document.createElement('div'); row.className='etiq-row';
+  const el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=id;
   el.appendChild(document.createTextNode(id.substring(0,7)));
-
-  const led = document.createElement('span');
-  led.className = 'led';
-  led.dataset.ledPrim = id;
-  el.appendChild(led);
-
-  row.appendChild(el);
-
-  el.addEventListener('click', () => {
-    const was = el.classList.contains('activa');
-    // Selección múltiple para etiquetas
+  const led=document.createElement('span'); led.className='led'; led.dataset.ledPrim=id;
+  el.appendChild(led); row.appendChild(el);
+  el.addEventListener('click',()=>{
     el.classList.toggle('activa');
-    if(was) state.etiquetasActivas.delete(id);
-    else state.etiquetasActivas.add(id);
-    // Si hay etiqueta activa, desactiva herramienta
-    if(state.etiquetasActivas.size > 0){
-      document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-      state.primActivo = null;
-    }
+    if(el.classList.contains('activa')) state.etiquetasActivas.add(id);
+    else state.etiquetasActivas.delete(id);
+    actualizarAtenuacion();
+    if(state.etiquetasActivas.size>0){document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));state.primActivo=null;}
   });
-
   document.getElementById('tagStrip').appendChild(row);
 }
 
-function actualizarTagStrip(prim) {
+function actualizarAtenuacion(){
+  const activas=state.etiquetasActivas;
+  document.querySelectorAll('.etiqueta').forEach(el=>{
+    if(activas.size===0){ el.classList.remove('atenuada'); return; }
+    if(activas.has(el.dataset.prim)) el.classList.remove('atenuada');
+    else el.classList.add('atenuada');
+  });
+}
+
+function dispararPulso(led,nivel){
+  led.classList.remove('pulso-fuerte','pulso-media');
+  void led.offsetWidth;
+  led.classList.add(nivel==='fuerte'?'pulso-fuerte':'pulso-media');
+}
+
+function actualizarTagStrip(prim){
   tagCounts[prim]=(tagCounts[prim]||0)+1;
   if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
   const led=document.querySelector(`.led[data-led-prim="${prim}"]`);
   if(!led) return;
   const ev=tagCounts[prim];
   led.className='led';
-  if(ev>=UMBRAL_FUERTE) led.classList.add('fuerte');
-  else if(ev>=UMBRAL_MEDIA) led.classList.add('media');
+  if(ev>=UMBRAL_FUERTE){led.classList.add('fuerte');dispararPulso(led,'fuerte');}
+  else if(ev>=UMBRAL_MEDIA){led.classList.add('media');dispararPulso(led,'media');}
   else if(ev>=1) led.classList.add('debil');
 }
 
-function verReconstruccion() { showNotif('VER — próximamente'); }
+function verReconstruccion(){showNotif('VER — próximamente');}
 
-function exportarEtiquetas() {
+function exportarEtiquetas(){
   if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
   const celdas=[];
   for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
-  const ci=cCtx.getImageData(0,0,CRES,CRES), cp=[];
-  for(let i=0;i<ci.data.length;i+=4) cp.push([ci.data[i],ci.data[i+1],ci.data[i+2]]);
   const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
   showNotif('JSON exportado');
 }
 
-function updateFrameCount(){ document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq'; }
-function showNotif(msg,dur=1800){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),dur); }
+function updateFrameCount(){document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq';}
+function showNotif(msg,dur=1800){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),dur);}
 </script>
 </body>
 </html>
