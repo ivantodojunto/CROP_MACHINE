@@ -151,19 +151,19 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
     <div id="logo">EP·ST // VER</div>
     <div id="modosBar">
       <button class="modo-btn active" data-modo="SIGNAL" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/SIGNAL_MODE.png" alt="S">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="S">
       </button>
       <button class="modo-btn" data-modo="CARE" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/CAREMODE.png" alt="C">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/INFLUENCE.png" alt="C">
       </button>
       <button class="modo-btn" data-modo="BUILD" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/BUILD_MODE.png" alt="B">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/TOOLS MODE.png" alt="B">
       </button>
       <button class="modo-btn" data-modo="GENETIC" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENETIC_MODE.png" alt="G">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/GENERATE MODE.png" alt="G">
       </button>
       <button class="modo-btn" data-modo="ZEN" onclick="setModo(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN_MODE.png" alt="Z">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="Z">
       </button>
     </div>
     <div id="frameCount">0 etiq</div>
@@ -194,13 +194,13 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
   <div id="toolsWrapper">
     <div id="primitivosPanel">
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSITION.png" alt="·">SPOT
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="·">SPOT
       </button>
       <button class="prim-btn" data-prim="AREA" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/FUZZY_AREA.png" alt="◯">ÁREA
       </button>
       <button class="prim-btn" data-prim="RUIDO" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/MOISE.png" alt="≋">RUIDO
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/NOISE.png" alt="≋">RUIDO
       </button>
       <button class="prim-btn" data-prim="PATRON" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/PATTERN.png" alt="⊞">PATRÓN
@@ -214,10 +214,34 @@ html,body { height:100dvh; background:var(--black); color:var(--white); font-fam
       <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)">
         <img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="◆">VÉRTICE
       </button>
+
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)">
-        <img src="https://ivantodojunto.github.io/CROP_MACHINE/SILUETA.png" alt="▣">FIGURA
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="▣">FIGURA
+      </button>
+      <button class="prim-btn" data-prim="MARIPOSAS" onclick="selectPrim(this); abrirPrismaticos()">
+        <img src="https://ivantodojunto.github.io/CROP_MACHINE/MARIPOSAS.png" alt="🦋">MARIPOSAS
       </button>
     </div>
+  </div>
+
+  <!-- PANEL PRISMÁTICOS -->
+  <div id="prismaticosPanel" style="display:none; position:fixed; inset:0; z-index:600; background:#000; flex-direction:column; align-items:center; justify-content:center;">
+    <div id="prismaticosVisor" style="position:relative; width:90vmin; height:90vmin;">
+      <!-- Mira de prismáticos: dos lentes fusionadas -->
+      <svg id="miraSVG" viewBox="0 0 200 100" style="position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none;">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="150" cy="50" r="48" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
+        <line x1="98" y1="50" x2="102" y2="50" stroke="#00ff41" stroke-width="1"/>
+        <line x1="100" y1="2" x2="100" y2="98" stroke="#00ff41" stroke-width="0.5" opacity="0.4"/>
+      </svg>
+      <!-- Canvas ampliado de la zona -->
+      <canvas id="prismaticosCanvas" style="width:100%; height:100%; image-rendering:pixelated; border-radius:50%;"></canvas>
+      <!-- Mariposas (ejemplares) flotando -->
+      <div id="mariposasList" style="position:absolute; inset:0; z-index:3; pointer-events:none;"></div>
+    </div>
+    <!-- Anotación de campo -->
+    <div id="anotacionCampo" style="margin-top:20px; font-size:10px; letter-spacing:0.12em; color:#555; text-align:center; max-width:80vw;"></div>
+    <button onclick="cerrarPrismaticos()" style="margin-top:24px; background:none; border:1px solid #333; color:#555; font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.15em; padding:8px 20px; cursor:pointer;">— CERRAR —</button>
   </div>
 
   <div id="bottomBar">
@@ -752,6 +776,7 @@ function etiquetarElipse(e,prim) {
   if(count>0){ actualizarTagStrip(prim); updateFrameCount(); showNotif(prim+' · '+count); }
 }
 
+
 // ── PRIMITIVOS ──
 function selectPrim(btn) {
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
@@ -765,6 +790,63 @@ function setModo(btn) {
   document.querySelectorAll('.modo-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); state.modo=btn.dataset.modo;
   showNotif(btn.dataset.modo);
+}
+
+// ── PRISMÁTICOS / MARIPOSAS ──
+function abrirPrismaticos() {
+  const panel = document.getElementById('prismaticosPanel');
+  panel.style.display = 'flex';
+
+  // Captura el frame actual del viewCanvas ampliado
+  const src = document.getElementById('viewCanvas');
+  const dst = document.getElementById('prismaticosCanvas');
+  if(src && src.width > 0) {
+    dst.width = src.width;
+    dst.height = src.height;
+    dst.getContext('2d').drawImage(src, 0, 0);
+  }
+
+  // Construye las mariposas con los tokens activos y sus conteos
+  const lista = document.getElementById('mariposasList');
+  const anotacion = document.getElementById('anotacionCampo');
+  lista.innerHTML = '';
+  anotacion.innerHTML = '';
+
+  const activas = Object.entries(tagCounts).filter(([k,v])=>v>0);
+  if(activas.length === 0) {
+    anotacion.textContent = 'sin ejemplares en esta zona';
+    return;
+  }
+
+  // Mariposas flotando — una por etiqueta activa, posición aleatoria dentro de los círculos
+  activas.forEach(([nombre, count]) => {
+    const m = document.createElement('div');
+    m.style.cssText = `position:absolute; font-size:${10+Math.min(count,8)*2}px; opacity:${0.4+Math.min(count,10)*0.06}; cursor:default; user-select:none;`;
+    // Posición dentro del área circular (lado izquierdo o derecho del prisma)
+    const lado = Math.random() > 0.5;
+    const cx = lado ? 25 : 75; // % del ancho
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.random() * 30;
+    m.style.left = (cx + r * Math.cos(angle)) + '%';
+    m.style.top  = (50 + r * Math.sin(angle) * 0.8) + '%';
+    m.style.transform = 'translate(-50%,-50%)';
+    m.textContent = '🦋';
+    m.title = `${nombre}: ${count}`;
+    lista.appendChild(m);
+  });
+
+  // Anotación de campo
+  anotacion.innerHTML = activas
+    .sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`${v} ejemplar${v!==1?'es':''} de <strong style="color:#fff">${k}</strong>`)
+    .join('<br>');
+}
+
+function cerrarPrismaticos() {
+  document.getElementById('prismaticosPanel').style.display = 'none';
+  // Deseleccionar herramienta mariposas
+  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
+  state.primActivo = null;
 }
 
 // ── ETIQUETAS ──
