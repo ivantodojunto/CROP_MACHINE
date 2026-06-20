@@ -103,16 +103,17 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 /* Palanca — sale del borde del disco a las ~2 del reloj */
 #specPalanca{
   position:absolute;
-  /* Se posiciona en el borde derecho-superior del dial */
   top:18%;right:-28%;
   width:55%;height:22%;
   z-index:4;
   cursor:pointer;touch-action:none;
-  transform-origin:right center;
+  transform-origin:left center;  /* pivota en el lado que toca el disco */
   pointer-events:all;
   transition:transform 0.15s ease;
 }
-#specPalanca.presionada{transform:rotate(12deg);}
+#specPalanca.presionada{transform:rotate(-18deg);}
+#specPalanca.rebote{transform:rotate(6deg);transition:transform 0.08s ease;}
+#specPalanca.reposo{transform:rotate(0deg);transition:transform 0.2s ease;}
 #specPalancaImg{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
 
 /* Label 1 PUSH */
@@ -180,6 +181,15 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .b-btn.invitar{color:var(--green);border-top:2px solid var(--green);background:rgba(0,255,65,0.08);font-weight:700;}
 #notif{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--black);padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:0.1em;border-radius:2px;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:999;white-space:nowrap;}
 #notif.show{opacity:1;}
+
+/* DEBUG OVERLAY */
+#debugOverlay{position:fixed;inset:0;pointer-events:none;z-index:9999;display:none;}
+#debugOverlay.on{display:block;}
+#debugGrid{position:absolute;inset:0;}
+#debugCoord{position:fixed;bottom:4px;right:4px;background:rgba(0,0,0,0.85);color:#0f0;font-family:'Courier New',monospace;font-size:10px;padding:4px 7px;border:1px solid #0f0;letter-spacing:.08em;z-index:10000;pointer-events:none;display:none;}
+#debugCoord.on{display:block;}
+#debugKey{position:fixed;top:4px;right:4px;background:rgba(0,255,0,0.12);color:#0f0;font-family:'Courier New',monospace;font-size:9px;padding:3px 6px;border:1px solid #0f0;letter-spacing:.1em;z-index:10000;pointer-events:none;display:none;}
+#debugKey.on{display:block;}
 </style>
 </head>
 <body>
@@ -285,13 +295,16 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
   </div>
 </div>
 <div id="notif"></div>
+<div id="debugOverlay"><canvas id="debugGrid"></canvas></div>
+<div id="debugCoord" class=""></div>
+<div id="debugKey" class="">D = debug ON/OFF</div>
 
 <script>
 const RES=64,CRES=16,UMBRAL_MEDIA=3,UMBRAL_FUERTE=10,N_BANDAS=16;
 const BASE='https://ivantodojunto.github.io/CROP_MACHINE/';
 
 const state={stream:null,running:false,frozen:false,primActivo:null,modo:'SIGNAL',vistaIdx:0,etiquetasActivas:new Set(),zonas:[],grid:Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),spots:[],totalEtiquetas:0,spotSeq:0,patronActivo:false};
-const spec={base:2.0,phi:0,wheelOff:0,dragW:false,dragWY:0,wheelOffStart:0,dialDrag:false,dialLastA:0,phi0:0,autoRunning:false,autoFrame:null,autoLastT:0,frameSnap:null,rotCanvas:null,rotCtx:null,palancaTimer:null};
+const spec={base:2.0,phi:0,wheelOff:0,dragW:false,dragWY:0,wheelOffStart:0,dialDrag:false,dialLastA:0,phi0:0,autoRunning:false,autoFrame:null,autoLastT:0,frameSnap:null,rotCanvas:null,rotCtx:null};
 const gesto={fase:0,p1:null,p2:null,downPos:null,moviendo:null,tapMoved:false};
 const VISTAS=[{id:'BN',label:'B/N',color:'#888'},{id:'COLOR',label:'COLOR',color:'#ffb800'},{id:'U60',label:'U·60',color:'#aaa',umbral:60},{id:'U100',label:'U·100',color:'#aaa',umbral:100},{id:'U140',label:'U·140',color:'#aaa',umbral:140},{id:'U180',label:'U·180',color:'#aaa',umbral:180}];
 const N_PART=120;
@@ -332,21 +345,90 @@ document.addEventListener('DOMContentLoaded',()=>{
   disco.addEventListener('mousedown',e=>{spec.dialDrag=true;spec.dialLastA=dialA(e.clientX,e.clientY);spec.phi0=spec.phi;e.preventDefault();});
   disco.addEventListener('touchstart',e=>{e.preventDefault();spec.dialDrag=true;spec.dialLastA=dialA(e.touches[0].clientX,e.touches[0].clientY);spec.phi0=spec.phi;},{passive:false});
 
-  // Palanca — presionar = giro continuo, soltar = rebote
+  // Palanca — toggle semi-automático con cooldown
   const palanca=document.getElementById('specPalanca');
-  function palancaStart(e){
+  const PALANCA_DURACION=10000; // ms para 360°
+  const PALANCA_VEL_BASE=360/PALANCA_DURACION; // grados/ms
+  let palancaState={
+    girando:false,
+    vel:PALANCA_VEL_BASE,   // grados/ms actual
+    inicio:0,               // timestamp arranque
+    phiInicio:0,            // phi cuando arrancó
+    giroObjetivo:360,       // grados a recorrer
+    giradoAcum:0,           // grados recorridos desde inicio
+    cooldown:false,         // esperando rebote
+    rafId:null
+  };
+
+  function palancaAnimar(ts){
+    if(!palancaState.girando) return;
+    if(!palancaState.inicio) palancaState.inicio=ts;
+    const dt=ts-palancaState.inicio;
+    palancaState.giradoAcum=dt*palancaState.vel;
+
+    if(palancaState.giradoAcum>=palancaState.giroObjetivo){
+      // completó — frenar hasta 0
+      spec.phi=0;
+      actualizarDialUI();
+      palancaState.girando=false;
+      palancaState.vel=PALANCA_VEL_BASE;
+      palancaState.giradoAcum=0;
+      palancaState.rafId=null;
+      return;
+    }
+
+    spec.phi=(palancaState.phiInicio+palancaState.giradoAcum)%360;
+    actualizarDialUI();
+    palancaState.rafId=requestAnimationFrame(palancaAnimar);
+  }
+
+  function palancaArrancar(){
+    if(palancaState.girando) return; // ya gira
+    palancaState.girando=true;
+    palancaState.vel=PALANCA_VEL_BASE;
+    palancaState.phiInicio=spec.phi;
+    palancaState.giroObjetivo=360;
+    palancaState.giradoAcum=0;
+    palancaState.inicio=0;
+    palancaState.rafId=requestAnimationFrame(palancaAnimar);
+  }
+
+  function palancaAcelerar(){
+    if(!palancaState.girando||palancaState.cooldown) return;
+    // resetea 360° desde posición actual, velocidad ×2.5
+    palancaState.vel=PALANCA_VEL_BASE*2.5;
+    palancaState.phiInicio=spec.phi;
+    palancaState.giroObjetivo=360;
+    palancaState.giradoAcum=0;
+    palancaState.inicio=0;
+  }
+
+  function palancaToque(e){
     e.stopPropagation(); e.preventDefault();
+    if(palancaState.cooldown) return;
+    // animación visual: presionada → rebote → reposo
+    palancaState.cooldown=true;
+    palanca.classList.remove('reposo','rebote');
     palanca.classList.add('presionada');
-    spec.palancaTimer=setInterval(()=>{spec.phi=(spec.phi+2)%360;actualizarDialUI();},30);
+    setTimeout(()=>{
+      palanca.classList.remove('presionada');
+      palanca.classList.add('rebote');
+      setTimeout(()=>{
+        palanca.classList.remove('rebote');
+        palanca.classList.add('reposo');
+        palancaState.cooldown=false;
+      },120);
+    },180);
+
+    if(!palancaState.girando){
+      palancaArrancar();
+    } else {
+      palancaAcelerar();
+    }
   }
-  function palancaEnd(){
-    palanca.classList.remove('presionada');
-    if(spec.palancaTimer){clearInterval(spec.palancaTimer);spec.palancaTimer=null;}
-  }
-  palanca.addEventListener('mousedown',palancaStart);
-  palanca.addEventListener('touchstart',palancaStart,{passive:false});
-  window.addEventListener('mouseup',palancaEnd);
-  window.addEventListener('touchend',palancaEnd);
+
+  palanca.addEventListener('mousedown',palancaToque);
+  palanca.addEventListener('touchstart',palancaToque,{passive:false});
 
   window.addEventListener('mousemove',e=>{
     if(spec.dragW){const dy=e.clientY-spec.dragWY;spec.wheelOff=spec.wheelOffStart+dy;const n=((spec.wheelOff%240)+240)%240/240;spec.base=1.05+n*8.95;if(state.patronActivo) actualizarDialUI();}
@@ -367,7 +449,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function posicionarTagStrip(){const zone=document.getElementById('cameraZone'),strip=document.getElementById('tagStrip');const rect=zone.getBoundingClientRect();strip.style.top=rect.top+'px';strip.style.height=rect.height+'px';}
-function resizeCanvases(){if(!viewCanvas) return;const zone=document.getElementById('cameraZone');const W=zone.clientWidth,H=zone.clientHeight;const size=Math.min(W,H)*0.96;[viewCanvas,overlayCanvas].forEach(c=>{c.style.width=c.style.height=size+'px';c.width=c.height=size;c.style.position='absolute';c.style.left=((W-size)/2)+'px';c.style.top=((H-size)/2)+'px';});}
+function resizeCanvases(){if(!viewCanvas) return;const zone=document.getElementById('cameraZone');const W=zone.clientWidth,H=zone.clientHeight;const ratio=W/H;let cW,cH;if(ratio<1.4){const s=Math.min(W,H)*0.98;cW=cH=s;}else{cH=H*0.98;cW=Math.min(W*0.98,cH*1.6);}[viewCanvas,overlayCanvas].forEach(c=>{c.style.width=cW+'px';c.style.height=cH+'px';c.width=Math.round(cW);c.height=Math.round(cH);c.style.position='absolute';c.style.left=((W-cW)/2)+'px';c.style.top=((H-cH)/2)+'px';});}
 function resizeSpec(){if(!specCanvas) return;const zone=document.getElementById('cameraZone');specCanvas.width=zone.clientWidth||360;specCanvas.height=zone.clientHeight||400;}
 
 function abrirModos(){document.getElementById('modosPanel').classList.add('visible');}
@@ -385,11 +467,13 @@ function mandoRelease(){document.getElementById('specMando').classList.remove('f
 function activarPatron(btn){
   if(state.patronActivo){desactivarPatron();return;}
   state.patronActivo=true;
-  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('tagStrip').classList.add('hidden');
-  document.getElementById('specOverlay').classList.add('visible');
-  document.getElementById('specBottom').classList.add('visible');
+  document.querySelectorAll(".prim-btn").forEach(b=>b.classList.remove("selected"));
+  btn.classList.add("selected");
+  document.getElementById("tagStrip").classList.add("hidden");
+  document.getElementById("specOverlay").classList.add("visible");
+  document.getElementById("specBottom").classList.add("visible");
+  document.getElementById("toolsWrapper").style.display="none";
+  document.getElementById("bottomBar").style.display="none";
   if(state.running){
     spec.frameSnap=wCtx.getImageData(0,0,RES,RES);
     specThumbCtx.imageSmoothingEnabled=false;
@@ -409,10 +493,11 @@ function desactivarPatron(){
   state.patronActivo=false;
   if(specAnimFrame) cancelAnimationFrame(specAnimFrame);
   if(spec.autoRunning) toggleAuto();
-  if(spec.palancaTimer){clearInterval(spec.palancaTimer);spec.palancaTimer=null;}
   document.getElementById('specOverlay').classList.remove('visible');
   document.getElementById('specBottom').classList.remove('visible');
   document.getElementById('tagStrip').classList.remove('hidden');
+  document.getElementById('toolsWrapper').style.display='';
+  document.getElementById('bottomBar').style.display='';
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   state.primActivo=null;
 }
@@ -566,6 +651,56 @@ function actualizarTagStrip(prim){tagCounts[prim]=(tagCounts[prim]||0)+1;if(!doc
 function exportarEtiquetas(){if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}const celdas=[];for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='ver_'+Date.now()+'.json';a.click();showNotif('JSON exportado');}
 function updateFrameCount(){document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq';}
 function showNotif(msg,dur=1800){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),dur);}
+// ── DEBUG OVERLAY ──────────────────────────────────────────
+let debugOn=false;
+function toggleDebug(){
+  debugOn=!debugOn;
+  document.getElementById('debugOverlay').classList.toggle('on',debugOn);
+  document.getElementById('debugCoord').classList.toggle('on',debugOn);
+  document.getElementById('debugKey').classList.toggle('on',debugOn);
+  if(debugOn) renderDebugGrid();
+}
+function renderDebugGrid(){
+  const cv=document.getElementById('debugGrid');
+  const W=window.innerWidth,H=window.innerHeight;
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  // líneas cada 10%
+  ctx.strokeStyle='rgba(0,255,0,0.18)'; ctx.lineWidth=1;
+  ctx.font='9px Courier New'; ctx.fillStyle='rgba(0,255,0,0.7)';
+  for(let i=0;i<=10;i++){
+    const x=W*i/10, y=H*i/10;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    if(i>0&&i<10){
+      ctx.fillText(i*10+'%',x+2,10);
+      ctx.fillText(i*10+'%',2,y-2);
+    }
+  }
+  // líneas cada 5% más sutiles
+  ctx.strokeStyle='rgba(0,255,0,0.07)';
+  for(let i=0;i<=20;i++){
+    const x=W*i/20, y=H*i/20;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+}
+document.addEventListener('mousemove',e=>{
+  if(!debugOn) return;
+  const W=window.innerWidth,H=window.innerHeight;
+  const px=Math.round(e.clientX),py=Math.round(e.clientY);
+  const pc=Math.round(px/W*100),pr=Math.round(py/H*100);
+  document.getElementById('debugCoord').textContent=
+    `x:${px}px (${pc}%)  y:${py}px (${pr}%)  ventana:${W}×${H}`;
+  // resaltar elemento bajo cursor
+  const el=document.elementFromPoint(px,py);
+  document.getElementById('debugCoord').textContent+=
+    el?' — #'+(el.id||el.className||el.tagName):'';
+});
+document.addEventListener('keydown',e=>{if(e.key==='d'||e.key==='D') toggleDebug();});
+window.addEventListener('resize',()=>{if(debugOn) renderDebugGrid();});
+
 </script>
 </body>
 </html>
