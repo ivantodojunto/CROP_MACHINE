@@ -11,16 +11,12 @@
 :root{--black:#000;--near:#0a0a0a;--dim:#111;--border:#222;--mid:#555;--light:#999;--white:#fff;--green:#00ff41;--amber:#ffb800;--red:#ff2d2d;--r-op:8px;--r-etiq:20px;}
 html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'Courier New',monospace;overflow:hidden;touch-action:none;}
 #app{display:flex;flex-direction:column;height:100dvh;position:relative;}
-
-/* HEADER */
 #header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;}
 #logo{font-size:9px;font-weight:700;letter-spacing:0.2em;border:1px solid var(--border);padding:4px 7px;flex-shrink:0;}
 #modoActivo{font-size:9px;font-weight:700;letter-spacing:0.15em;color:var(--mid);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:4px;flex-shrink:0;}
 #frameCount{font-size:9px;color:var(--mid);letter-spacing:0.1em;flex:1;text-align:center;}
-#btnOjo{width:36px;height:36px;border-radius:50%;background:var(--dim);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;opacity:0.4;transition:all 0.2s;}
+#btnOjo{width:36px;height:36px;border-radius:50%;background:var(--dim);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;opacity:0.4;}
 #btnCanal{background:transparent;border:1px solid #444;color:#666;font-family:'Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:4px 8px;cursor:pointer;border-radius:3px;flex-shrink:0;}
-
-/* PANEL MODOS */
 #modosPanel{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.94);gap:14px;}
 #modosPanel.visible{display:flex;}
 .modo-opt{width:220px;padding:14px 20px;border-radius:40px;background:var(--dim);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:14px;color:var(--mid);font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;transition:all 0.15s;}
@@ -29,8 +25,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .modo-opt img{width:24px;height:24px;filter:invert(0.4);flex-shrink:0;}
 .modo-opt.active img{filter:invert(1) sepia(1) saturate(3) hue-rotate(80deg);}
 #modosCerrar{margin-top:8px;font-size:9px;letter-spacing:0.15em;color:var(--mid);cursor:pointer;padding:8px 20px;}
-
-/* ZONA CÁMARA */
 #cameraZone{flex:1;position:relative;overflow:hidden;background:#000;}
 #viewCanvas{image-rendering:pixelated;display:block;pointer-events:none;position:absolute;}
 #overlayCanvas{position:absolute;top:0;left:0;cursor:crosshair;}
@@ -45,62 +39,52 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 #specOverlay{position:absolute;inset:0;display:none;pointer-events:none;}
 #specOverlay.visible{display:block;}
 #specCanvas{position:absolute;inset:0;width:100%;height:100%;}
+#specHud{position:absolute;top:10px;left:62px;font-family:'VT323',monospace;font-size:30px;color:#ff8c00;letter-spacing:.05em;pointer-events:none;line-height:1;text-shadow:0 0 16px rgba(255,140,0,0.4);}
+#specR{position:absolute;top:10px;right:12px;font-family:'VT323',monospace;font-size:34px;color:#ff8c00;pointer-events:none;text-shadow:0 0 16px rgba(255,140,0,0.4);}
 
-/* HUD espectrómetro */
-#specHud{position:absolute;top:10px;left:54px;font-family:'VT323',monospace;font-size:32px;color:#ff8c00;letter-spacing:.05em;pointer-events:none;line-height:1;text-shadow:0 0 20px rgba(255,140,0,0.4);}
-#specR{position:absolute;top:10px;right:12px;font-family:'VT323',monospace;font-size:36px;color:#ff8c00;pointer-events:none;text-shadow:0 0 20px rgba(255,140,0,0.4);}
-#specThumbWrap{position:absolute;bottom:10px;right:10px;pointer-events:none;}
-#specThumbHud{font-family:'VT323',monospace;font-size:16px;color:#00cc33;line-height:1.2;text-align:right;margin-bottom:4px;}
-#specThumb{width:88px;height:66px;border:1.5px solid #00cc33;display:block;}
-#specThumbCanvas{width:100%;height:100%;image-rendering:pixelated;display:block;}
-
-/* RUEDA lateral — metálica, sale por la izquierda */
+/* Rueda — PNG con fondo negro, screen para que negro sea transparente */
 #specWheel{
-  position:absolute;left:-12px;top:12%;width:48px;height:76%;
+  position:absolute;left:-14px;top:10%;width:56px;height:80%;
   cursor:ns-resize;z-index:20;touch-action:none;pointer-events:all;
-  border-radius:10px;
-  /* sombra azulada en modo multiplicar simulada con box-shadow */
-  filter:drop-shadow(8px 0 18px rgba(40,80,255,0.45));
+  mix-blend-mode:screen;
+  filter:drop-shadow(10px 0 20px rgba(40,80,255,0.5));
 }
-#specWheelCanvas{display:block;border-radius:10px;width:48px;}
+#specWheelImg{width:100%;height:100%;object-fit:fill;display:block;}
 
-/* PANEL INFERIOR espectrómetro */
-#specBottom{
-  position:absolute;bottom:0;left:0;right:0;
-  background:rgba(18,14,4,0.96);border-top:1px solid #2a2000;
-  display:none;pointer-events:all;
-}
+/* Mini mapa */
+#specThumbWrap{position:absolute;bottom:8px;right:8px;pointer-events:none;}
+#specThumbHud{font-family:'VT323',monospace;font-size:16px;color:#555;line-height:1.2;text-align:right;margin-bottom:3px;}
+#specThumb{width:88px;height:66px;border:1px solid #333;display:block;}
+#specThumbCanvas{width:100%;height:100%;image-rendering:pixelated;display:block;filter:grayscale(1) brightness(0.5);}
+
+/* Panel inferior espectrómetro */
+#specBottom{position:absolute;bottom:0;left:0;right:0;background:rgba(10,8,2,0.97);border-top:1px solid #2a2000;display:none;pointer-events:all;}
 #specBottom.visible{display:flex;}
-#specBottomInner{display:flex;align-items:center;gap:10px;padding:8px 12px;width:100%;}
+#specBottomInner{display:flex;align-items:center;gap:8px;padding:8px 10px;width:100%;}
 
-/* Dial circular */
-#specDialWrap{position:relative;width:100px;height:100px;flex-shrink:0;touch-action:none;}
-#specDialCanvas{display:block;}
-#dialPushBtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ddd,#888);border:1px solid #555;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.6);z-index:5;}
-#dialPushBtn:active{transform:translate(-50%,-50%) scale(0.92);}
-#dialPushLabel{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:7px;color:#666;letter-spacing:.08em;white-space:nowrap;}
+/* Dial — PNG que gira */
+#specDialWrap{position:relative;width:100px;height:100px;flex-shrink:0;touch-action:none;cursor:grab;}
+#specDialWrap:active{cursor:grabbing;}
+#specDialImg{width:100%;height:100%;display:block;transform-origin:center;user-select:none;pointer-events:none;}
+/* Tirador sobre el dial */
+#specTirador{position:absolute;left:50%;top:50%;width:80px;height:22px;transform-origin:10px 11px;transform:translateY(-11px);pointer-events:all;cursor:pointer;z-index:5;}
+#specTiradorImg{width:100%;height:100%;object-fit:contain;display:block;}
 
-/* Controles derecha */
-#specControls{display:flex;flex-direction:column;gap:5px;flex:1;}
-.spec-row{display:flex;align-items:center;gap:6px;}
-.spec-toggle{display:flex;align-items:center;gap:5px;font-size:8px;color:#444;cursor:pointer;letter-spacing:.1em;user-select:none;flex:1;}
-.spec-dot{width:22px;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #333;transition:background .2s;flex-shrink:0;}
+/* Controles */
+#specControls{display:flex;flex-direction:column;gap:4px;flex:1;}
+.spec-toggle{display:flex;align-items:center;gap:5px;font-size:8px;color:#444;cursor:pointer;letter-spacing:.1em;user-select:none;}
+.spec-dot{width:20px;height:9px;border-radius:4px;background:#1a1a1a;border:1px solid #333;transition:background .2s;flex-shrink:0;}
 .spec-dot.on{background:#00ff41;border-color:#00ff41;}
 .spec-toggle.on{color:#00ff41;}
-#autoBtn{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#555,#222);border:1px solid #444;cursor:pointer;flex-shrink:0;font-size:7px;color:#888;letter-spacing:.05em;}
-#autoBtn.on{background:radial-gradient(circle at 40% 35%,#00ff41,#008820);color:#000;border-color:#00ff41;}
+#autoBtn{padding:3px 8px;background:#111;border:1px solid #333;color:#555;font-family:'Courier New',monospace;font-size:8px;cursor:pointer;border-radius:3px;letter-spacing:.08em;}
+#autoBtn.on{color:#00ff41;border-color:#00ff41;background:#001a00;}
+#specSalir{font-size:8px;color:#333;cursor:pointer;padding:3px 0;letter-spacing:.1em;border-top:1px solid #1a1a00;margin-top:3px;}
 
-/* Botones FAR/NEAR */
-#specColors{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
-.color-btn{width:52px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;transition:transform .1s;}
-.color-btn:active{transform:scale(0.95);}
-#colorFar{background:#1a3a6a;}
-#colorNear{background:#b87420;}
-.color-label{font-size:7px;color:#555;letter-spacing:.1em;text-align:center;margin-bottom:1px;}
+/* Mando dosbotones */
+#specMando{flex-shrink:0;width:56px;cursor:pointer;}
+#specMandoImg{width:100%;display:block;}
 
-#specSalir{font-size:8px;color:#333;cursor:pointer;padding:2px 6px;letter-spacing:.1em;border-top:1px solid #222;margin-top:2px;text-align:center;}
-
-/* ETIQUETAS — ocultas en modo PATRÓN */
+/* ETIQUETAS */
 #tagStrip{position:fixed;left:6px;overflow-y:auto;overflow-x:visible;display:flex;flex-direction:column;gap:5px;padding:8px 0;scrollbar-width:none;z-index:100;width:160px;transition:opacity 0.3s;}
 #tagStrip.hidden{opacity:0;pointer-events:none;}
 #tagStrip::-webkit-scrollbar{display:none;}
@@ -116,8 +100,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 @keyframes sonar-media{0%{box-shadow:0 0 0 0 rgba(180,180,180,0.5)}70%{box-shadow:0 0 0 8px rgba(180,180,180,0)}100%{box-shadow:0 0 0 0 rgba(180,180,180,0)}}
 .led.pulso-fuerte{animation:sonar 0.5s ease-out;}
 .led.pulso-media{animation:sonar-media 0.7s ease-out;}
-
-/* HERRAMIENTAS */
 #toolsWrapper{flex-shrink:0;border-top:1px solid var(--border);background:var(--black);display:flex;justify-content:center;}
 #primitivosPanel{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:3px;padding:4px;width:100%;max-width:420px;}
 .prim-btn{height:68px;width:100%;background:var(--dim);border:1px solid var(--border);color:#666;font-family:'Courier New',monospace;font-size:8px;font-weight:700;letter-spacing:0.04em;cursor:pointer;border-radius:var(--r-op);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.1s;}
@@ -125,8 +107,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .prim-btn.selected{border-color:#ff8c00;color:#ff8c00;}
 .prim-btn.selected img{opacity:1;}
 .prim-btn:active{background:var(--border);}
-
-/* BOTTOM BAR */
 #bottomBar{flex-shrink:0;border-top:1px solid var(--border);display:flex;justify-content:center;}
 #bottomBar .inner{display:flex;width:100%;max-width:420px;}
 .b-btn{flex:1;background:var(--dim);border:none;border-right:1px solid var(--border);color:#555;padding:8px 4px;font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.07em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all 0.15s;}
@@ -140,7 +120,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 </head>
 <body>
 <div id="app">
-
   <div id="header">
     <div id="logo">EP·ST // VER</div>
     <div id="modoActivo" onclick="abrirModos()">SIGNAL</div>
@@ -148,7 +127,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
     <button id="btnOjo" onclick="abrirModos()">👁</button>
     <button id="btnCanal" onclick="toggleCanal()">B/N</button>
   </div>
-
   <div id="modosPanel">
     <button class="modo-opt active" data-modo="SIGNAL" onclick="setModo(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/DETECTING MODE.png" alt="">SIGNAL</button>
     <button class="modo-opt" data-modo="CARE" onclick="setModo(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/INFLUENCE.png" alt="">CARE</button>
@@ -156,58 +134,50 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
     <button class="modo-opt" data-modo="ZEN" onclick="setModo(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/ZEN MODE.png" alt="">ZEN</button>
     <div id="modosCerrar" onclick="cerrarModos()">— CERRAR —</div>
   </div>
-
   <div id="cameraZone">
     <canvas id="viewCanvas"></canvas>
     <canvas id="overlayCanvas"></canvas>
     <video id="video" autoplay playsinline muted></video>
     <div id="cameraOff"><div class="eye">👁</div><p>CAM APAGADA</p></div>
     <div id="colorChannel"><canvas id="colorCanvas" width="16" height="16"></canvas></div>
-
-    <!-- ESPECTRÓMETRO overlay (sobre la foto) -->
     <div id="specOverlay">
       <canvas id="specCanvas"></canvas>
-      <div id="specWheel"><canvas id="specWheelCanvas" width="48"></canvas></div>
+      <!-- Rueda logarítmica — PNG metálica con naranja -->
+      <div id="specWheel">
+        <img id="specWheelImg" src="https://ivantodojunto.github.io/CROP_MACHINE/thumbwheel orange.png" alt="">
+      </div>
       <div id="specHud">b=<span id="specB">2.0</span> <span id="specPhiHud">0</span>°</div>
       <div id="specR"><span id="specRVal">—</span></div>
       <div id="specThumbWrap">
-        <div id="specThumbHud"><span id="specThumbPhi">0</span>°<br>1:<span id="specThumbB">2</span></div>
+        <div id="specThumbHud"><span id="specThumbPhi">0</span>°·1:<span id="specThumbB">2</span></div>
         <div id="specThumb"><canvas id="specThumbCanvas" width="88" height="66"></canvas></div>
       </div>
     </div>
-
-    <!-- Panel inferior espectrómetro (dentro del cameraZone, pegado abajo) -->
     <div id="specBottom">
       <div id="specBottomInner">
-        <!-- Dial -->
+        <!-- Dial que rota + tirador encima -->
         <div id="specDialWrap">
-          <div id="dialPushLabel">1 PUSH: 10°</div>
-          <canvas id="specDialCanvas" width="100" height="100"></canvas>
-          <button id="dialPushBtn" onclick="dialPush()"></button>
-        </div>
-        <!-- Toggles -->
-        <div id="specControls">
-          <div class="spec-row">
-            <div class="spec-toggle on" onclick="specToggle('log')"><div class="spec-dot on" id="specDotLog"></div>LOG(n)</div>
-            <button id="autoBtn" onclick="toggleAuto()">AUTO</button>
+          <img id="specDialImg" src="https://ivantodojunto.github.io/CROP_MACHINE/RADAR_angulos.png" alt="">
+          <div id="specTirador">
+            <img id="specTiradorImg" src="https://ivantodojunto.github.io/CROP_MACHINE/Tirador.png" alt="">
           </div>
+        </div>
+        <!-- Toggles + auto + salir -->
+        <div id="specControls">
+          <div class="spec-toggle on" onclick="specToggle('log')"><div class="spec-dot on" id="specDotLog"></div>LOG(n)</div>
           <div class="spec-toggle" onclick="specToggle('angle')"><div class="spec-dot" id="specDotAngle"></div>ANGLE</div>
           <div class="spec-toggle" onclick="specToggle('zoom')"><div class="spec-dot" id="specDotZoom"></div>ZOOM</div>
+          <button id="autoBtn" onclick="toggleAuto()">AUTO</button>
           <div id="specSalir" onclick="desactivarPatron()">— SALIR —</div>
         </div>
-        <!-- FAR / NEAR -->
-        <div id="specColors">
-          <div class="color-label">FAR</div>
-          <div class="color-btn" id="colorFar"></div>
-          <div class="color-btn" id="colorNear"></div>
-          <div class="color-label">NEAR</div>
+        <!-- Mando dosbotones -->
+        <div id="specMando">
+          <img id="specMandoImg" src="https://ivantodojunto.github.io/CROP_MACHINE/mando_dosbotones_verde_naranja.png" alt="">
         </div>
       </div>
     </div>
   </div>
-
   <div id="tagStrip"></div>
-
   <div id="toolsWrapper">
     <div id="primitivosPanel">
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="">SPOT</button>
@@ -220,7 +190,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="">FIGURA</button>
     </div>
   </div>
-
   <div id="bottomBar">
     <div class="inner">
       <button class="b-btn invitar" id="btnCam" onclick="toggleCamera()">
@@ -231,73 +200,32 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
       </button>
     </div>
   </div>
-
 </div>
 <div id="notif"></div>
-
 <script>
 const RES=64,CRES=16,UMBRAL_MEDIA=3,UMBRAL_FUERTE=10,N_BANDAS=16;
+const BASE_URL='https://ivantodojunto.github.io/CROP_MACHINE/';
 
-const state={
-  stream:null,running:false,frozen:false,
-  primActivo:null,modo:'SIGNAL',vistaIdx:0,
-  etiquetasActivas:new Set(),zonas:[],
-  grid:Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),
-  spots:[],totalEtiquetas:0,spotSeq:0,
-  patronActivo:false,
-};
-
-const spec={
-  base:2.0,phi:0,wheelOff:0,
-  dragW:false,dragWY:0,wheelOffStart:0,
-  dialAngle:0,dialDragActive:false,dialLastAngle:0,dialAngleStart:0,
-  autoRunning:false,autoFrame:null,autoLastT:0,
-  frameSnap:null,
-  rotCanvas:null,rotCtx:null,
-};
-
+const state={stream:null,running:false,frozen:false,primActivo:null,modo:'SIGNAL',vistaIdx:0,etiquetasActivas:new Set(),zonas:[],grid:Array.from({length:RES},()=>Array.from({length:RES},()=>({}))),spots:[],totalEtiquetas:0,spotSeq:0,patronActivo:false};
+const spec={base:2.0,phi:0,wheelOff:0,dragW:false,dragWY:0,wheelOffStart:0,dialDragActive:false,dialLastAngle:0,phi0:0,autoRunning:false,autoFrame:null,autoLastT:0,frameSnap:null,rotCanvas:null,rotCtx:null,tiradorActivo:false};
 const gesto={fase:0,p1:null,p2:null,downPos:null,moviendo:null,tapMoved:false};
-
-const VISTAS=[
-  {id:'BN',label:'B/N',color:'#888'},
-  {id:'COLOR',label:'COLOR',color:'#ffb800'},
-  {id:'U60',label:'U·60',color:'#aaa',umbral:60},
-  {id:'U100',label:'U·100',color:'#aaa',umbral:100},
-  {id:'U140',label:'U·140',color:'#aaa',umbral:140},
-  {id:'U180',label:'U·180',color:'#aaa',umbral:180},
-];
-
+const VISTAS=[{id:'BN',label:'B/N',color:'#888'},{id:'COLOR',label:'COLOR',color:'#ffb800'},{id:'U60',label:'U·60',color:'#aaa',umbral:60},{id:'U100',label:'U·100',color:'#aaa',umbral:100},{id:'U140',label:'U·140',color:'#aaa',umbral:140},{id:'U180',label:'U·180',color:'#aaa',umbral:180}];
 const N_PARTICULAS=120;
 const particulas=Array.from({length:N_PARTICULAS},()=>({x:Math.random(),y:Math.random(),vx:0,vy:0}));
-
-let viewCanvas,overlayCanvas,vCtx,oCtx;
-let video,workCanvas,wCtx,colorCanvas,cCtx,colorWork,cwCtx;
-let specCanvas,specCtx,specWheelCanvas,specWheelCtx,specDialCanvas,specDialCtx,specThumbCanvas,specThumbCtx;
+let viewCanvas,overlayCanvas,vCtx,oCtx,video,workCanvas,wCtx,colorCanvas,cCtx,colorWork,cwCtx;
+let specCanvas,specCtx,specThumbCanvas,specThumbCtx;
 let specAnimFrame=null;
 
 document.addEventListener('DOMContentLoaded',()=>{
-  viewCanvas=document.getElementById('viewCanvas');
-  overlayCanvas=document.getElementById('overlayCanvas');
-  vCtx=viewCanvas.getContext('2d',{willReadFrequently:true});
-  oCtx=overlayCanvas.getContext('2d');
+  viewCanvas=document.getElementById('viewCanvas'); overlayCanvas=document.getElementById('overlayCanvas');
+  vCtx=viewCanvas.getContext('2d',{willReadFrequently:true}); oCtx=overlayCanvas.getContext('2d');
   video=document.getElementById('video');
   colorCanvas=document.getElementById('colorCanvas'); cCtx=colorCanvas.getContext('2d');
-  workCanvas=document.createElement('canvas'); workCanvas.width=workCanvas.height=RES;
-  wCtx=workCanvas.getContext('2d',{willReadFrequently:true});
-  colorWork=document.createElement('canvas'); colorWork.width=colorWork.height=CRES;
-  cwCtx=colorWork.getContext('2d',{willReadFrequently:true});
-
-  specCanvas=document.getElementById('specCanvas');
-  specCtx=specCanvas.getContext('2d');
-  specWheelCanvas=document.getElementById('specWheelCanvas');
-  specWheelCtx=specWheelCanvas.getContext('2d');
-  specDialCanvas=document.getElementById('specDialCanvas');
-  specDialCtx=specDialCanvas.getContext('2d');
-  specThumbCanvas=document.getElementById('specThumbCanvas');
-  specThumbCtx=specThumbCanvas.getContext('2d');
-
-  spec.rotCanvas=document.createElement('canvas');
-  spec.rotCanvas.width=spec.rotCanvas.height=RES*3;
+  workCanvas=document.createElement('canvas'); workCanvas.width=workCanvas.height=RES; wCtx=workCanvas.getContext('2d',{willReadFrequently:true});
+  colorWork=document.createElement('canvas'); colorWork.width=colorWork.height=CRES; cwCtx=colorWork.getContext('2d',{willReadFrequently:true});
+  specCanvas=document.getElementById('specCanvas'); specCtx=specCanvas.getContext('2d');
+  specThumbCanvas=document.getElementById('specThumbCanvas'); specThumbCtx=specThumbCanvas.getContext('2d');
+  spec.rotCanvas=document.createElement('canvas'); spec.rotCanvas.width=spec.rotCanvas.height=RES*3;
   spec.rotCtx=spec.rotCanvas.getContext('2d');
 
   posicionarTagStrip(); iniciarEtiquetasBase(); actualizarBtnCam();
@@ -309,70 +237,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   overlayCanvas.addEventListener('mousemove',onPointerMove);
   overlayCanvas.addEventListener('mouseup',onPointerUp);
 
-  // Rueda — drag vertical
+  // Rueda — drag vertical sobre la imagen PNG
   const sw=document.getElementById('specWheel');
   sw.addEventListener('mousedown',e=>{spec.dragW=true;spec.dragWY=e.clientY;spec.wheelOffStart=spec.wheelOff;e.stopPropagation();e.preventDefault();});
   sw.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();spec.dragW=true;spec.dragWY=e.touches[0].clientY;spec.wheelOffStart=spec.wheelOff;},{passive:false});
 
-  // Dial — giro tangencial como objetivo de cámara
+  // Dial — giro tangencial como objetivo
   const sd=document.getElementById('specDialWrap');
-  function dialGetAngle(cx,cy){
-    const r=sd.getBoundingClientRect();
-    return Math.atan2(cy-r.top-50,cx-r.left-50)*180/Math.PI;
-  }
-  sd.addEventListener('mousedown',e=>{
-    if(e.target.id==='dialPushBtn') return;
-    spec.dialDragActive=true;
-    spec.dialLastAngle=dialGetAngle(e.clientX,e.clientY);
-    spec.dialAngleStart=spec.phi;
-    e.preventDefault();
-  });
-  sd.addEventListener('touchstart',e=>{
-    if(e.target.id==='dialPushBtn') return;
-    e.preventDefault();
-    spec.dialDragActive=true;
-    spec.dialLastAngle=dialGetAngle(e.touches[0].clientX,e.touches[0].clientY);
-    spec.dialAngleStart=spec.phi;
-  },{passive:false});
+  function dialGetA(cx,cy){const r=sd.getBoundingClientRect();return Math.atan2(cy-r.top-50,cx-r.left-50)*180/Math.PI;}
+  sd.addEventListener('mousedown',e=>{if(e.target.id==='specTirador'||e.target.id==='specTiradorImg') return;spec.dialDragActive=true;spec.dialLastAngle=dialGetA(e.clientX,e.clientY);spec.phi0=spec.phi;e.preventDefault();});
+  sd.addEventListener('touchstart',e=>{if(e.target.id==='specTirador'||e.target.id==='specTiradorImg') return;e.preventDefault();spec.dialDragActive=true;spec.dialLastAngle=dialGetA(e.touches[0].clientX,e.touches[0].clientY);spec.phi0=spec.phi;},{passive:false});
+
+  // Tirador — pulso: avanza 10° el dial, no la rueda
+  const tirador=document.getElementById('specTirador');
+  tirador.addEventListener('click',e=>{e.stopPropagation();dialPush();});
 
   window.addEventListener('mousemove',e=>{
-    if(spec.dragW){
-      const dy=e.clientY-spec.dragWY;
-      spec.wheelOff=spec.wheelOffStart+dy;
-      const n=((spec.wheelOff%240)+240)%240/240;
-      spec.base=1.05+n*8.95;
-      if(state.patronActivo) renderSpec();
-    }
-    if(spec.dialDragActive){
-      const a=Math.atan2(
-        e.clientY-document.getElementById('specDialWrap').getBoundingClientRect().top-50,
-        e.clientX-document.getElementById('specDialWrap').getBoundingClientRect().left-50
-      )*180/Math.PI;
-      const delta=a-spec.dialLastAngle;
-      // Corrección de wrap
-      const dAdj=delta>180?delta-360:delta<-180?delta+360:delta;
-      spec.phi=(spec.phi+dAdj+360)%360;
-      spec.dialLastAngle=a;
-      if(state.patronActivo) renderSpec();
-    }
+    if(spec.dragW){const dy=e.clientY-spec.dragWY;spec.wheelOff=spec.wheelOffStart+dy;const n=((spec.wheelOff%240)+240)%240/240;spec.base=1.05+n*8.95;if(state.patronActivo) actualizarSpecUI();}
+    if(spec.dialDragActive){const sd2=document.getElementById('specDialWrap');const r=sd2.getBoundingClientRect();const a=Math.atan2(e.clientY-r.top-50,e.clientX-r.left-50)*180/Math.PI;const d=a-spec.dialLastAngle;const da=d>180?d-360:d<-180?d+360:d;spec.phi=(spec.phi+da+360)%360;spec.dialLastAngle=a;if(state.patronActivo) actualizarSpecUI();}
   });
   window.addEventListener('touchmove',e=>{
-    if(spec.dragW){
-      const dy=e.touches[0].clientY-spec.dragWY;
-      spec.wheelOff=spec.wheelOffStart+dy;
-      const n=((spec.wheelOff%240)+240)%240/240;
-      spec.base=1.05+n*8.95;
-      if(state.patronActivo) renderSpec();
-    }
-    if(spec.dialDragActive){
-      const r=document.getElementById('specDialWrap').getBoundingClientRect();
-      const a=Math.atan2(e.touches[0].clientY-r.top-50,e.touches[0].clientX-r.left-50)*180/Math.PI;
-      const delta=a-spec.dialLastAngle;
-      const dAdj=delta>180?delta-360:delta<-180?delta+360:delta;
-      spec.phi=(spec.phi+dAdj+360)%360;
-      spec.dialLastAngle=a;
-      if(state.patronActivo) renderSpec();
-    }
+    if(spec.dragW){const dy=e.touches[0].clientY-spec.dragWY;spec.wheelOff=spec.wheelOffStart+dy;const n=((spec.wheelOff%240)+240)%240/240;spec.base=1.05+n*8.95;if(state.patronActivo) actualizarSpecUI();}
+    if(spec.dialDragActive){const sd2=document.getElementById('specDialWrap');const r=sd2.getBoundingClientRect();const a=Math.atan2(e.touches[0].clientY-r.top-50,e.touches[0].clientX-r.left-50)*180/Math.PI;const d=a-spec.dialLastAngle;const da=d>180?d-360:d<-180?d+360:d;spec.phi=(spec.phi+da+360)%360;spec.dialLastAngle=a;if(state.patronActivo) actualizarSpecUI();}
   },{passive:false});
   window.addEventListener('mouseup',()=>{spec.dragW=false;spec.dialDragActive=false;});
   window.addEventListener('touchend',()=>{spec.dragW=false;spec.dialDragActive=false;});
@@ -384,24 +270,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   resizeCanvases(); resizeSpec(); renderLoop();
 });
 
-function posicionarTagStrip(){
-  const zone=document.getElementById('cameraZone'),strip=document.getElementById('tagStrip');
-  const rect=zone.getBoundingClientRect();
-  strip.style.top=rect.top+'px'; strip.style.height=rect.height+'px';
-}
+function posicionarTagStrip(){const zone=document.getElementById('cameraZone'),strip=document.getElementById('tagStrip');const rect=zone.getBoundingClientRect();strip.style.top=rect.top+'px';strip.style.height=rect.height+'px';}
 
 function resizeCanvases(){
   if(!viewCanvas) return;
   const zone=document.getElementById('cameraZone');
   const W=zone.clientWidth,H=zone.clientHeight;
-  // En modo patrón la foto ocupa todo el cameraZone
-  const size=state.patronActivo?Math.max(W,H)*1.1:Math.min(W,H)*0.96;
-  [viewCanvas,overlayCanvas].forEach(c=>{
-    c.style.width=c.style.height=size+'px'; c.width=c.height=size;
-    c.style.position='absolute';
-    c.style.left=((W-size)/2)+'px';
-    c.style.top=((H-size)/2)+'px';
-  });
+  const size=Math.min(W,H)*0.96;
+  [viewCanvas,overlayCanvas].forEach(c=>{c.style.width=c.style.height=size+'px';c.width=c.height=size;c.style.position='absolute';c.style.left=((W-size)/2)+'px';c.style.top=((H-size)/2)+'px';});
 }
 
 function resizeSpec(){
@@ -409,41 +285,26 @@ function resizeSpec(){
   const zone=document.getElementById('cameraZone');
   specCanvas.width=zone.clientWidth||360;
   specCanvas.height=zone.clientHeight||400;
-  const wh=Math.floor((zone.clientHeight||400)*0.7);
-  specWheelCanvas.width=48; specWheelCanvas.height=wh;
-  document.getElementById('specWheel').style.height=wh+'px';
-  document.getElementById('specWheel').style.top=Math.floor((zone.clientHeight||400)*0.15)+'px';
 }
 
-// MODOS
 function abrirModos(){document.getElementById('modosPanel').classList.add('visible');}
 function cerrarModos(){document.getElementById('modosPanel').classList.remove('visible');}
-function setModo(btn){
-  document.querySelectorAll('.modo-opt').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); state.modo=btn.dataset.modo;
-  document.getElementById('modoActivo').textContent=btn.dataset.modo;
-  cerrarModos(); showNotif(btn.dataset.modo);
-}
+function setModo(btn){document.querySelectorAll('.modo-opt').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.modo=btn.dataset.modo;document.getElementById('modoActivo').textContent=btn.dataset.modo;cerrarModos();showNotif(btn.dataset.modo);}
 
-// PATRÓN
 function activarPatron(btn){
   if(state.patronActivo){desactivarPatron();return;}
   state.patronActivo=true;
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
-  // Ocultar etiquetas
   document.getElementById('tagStrip').classList.add('hidden');
-  // Mostrar overlay y panel
   document.getElementById('specOverlay').classList.add('visible');
   document.getElementById('specBottom').classList.add('visible');
-  // Capturar frame
   if(state.running){
     spec.frameSnap=wCtx.getImageData(0,0,RES,RES);
     specThumbCtx.imageSmoothingEnabled=false;
     specThumbCtx.drawImage(workCanvas,0,0,88,66);
   }
-  resizeCanvases(); resizeSpec();
-  // Loop del espectrómetro
+  resizeSpec();
   function specLoop(){
     if(!state.patronActivo) return;
     if(state.running&&!state.frozen&&video.readyState>=2){
@@ -464,86 +325,61 @@ function desactivarPatron(){
   document.getElementById('tagStrip').classList.remove('hidden');
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   state.primActivo=null;
-  resizeCanvases();
 }
 
-function specToggle(key){
-  const K=key.charAt(0).toUpperCase()+key.slice(1);
-  const dot=document.getElementById('specDot'+K);
-  const tog=dot.parentElement;
-  const on=dot.classList.toggle('on');
-  tog.classList.toggle('on',on);
+function actualizarSpecUI(){
+  // Rotar la imagen del dial según phi
+  document.getElementById('specDialImg').style.transform='rotate('+spec.phi+'deg)';
+  // El tirador no rota con el dial — es fijo, solo actúa
+  document.getElementById('specB').textContent=spec.base.toFixed(1);
+  document.getElementById('specPhiHud').textContent=Math.round(spec.phi);
+  document.getElementById('specThumbPhi').textContent=Math.round(spec.phi);
+  document.getElementById('specThumbB').textContent=Math.round(spec.base*8);
 }
 
-// Palanca — avanza 10° por pulso, animado
+function specToggle(key){const K=key.charAt(0).toUpperCase()+key.slice(1);const dot=document.getElementById('specDot'+K);const tog=dot.parentElement;const on=dot.classList.toggle('on');tog.classList.toggle('on',on);}
+
 function dialPush(){
-  const target=spec.phi+10;
-  const start=spec.phi,dur=400;
-  let t0=null;
-  function anim(ts){
-    if(!t0) t0=ts;
-    const p=Math.min(1,(ts-t0)/dur);
-    const ease=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-    spec.phi=(start+ease*10)%360;
-    if(state.patronActivo) renderSpec();
-    if(p<1) requestAnimationFrame(anim);
-  }
+  // Tirador: avanza 10° el ángulo, animado
+  const start=spec.phi,dur=500;let t0=null;
+  function anim(ts){if(!t0) t0=ts;const p=Math.min(1,(ts-t0)/dur);const ease=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;spec.phi=(start+ease*10)%360;actualizarSpecUI();if(p<1) requestAnimationFrame(anim);}
   requestAnimationFrame(anim);
 }
 
-// AUTO
 function toggleAuto(){
   spec.autoRunning=!spec.autoRunning;
   const btn=document.getElementById('autoBtn');
   btn.classList.toggle('on',spec.autoRunning);
+  btn.textContent=spec.autoRunning?'STOP':'AUTO';
   if(spec.autoRunning){
     spec.autoLastT=0;
     function autoLoop(ts){
       if(!spec.autoRunning) return;
       if(spec.autoLastT){
         const dt=(ts-spec.autoLastT)/1000;
-        const dotLog=document.getElementById('specDotLog').classList.contains('on');
-        const dotAngle=document.getElementById('specDotAngle').classList.contains('on');
-        if(dotAngle) spec.phi=(spec.phi+dt*15)%360;
-        if(dotLog){
-          spec.wheelOff+=dt*30;
-          const n=((spec.wheelOff%240)+240)%240/240;
-          spec.base=1.05+n*8.95;
-        }
-        if(state.patronActivo) renderSpec();
+        if(document.getElementById('specDotAngle').classList.contains('on')){spec.phi=(spec.phi+dt*18)%360;}
+        if(document.getElementById('specDotLog').classList.contains('on')){spec.wheelOff+=dt*28;const n=((spec.wheelOff%240)+240)%240/240;spec.base=1.05+n*8.95;}
+        actualizarSpecUI();
       }
       spec.autoLastT=ts;
       spec.autoFrame=requestAnimationFrame(autoLoop);
     }
     requestAnimationFrame(autoLoop);
-  } else {
-    if(spec.autoFrame) cancelAnimationFrame(spec.autoFrame);
-  }
+  } else {if(spec.autoFrame) cancelAnimationFrame(spec.autoFrame);}
 }
 
-// Rasterización: foto rotada + bandas logarítmicas
-function rayasLog(b,H){
-  const pos=[];
-  for(let i=0;i<=N_BANDAS;i++){
-    if(b<=1.01) pos.push(i/N_BANDAS*H);
-    else pos.push(Math.log(1+i*(b-1)/N_BANDAS)/Math.log(b)*H);
-  }
-  return pos;
-}
+function rayasLog(b,H){const pos=[];for(let i=0;i<=N_BANDAS;i++){if(b<=1.01) pos.push(i/N_BANDAS*H);else pos.push(Math.log(1+i*(b-1)/N_BANDAS)/Math.log(b)*H);}return pos;}
 
 function calcR(){
   if(!spec.frameSnap) return 0;
   const d=spec.frameSnap.data;
-  const rad=spec.phi*Math.PI/180;
-  const ux=Math.cos(rad),uy=Math.sin(rad);
+  const rad=spec.phi*Math.PI/180,ux=Math.cos(rad),uy=Math.sin(rad);
   let sum=0,count=0;
   for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
-    const gx=d[(r*RES+c+1)*4]-d[(r*RES+c-1)*4];
-    const gy=d[((r+1)*RES+c)*4]-d[((r-1)*RES+c)*4];
+    const gx=d[(r*RES+c+1)*4]-d[(r*RES+c-1)*4],gy=d[((r+1)*RES+c)*4]-d[((r-1)*RES+c)*4];
     const mag=Math.sqrt(gx*gx+gy*gy);
     if(mag<8) continue;
-    sum+=Math.abs((gx*ux+gy*uy)/mag);
-    count++;
+    sum+=Math.abs((gx*ux+gy*uy)/mag); count++;
   }
   return count>0?sum/count:0;
 }
@@ -552,171 +388,46 @@ function renderSpec(){
   if(!specCanvas) return;
   const W=specCanvas.width,H=specCanvas.height;
   specCtx.fillStyle='#050400'; specCtx.fillRect(0,0,W,H);
-
   if(spec.frameSnap){
-    const S=spec.rotCanvas.width;
-    const rc=spec.rotCtx;
-
-    // 1. Foto rotada en canvas auxiliar
+    const S=spec.rotCanvas.width,rc=spec.rotCtx;
     rc.clearRect(0,0,S,S);
-    rc.save();
-    rc.translate(S/2,S/2);
-    rc.rotate(spec.phi*Math.PI/180);
-    rc.imageSmoothingEnabled=false;
+    rc.save(); rc.translate(S/2,S/2); rc.rotate(spec.phi*Math.PI/180); rc.imageSmoothingEnabled=false;
     const tmp=document.createElement('canvas'); tmp.width=tmp.height=RES;
     tmp.getContext('2d').putImageData(spec.frameSnap,0,0);
-    // Escalar para que llene el canvas rotado
-    const sc=S/RES*0.9;
+    const sc=S*0.85/RES;
     rc.drawImage(tmp,-RES*sc/2,-RES*sc/2,RES*sc,RES*sc);
     rc.restore();
-
-    // 2. Bandas logarítmicas
     const posLog=rayasLog(spec.base,H);
     const srcH=S/N_BANDAS;
     specCtx.save();
     for(let i=0;i<N_BANDAS;i++){
-      const srcY=i*srcH;
-      const dstY=posLog[i];
-      const dstH=posLog[i+1]-posLog[i];
+      const srcY=i*srcH,dstY=posLog[i],dstH=posLog[i+1]-posLog[i];
       if(dstH<=0) continue;
-      const lineal=H/N_BANDAS;
-      const dens=dstH/lineal;
-      specCtx.globalAlpha=Math.min(0.9,0.6/Math.max(0.08,dens))*0.85;
+      const dens=dstH/(H/N_BANDAS);
+      specCtx.globalAlpha=Math.min(0.88,0.55/Math.max(0.07,dens))*0.9;
       specCtx.imageSmoothingEnabled=false;
       specCtx.drawImage(spec.rotCanvas,0,srcY,S,srcH,0,dstY,W,Math.max(1,dstH));
     }
-    specCtx.globalAlpha=1;
-    specCtx.restore();
-
-    // 3. Rayas naranja encima
+    specCtx.globalAlpha=1; specCtx.restore();
+    // Rayas naranja
     for(let i=0;i<=N_BANDAS;i++){
       const y=posLog[i];
       const dens=i>0?(posLog[i]-posLog[i-1])/(H/N_BANDAS):1;
-      const bright=Math.min(0.9,0.2/Math.max(0.03,dens));
-      specCtx.strokeStyle=`rgba(255,140,0,${bright.toFixed(2)})`;
-      specCtx.lineWidth=dens<0.4?2:0.8;
-      specCtx.beginPath(); specCtx.moveTo(44,y); specCtx.lineTo(W,y); specCtx.stroke();
+      const bright=Math.min(0.85,0.18/Math.max(0.03,dens));
+      specCtx.strokeStyle='rgba(255,140,0,'+bright.toFixed(2)+')';
+      specCtx.lineWidth=dens<0.4?1.5:0.7;
+      specCtx.beginPath(); specCtx.moveTo(50,y); specCtx.lineTo(W,y); specCtx.stroke();
     }
   } else {
-    specCtx.fillStyle='rgba(255,140,0,0.18)';
-    specCtx.font='10px Courier New';
-    specCtx.fillText('activa CAM para analizar',48,H/2);
+    specCtx.fillStyle='rgba(255,140,0,0.15)'; specCtx.font='10px Courier New';
+    specCtx.fillText('activa CAM para analizar',54,H/2);
   }
-
-  // Calcular R y actualizar HUD
   const R=calcR();
-  document.getElementById('specB').textContent=spec.base.toFixed(1);
-  document.getElementById('specPhiHud').textContent=Math.round(spec.phi);
   document.getElementById('specRVal').textContent=Math.round(R*100)+'%';
-  document.getElementById('specThumbPhi').textContent=Math.round(spec.phi);
-  document.getElementById('specThumbB').textContent=Math.round(spec.base*8);
-
-  renderSpecWheel(); renderSpecDial();
+  actualizarSpecUI();
 }
 
-function renderSpecWheel(){
-  const W=48,H=specWheelCanvas.height||200;
-  specWheelCtx.clearRect(0,0,W,H);
-
-  // Cuerpo metálico plateado con gradiente
-  const grad=specWheelCtx.createLinearGradient(0,0,W,0);
-  grad.addColorStop(0,'#1a1a1a');
-  grad.addColorStop(0.15,'#4a4a4a');
-  grad.addColorStop(0.4,'#888');
-  grad.addColorStop(0.55,'#aaa');
-  grad.addColorStop(0.75,'#777');
-  grad.addColorStop(0.9,'#3a3a3a');
-  grad.addColorStop(1,'#111');
-  specWheelCtx.fillStyle=grad;
-  specWheelCtx.beginPath();
-  specWheelCtx.roundRect(2,0,W-2,H,8);
-  specWheelCtx.fill();
-
-  // Estrías horizontales
-  const sp=16,off=((spec.wheelOff%sp)+sp)%sp;
-  for(let y=off-sp;y<H+sp;y+=sp){
-    // Ranura oscura
-    specWheelCtx.strokeStyle='rgba(0,0,0,0.55)'; specWheelCtx.lineWidth=4;
-    specWheelCtx.beginPath(); specWheelCtx.moveTo(4,y); specWheelCtx.lineTo(W-4,y); specWheelCtx.stroke();
-    // Brillo superior de la ranura
-    specWheelCtx.strokeStyle='rgba(255,255,255,0.15)'; specWheelCtx.lineWidth=1;
-    specWheelCtx.beginPath(); specWheelCtx.moveTo(4,y-1); specWheelCtx.lineTo(W-4,y-1); specWheelCtx.stroke();
-  }
-
-  // Indicador central — bulto metálico
-  const cy=H/2,bw=W-6,bh=14;
-  const bg=specWheelCtx.createLinearGradient(3,cy-bh/2,3,cy+bh/2);
-  bg.addColorStop(0,'#ddd'); bg.addColorStop(0.4,'#fff'); bg.addColorStop(1,'#888');
-  specWheelCtx.fillStyle=bg;
-  specWheelCtx.beginPath();
-  specWheelCtx.roundRect(3,cy-bh/2,bw,bh,4);
-  specWheelCtx.fill();
-  specWheelCtx.strokeStyle='rgba(0,0,0,0.3)'; specWheelCtx.lineWidth=0.5;
-  specWheelCtx.stroke();
-}
-
-function renderSpecDial(){
-  const W=100,H=100,cx=50,cy=50,R=42;
-  specDialCtx.clearRect(0,0,W,H);
-
-  // Fondo
-  specDialCtx.fillStyle='#0f0e0a';
-  specDialCtx.beginPath(); specDialCtx.arc(cx,cy,R+6,0,Math.PI*2); specDialCtx.fill();
-
-  // Borde con marcas
-  for(let i=0;i<72;i++){
-    const a=i/72*Math.PI*2,len=i%6===0?8:i%2===0?4:2;
-    specDialCtx.strokeStyle=i%6===0?'#555':'#2a2a2a';
-    specDialCtx.lineWidth=i%6===0?1.5:0.7;
-    specDialCtx.beginPath();
-    specDialCtx.moveTo(cx+(R+1)*Math.cos(a),cy+(R+1)*Math.sin(a));
-    specDialCtx.lineTo(cx+(R+1+len)*Math.cos(a),cy+(R+1+len)*Math.sin(a));
-    specDialCtx.stroke();
-  }
-
-  // Disco
-  specDialCtx.fillStyle='#080808';
-  specDialCtx.beginPath(); specDialCtx.arc(cx,cy,R,0,Math.PI*2); specDialCtx.fill();
-
-  // Anillos escala (256, 16, 4) — etiquetas a la derecha
-  [[R*0.28,'256'],[R*0.54,'16'],[R*0.8,'4']].forEach(([r,v])=>{
-    specDialCtx.strokeStyle=`rgba(0,180,50,0.12)`; specDialCtx.lineWidth=0.8;
-    specDialCtx.beginPath(); specDialCtx.arc(cx,cy,r,0,Math.PI*2); specDialCtx.stroke();
-    specDialCtx.fillStyle='rgba(255,255,255,0.18)'; specDialCtx.font='6px Courier New';
-    specDialCtx.fillText(v,cx+r+2,cy+2);
-  });
-
-  // Eje vertical de referencia (0° = arriba)
-  specDialCtx.strokeStyle='rgba(255,255,255,0.12)'; specDialCtx.lineWidth=0.5;
-  specDialCtx.setLineDash([2,4]);
-  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R); specDialCtx.lineTo(cx,cy+R); specDialCtx.stroke();
-  specDialCtx.setLineDash([]);
-
-  // Aguja naranja — 0° apunta arriba (-90° en canvas)
-  const rad=(spec.phi-90)*Math.PI/180,agLen=R*0.78;
-  specDialCtx.save(); specDialCtx.translate(cx,cy);
-  // sombra
-  specDialCtx.strokeStyle='rgba(0,0,0,0.6)'; specDialCtx.lineWidth=7; specDialCtx.lineCap='round';
-  specDialCtx.beginPath(); specDialCtx.moveTo(0,0); specDialCtx.lineTo(agLen*Math.cos(rad),agLen*Math.sin(rad)); specDialCtx.stroke();
-  // cuerpo naranja ancho (como palanca de timbre)
-  const gNeedle=specDialCtx.createLinearGradient(0,-4,0,4);
-  gNeedle.addColorStop(0,'#ffcc60'); gNeedle.addColorStop(0.5,'#e8a020'); gNeedle.addColorStop(1,'#a05000');
-  specDialCtx.strokeStyle=gNeedle; specDialCtx.lineWidth=8; specDialCtx.lineCap='round';
-  specDialCtx.beginPath(); specDialCtx.moveTo(0,0); specDialCtx.lineTo(agLen*Math.cos(rad),agLen*Math.sin(rad)); specDialCtx.stroke();
-  // Bulbo base
-  const gb=specDialCtx.createRadialGradient(-1,-1,0,0,0,7);
-  gb.addColorStop(0,'#ffdd88'); gb.addColorStop(1,'#c87020');
-  specDialCtx.fillStyle=gb; specDialCtx.beginPath(); specDialCtx.arc(0,0,7,0,Math.PI*2); specDialCtx.fill();
-  specDialCtx.restore();
-
-  // Puntero fijo arriba (blanco)
-  specDialCtx.fillStyle='#ccc';
-  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R); specDialCtx.lineTo(cx-4,cy-R-9); specDialCtx.lineTo(cx+4,cy-R-9); specDialCtx.closePath(); specDialCtx.fill();
-}
-
-// CÁMARA
 async function toggleCamera(){if(state.running) stopCamera(); else await startCamera();}
-
 async function startCamera(){
   try{
     state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:320},height:{ideal:320}},audio:false});
@@ -727,36 +438,11 @@ async function startCamera(){
     actualizarBtnCam();
   }catch(e){showNotif('Sin permiso de cámara');}
 }
+function stopCamera(){if(state.stream) state.stream.getTracks().forEach(t=>t.stop());state.running=false;document.getElementById('cameraOff').style.display='flex';document.getElementById('colorChannel').style.display='none';actualizarBtnCam();}
+function actualizarBtnCam(){const btn=document.getElementById('btnCam'),icon=document.getElementById('iconCam');if(state.running){btn.classList.add('encendido');btn.classList.remove('invitar');if(icon) icon.src=BASE_URL+'EYE_PAUSE.png';}else{btn.classList.remove('encendido');btn.classList.add('invitar');if(icon) icon.src=BASE_URL+'EYE_PLAY.png';}}
+function toggleCanal(){state.vistaIdx=(state.vistaIdx+1)%VISTAS.length;const v=VISTAS[state.vistaIdx];const btn=document.getElementById('btnCanal');btn.textContent=v.label;btn.style.color=v.color;btn.style.borderColor=v.color;}
+function freezeFrame(){if(!state.running) return;state.frozen=!state.frozen;state.stream.getTracks().forEach(t=>t.enabled=!state.frozen);showNotif(state.frozen?'CONGELADO':'EN VIVO');}
 
-function stopCamera(){
-  if(state.stream) state.stream.getTracks().forEach(t=>t.stop());
-  state.running=false;
-  document.getElementById('cameraOff').style.display='flex';
-  document.getElementById('colorChannel').style.display='none';
-  actualizarBtnCam();
-}
-
-function actualizarBtnCam(){
-  const btn=document.getElementById('btnCam'),icon=document.getElementById('iconCam');
-  if(state.running){btn.classList.add('encendido');btn.classList.remove('invitar');if(icon) icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PAUSE.png';}
-  else{btn.classList.remove('encendido');btn.classList.add('invitar');if(icon) icon.src='https://ivantodojunto.github.io/CROP_MACHINE/EYE_PLAY.png';}
-}
-
-function toggleCanal(){
-  state.vistaIdx=(state.vistaIdx+1)%VISTAS.length;
-  const v=VISTAS[state.vistaIdx];
-  const btn=document.getElementById('btnCanal');
-  btn.textContent=v.label; btn.style.color=v.color; btn.style.borderColor=v.color;
-}
-
-function freezeFrame(){
-  if(!state.running) return;
-  state.frozen=!state.frozen;
-  state.stream.getTracks().forEach(t=>t.enabled=!state.frozen);
-  showNotif(state.frozen?'CONGELADO':'EN VIVO');
-}
-
-// RENDER LOOP
 function renderLoop(){
   const sz=viewCanvas.width;
   if(state.running&&!state.frozen&&video.readyState>=2){
@@ -766,12 +452,7 @@ function renderLoop(){
     wCtx.putImageData(id,0,0);
     cwCtx.drawImage(video,0,0,CRES,CRES);
     const cd_=cwCtx.getImageData(0,0,CRES,CRES),cd=cd_.data;
-    for(let i=0;i<cd.length;i+=4){
-      const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2],s=2.2,m=128;
-      cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));
-      cd[i+1]=Math.min(255,Math.max(0,m+(cd[i+1]-br)*s+(br-m)*0.25));
-      cd[i+2]=Math.min(255,Math.max(0,m+(cd[i+2]-br)*s+(br-m)*0.25));
-    }
+    for(let i=0;i<cd.length;i+=4){const br=0.299*cd[i]+0.587*cd[i+1]+0.114*cd[i+2],s=2.2,m=128;cd[i]=Math.min(255,Math.max(0,m+(cd[i]-br)*s+(br-m)*0.25));cd[i+1]=Math.min(255,Math.max(0,m+(cd[i+1]-br)*s+(br-m)*0.25));cd[i+2]=Math.min(255,Math.max(0,m+(cd[i+2]-br)*s+(br-m)*0.25));}
     cwCtx.putImageData(cd_,0,0);
     cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
   }
@@ -785,9 +466,7 @@ function renderLoop(){
       else if(vista.umbral){
         const imgU=wCtx.getImageData(0,0,RES,RES),du=new Uint8ClampedArray(imgU.data);
         for(let i=0;i<du.length;i+=4){const v=du[i]>vista.umbral?255:0;du[i]=du[i+1]=du[i+2]=v;du[i+3]=255;}
-        const tmp=document.createElement('canvas');tmp.width=tmp.height=RES;
-        tmp.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
-        vCtx.drawImage(tmp,0,0,sz,sz);
+        const tmp=document.createElement('canvas');tmp.width=tmp.height=RES;tmp.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);vCtx.drawImage(tmp,0,0,sz,sz);
       }
       vCtx.globalAlpha=1;
     }
@@ -799,252 +478,37 @@ function renderLoop(){
   requestAnimationFrame(renderLoop);
 }
 
-function getCampoEtiqueta(ex,ey,id){
-  if(!workCanvas) return 0;
-  const c=Math.floor(ex*RES),r=Math.floor(ey*RES);
-  if(c<0||c>=RES||r<0||r>=RES) return 0;
-  const brillo=wCtx.getImageData(c,r,1,1).data[0]/255;
-  if(id==='LUZ') return brillo;
-  if(id==='SOMBRA') return 1-brillo;
-  if(id==='ROJO'||id==='VERDE'||id==='AZUL'){
-    const sc=Math.floor(ex*CRES),sr=Math.floor(ey*CRES),cd=cwCtx.getImageData(sc,sr,1,1).data;
-    if(id==='ROJO') return cd[0]/255;
-    if(id==='VERDE') return cd[1]/255;
-    if(id==='AZUL') return cd[2]/255;
-  }
-  const c2=Math.min(RES-1,c+1),r2=Math.min(RES-1,r+1),d=wCtx.getImageData(0,0,RES,RES).data;
-  const dx=(d[(r*RES+c2)*4]-d[(r*RES+Math.max(0,c-1))*4])/255;
-  const dy=(d[(r2*RES+c)*4]-d[(Math.max(0,r-1)*RES+c)*4])/255;
-  return Math.sqrt(dx*dx+dy*dy);
-}
+function getCampoEtiqueta(ex,ey,id){if(!workCanvas) return 0;const c=Math.floor(ex*RES),r=Math.floor(ey*RES);if(c<0||c>=RES||r<0||r>=RES) return 0;const brillo=wCtx.getImageData(c,r,1,1).data[0]/255;if(id==='LUZ') return brillo;if(id==='SOMBRA') return 1-brillo;if(id==='ROJO'||id==='VERDE'||id==='AZUL'){const sc=Math.floor(ex*CRES),sr=Math.floor(ey*CRES),cd=cwCtx.getImageData(sc,sr,1,1).data;if(id==='ROJO') return cd[0]/255;if(id==='VERDE') return cd[1]/255;if(id==='AZUL') return cd[2]/255;}const c2=Math.min(RES-1,c+1),r2=Math.min(RES-1,r+1),d=wCtx.getImageData(0,0,RES,RES).data;const dx=(d[(r*RES+c2)*4]-d[(r*RES+Math.max(0,c-1))*4])/255;const dy=(d[(r2*RES+c)*4]-d[(Math.max(0,r-1)*RES+c)*4])/255;return Math.sqrt(dx*dx+dy*dy);}
 
-function renderParticulas(){
-  if(!viewCanvas||!state.running) return;
-  const s=viewCanvas.width;
-  particulas.forEach(p=>{
-    let fx=0,fy=0;
-    [...state.etiquetasActivas].forEach(id=>{
-      const eps=0.02,v0=getCampoEtiqueta(p.x,p.y,id);
-      const vx=getCampoEtiqueta(Math.min(1,p.x+eps),p.y,id);
-      const vy=getCampoEtiqueta(p.x,Math.min(1,p.y+eps),id);
-      fx+=(vx-v0)/eps*0.0008; fy+=(vy-v0)/eps*0.0008;
-    });
-    fx+=(Math.random()-0.5)*0.002; fy+=(Math.random()-0.5)*0.002;
-    p.vx=p.vx*0.92+fx; p.vy=p.vy*0.92+fy;
-    const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    if(spd>0.008){p.vx=p.vx/spd*0.008;p.vy=p.vy/spd*0.008;}
-    p.x=Math.max(0,Math.min(1,p.x+p.vx)); p.y=Math.max(0,Math.min(1,p.y+p.vy));
-    if(p.x<=0||p.x>=1||p.y<=0||p.y>=1){p.x=Math.random();p.y=Math.random();p.vx=0;p.vy=0;}
-  });
-  vCtx.save();
-  particulas.forEach(p=>{
-    const px=p.x*s,py=p.y*s,spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
-    const alpha=Math.min(0.9,spd/0.008*0.7+0.2),radio=Math.min(4,spd/0.008*3+1);
-    vCtx.beginPath(); vCtx.arc(px,py,radio,0,Math.PI*2);
-    vCtx.fillStyle=`rgba(0,255,65,${alpha.toFixed(2)})`; vCtx.fill();
-  });
-  vCtx.restore();
-}
+function renderParticulas(){if(!viewCanvas||!state.running) return;const s=viewCanvas.width;particulas.forEach(p=>{let fx=0,fy=0;[...state.etiquetasActivas].forEach(id=>{const eps=0.02,v0=getCampoEtiqueta(p.x,p.y,id);const vx=getCampoEtiqueta(Math.min(1,p.x+eps),p.y,id);const vy=getCampoEtiqueta(p.x,Math.min(1,p.y+eps),id);fx+=(vx-v0)/eps*0.0008;fy+=(vy-v0)/eps*0.0008;});fx+=(Math.random()-0.5)*0.002;fy+=(Math.random()-0.5)*0.002;p.vx=p.vx*0.92+fx;p.vy=p.vy*0.92+fy;const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);if(spd>0.008){p.vx=p.vx/spd*0.008;p.vy=p.vy/spd*0.008;}p.x=Math.max(0,Math.min(1,p.x+p.vx));p.y=Math.max(0,Math.min(1,p.y+p.vy));if(p.x<=0||p.x>=1||p.y<=0||p.y>=1){p.x=Math.random();p.y=Math.random();p.vx=0;p.vy=0;}});vCtx.save();particulas.forEach(p=>{const px=p.x*s,py=p.y*s,spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);const alpha=Math.min(0.9,spd/0.008*0.7+0.2),radio=Math.min(4,spd/0.008*3+1);vCtx.beginPath();vCtx.arc(px,py,radio,0,Math.PI*2);vCtx.fillStyle='rgba(0,255,65,'+alpha.toFixed(2)+')';vCtx.fill();});vCtx.restore();}
 
-function renderDeteccion(){
-  if(!viewCanvas||!state.primActivo||!state.running) return;
-  const s=viewCanvas.width,cs=s/RES;
-  const imgData=wCtx.getImageData(0,0,RES,RES),d=imgData.data;
-  function brillo(r,c){return d[((r*RES)+c)*4];}
-  vCtx.save(); vCtx.strokeStyle='rgba(0,255,65,0.9)'; vCtx.lineWidth=1.5;
-  for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
-    const dx=brillo(r,c+1)-brillo(r,c-1),dy=brillo(r+1,c)-brillo(r-1,c);
-    const mag=Math.sqrt(dx*dx+dy*dy);
-    if(mag<8) continue;
-    const b=brillo(r,c);
-    let mostrar=false;
-    if(state.primActivo==='LUZ') mostrar=b>150;
-    else if(state.primActivo==='SOMBRA') mostrar=b<100;
-    else mostrar=true;
-    if(!mostrar) continue;
-    const cx=c*cs+cs/2,cy=r*cs+cs/2;
-    const len=Math.min(cs*1.4,mag/255*cs*5);
-    const nx=dx/mag,ny=dy/mag;
-    vCtx.beginPath(); vCtx.moveTo(cx-nx*len/2,cy-ny*len/2); vCtx.lineTo(cx+nx*len/2,cy+ny*len/2); vCtx.stroke();
-  }
-  vCtx.restore();
-}
+function renderDeteccion(){if(!viewCanvas||!state.primActivo||!state.running) return;const s=viewCanvas.width,cs=s/RES;const imgData=wCtx.getImageData(0,0,RES,RES),d=imgData.data;function brillo(r,c){return d[((r*RES)+c)*4];}vCtx.save();vCtx.strokeStyle='rgba(0,255,65,0.9)';vCtx.lineWidth=1.5;for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){const dx=brillo(r,c+1)-brillo(r,c-1),dy=brillo(r+1,c)-brillo(r-1,c);const mag=Math.sqrt(dx*dx+dy*dy);if(mag<8) continue;const b=brillo(r,c);let mostrar=false;if(state.primActivo==='LUZ') mostrar=b>150;else if(state.primActivo==='SOMBRA') mostrar=b<100;else mostrar=true;if(!mostrar) continue;const cx=c*cs+cs/2,cy=r*cs+cs/2;const len=Math.min(cs*1.4,mag/255*cs*5);const nx=dx/mag,ny=dy/mag;vCtx.beginPath();vCtx.moveTo(cx-nx*len/2,cy-ny*len/2);vCtx.lineTo(cx+nx*len/2,cy+ny*len/2);vCtx.stroke();}vCtx.restore();}
 
-function renderAcumulacion(){
-  const s=viewCanvas.width,cs=s/RES;
-  const maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);
-  vCtx.save();
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);
-    if(t<1) continue;
-    vCtx.fillStyle=`rgba(60,120,255,${Math.min(0.28,t/maxA*0.28)})`; vCtx.fillRect(c*cs,r*cs,cs,cs);
-  }
-  vCtx.restore();
-}
+function renderAcumulacion(){const s=viewCanvas.width,cs=s/RES;const maxA=Math.max(1,state.totalEtiquetas/(RES*RES)*20);vCtx.save();for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){const t=Object.values(state.grid[r][c]).reduce((a,v)=>a+v,0);if(t<1) continue;vCtx.fillStyle='rgba(60,120,255,'+Math.min(0.28,t/maxA*0.28)+')';vCtx.fillRect(c*cs,r*cs,cs,cs);}vCtx.restore();}
 
-function atraparZona(cx,cy){
-  const s=overlayCanvas.width,nx=cx/s,ny=cy/s,radio=0.12;
-  const cap=particulas.filter(p=>{const dx=p.x-nx,dy=p.y-ny;return Math.sqrt(dx*dx+dy*dy)<radio;});
-  if(cap.length<3){showNotif('zona vacía');return;}
-  const zona={x:nx,y:ny,radio,particulas:cap.length,etiquetas:[...state.etiquetasActivas],id:state.zonas.length+1};
-  state.zonas.push(zona);
-  if(state.zonas.length>=2) mostrarRelacion(state.zonas[state.zonas.length-2],zona);
-  else showNotif('Z'+zona.id+' · '+cap.length+' · toca otra');
-}
+function atraparZona(cx,cy){const s=overlayCanvas.width,nx=cx/s,ny=cy/s,radio=0.12;const cap=particulas.filter(p=>{const dx=p.x-nx,dy=p.y-ny;return Math.sqrt(dx*dx+dy*dy)<radio;});if(cap.length<3){showNotif('zona vacía');return;}const zona={x:nx,y:ny,radio,particulas:cap.length,etiquetas:[...state.etiquetasActivas],id:state.zonas.length+1};state.zonas.push(zona);if(state.zonas.length>=2) mostrarRelacion(state.zonas[state.zonas.length-2],zona);else showNotif('Z'+zona.id+' · '+cap.length+' · toca otra');}
+function mostrarRelacion(z1,z2){const dx=z2.x-z1.x,dy=z2.y-z1.y,dist=Math.sqrt(dx*dx+dy*dy);const comunes=[...new Set(z1.etiquetas)].filter(e=>z2.etiquetas.includes(e));let rel=dist<0.25?'CERCA':dist<0.5?'MEDIA':'LEJOS';let msg='Z'+z1.id+'↔Z'+z2.id+' · '+rel;if(comunes.length) msg+=' · '+comunes.join('+');showNotif(msg,4000);}
 
-function mostrarRelacion(z1,z2){
-  const dx=z2.x-z1.x,dy=z2.y-z1.y,dist=Math.sqrt(dx*dx+dy*dy);
-  const comunes=[...new Set(z1.etiquetas)].filter(e=>z2.etiquetas.includes(e));
-  let rel=dist<0.25?'CERCA':dist<0.5?'MEDIA':'LEJOS';
-  let msg=`Z${z1.id}↔Z${z2.id} · ${rel}`;
-  if(comunes.length) msg+=' · '+comunes.join('+');
-  showNotif(msg,4000);
-}
+function renderOverlay(){oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);state.spots.forEach(sp=>{oCtx.beginPath();oCtx.arc(sp.x,sp.y,5,0,Math.PI*2);oCtx.fillStyle='rgba(60,120,255,0.9)';oCtx.fill();oCtx.beginPath();oCtx.arc(sp.x,sp.y,9,0,Math.PI*2);oCtx.strokeStyle='rgba(60,120,255,0.25)';oCtx.lineWidth=1.5;oCtx.stroke();});const p1=gesto.p1,p2=gesto.p2||gesto.moviendo;if(!p1) return;oCtx.beginPath();oCtx.arc(p1.x,p1.y,6,0,Math.PI*2);oCtx.fillStyle='rgba(255,184,0,0.9)';oCtx.fill();if(p2){oCtx.beginPath();oCtx.moveTo(p1.x,p1.y);oCtx.lineTo(p2.x,p2.y);oCtx.strokeStyle='rgba(60,120,255,0.6)';oCtx.lineWidth=1.5;oCtx.setLineDash([5,3]);oCtx.stroke();oCtx.setLineDash([]);oCtx.beginPath();oCtx.arc(p2.x,p2.y,5,0,Math.PI*2);oCtx.fillStyle='rgba(60,120,255,0.7)';oCtx.fill();}}
 
-function renderOverlay(){
-  oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-  state.spots.forEach(sp=>{
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
-    oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2); oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
-  });
-  const p1=gesto.p1,p2=gesto.p2||gesto.moviendo;
-  if(!p1) return;
-  oCtx.beginPath(); oCtx.arc(p1.x,p1.y,6,0,Math.PI*2); oCtx.fillStyle='rgba(255,184,0,0.9)'; oCtx.fill();
-  if(p2){
-    oCtx.beginPath(); oCtx.moveTo(p1.x,p1.y); oCtx.lineTo(p2.x,p2.y);
-    oCtx.strokeStyle='rgba(60,120,255,0.6)'; oCtx.lineWidth=1.5; oCtx.setLineDash([5,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.beginPath(); oCtx.arc(p2.x,p2.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.7)'; oCtx.fill();
-  }
-}
+function getCanvasPos(e){const rect=overlayCanvas.getBoundingClientRect();const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;return {x:t.clientX-rect.left,y:t.clientY-rect.top};}
+function onPointerDown(e){if(state.patronActivo) return;e.preventDefault();gesto.tapMoved=false;const p=getCanvasPos(e);gesto.downPos=p;gesto.moviendo=p;if(state.primActivo==='SPOT'){gesto.p1=p;return;}if(!state.primActivo) return;if(gesto.fase===0){gesto.p1=p;gesto.fase=1;}}
+function onPointerMove(e){if(state.patronActivo) return;e.preventDefault();const p=getCanvasPos(e);gesto.moviendo=p;const ref=gesto.p1||gesto.downPos;if(!ref) return;if(Math.sqrt((p.x-ref.x)**2+(p.y-ref.y)**2)>8) gesto.tapMoved=true;}
+function onPointerUp(e){if(state.patronActivo) return;e.preventDefault();const p=getCanvasPos(e);if(state.primActivo==='SPOT'){if(!gesto.tapMoved) marcarSpot(p.x,p.y);gesto.p1=null;gesto.downPos=null;gesto.moviendo=null;gesto.tapMoved=false;return;}if(!state.primActivo){if(!gesto.tapMoved){if(state.etiquetasActivas.size>0) atraparZona(p.x,p.y);else freezeFrame();}gesto.downPos=null;gesto.moviendo=null;gesto.tapMoved=false;return;}if(gesto.fase===1){gesto.p2=p;gesto.fase=0;etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y},state.primActivo);gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null;gesto.tapMoved=false;}}
 
-function getCanvasPos(e){
-  const rect=overlayCanvas.getBoundingClientRect();
-  const t=(e.touches&&e.touches.length)?e.touches[0]:(e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e;
-  return {x:t.clientX-rect.left,y:t.clientY-rect.top};
-}
-function onPointerDown(e){
-  if(state.patronActivo) return;
-  e.preventDefault(); gesto.tapMoved=false;
-  const p=getCanvasPos(e); gesto.downPos=p; gesto.moviendo=p;
-  if(state.primActivo==='SPOT'){gesto.p1=p;return;}
-  if(!state.primActivo) return;
-  if(gesto.fase===0){gesto.p1=p;gesto.fase=1;}
-}
-function onPointerMove(e){
-  if(state.patronActivo) return;
-  e.preventDefault(); const p=getCanvasPos(e); gesto.moviendo=p;
-  const ref=gesto.p1||gesto.downPos; if(!ref) return;
-  if(Math.sqrt((p.x-ref.x)**2+(p.y-ref.y)**2)>8) gesto.tapMoved=true;
-}
-function onPointerUp(e){
-  if(state.patronActivo) return;
-  e.preventDefault(); const p=getCanvasPos(e);
-  if(state.primActivo==='SPOT'){
-    if(!gesto.tapMoved) marcarSpot(p.x,p.y);
-    gesto.p1=null; gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
-  }
-  if(!state.primActivo){
-    if(!gesto.tapMoved){
-      if(state.etiquetasActivas.size>0) atraparZona(p.x,p.y);
-      else freezeFrame();
-    }
-    gesto.downPos=null; gesto.moviendo=null; gesto.tapMoved=false; return;
-  }
-  if(gesto.fase===1){
-    gesto.p2=p; gesto.fase=0;
-    etiquetarElipse({x1:gesto.p1.x,y1:gesto.p1.y,x2:gesto.p2.x,y2:gesto.p2.y},state.primActivo);
-    gesto.p1=gesto.p2=gesto.downPos=gesto.moviendo=null; gesto.tapMoved=false;
-  }
-}
-
-function selectPrim(btn){
-  if(state.patronActivo) desactivarPatron();
-  document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
-  const prim=btn.dataset.prim;
-  state.primActivo=(state.primActivo===prim)?null:prim;
-  if(state.primActivo) btn.classList.add('selected');
-}
-
-function marcarSpot(x,y){
-  const s=viewCanvas.width;
-  const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));
-  const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));
-  state.spots.push({id:++state.spotSeq,col,row,x,y});
-  state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;
-  state.totalEtiquetas++;
-  actualizarTagStrip('SPOT'); updateFrameCount();
-}
-
-function etiquetarElipse(e,prim){
-  const s=viewCanvas.width,cs=s/RES;
-  const cx=(e.x1+e.x2)/2,cy=(e.y1+e.y2)/2;
-  const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2),ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);
-  let count=0;
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){
-    const px=c*cs+cs/2,py=r*cs+cs/2;
-    const dx=(px-cx)/rx,dy=(py-cy)/ry;
-    if(dx*dx+dy*dy<=1){state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1;count++;state.totalEtiquetas++;}
-  }
-  if(count>0){actualizarTagStrip(prim);updateFrameCount();showNotif(prim+' · '+count);}
-}
+function selectPrim(btn){if(state.patronActivo) desactivarPatron();document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));const prim=btn.dataset.prim;state.primActivo=(state.primActivo===prim)?null:prim;if(state.primActivo) btn.classList.add('selected');}
+function marcarSpot(x,y){const s=viewCanvas.width;const col=Math.max(0,Math.min(RES-1,Math.floor(x/s*RES)));const row=Math.max(0,Math.min(RES-1,Math.floor(y/s*RES)));state.spots.push({id:++state.spotSeq,col,row,x,y});state.grid[row][col]['SPOT']=(state.grid[row][col]['SPOT']||0)+1;state.totalEtiquetas++;actualizarTagStrip('SPOT');updateFrameCount();}
+function etiquetarElipse(e,prim){const s=viewCanvas.width,cs=s/RES;const cx=(e.x1+e.x2)/2,cy=(e.y1+e.y2)/2;const rx=Math.max(cs/2,Math.abs(e.x2-e.x1)/2),ry=Math.max(cs/2,Math.abs(e.y2-e.y1)/2);let count=0;for(let r=0;r<RES;r++) for(let c=0;c<RES;c++){const px=c*cs+cs/2,py=r*cs+cs/2;const dx=(px-cx)/rx,dy=(py-cy)/ry;if(dx*dx+dy*dy<=1){state.grid[r][c][prim]=(state.grid[r][c][prim]||0)+1;count++;state.totalEtiquetas++;}}if(count>0){actualizarTagStrip(prim);updateFrameCount();showNotif(prim+' · '+count);}}
 
 const ETIQUETAS_BASE=['LUZ','SOMBRA','ROJO','VERDE','AZUL','AMARILLO','MARRÓN','CARNE'];
 const tagCounts={};
-
 function iniciarEtiquetasBase(){ETIQUETAS_BASE.forEach(id=>{tagCounts[id]=0;crearEtiquetaEl(id);});}
+function crearEtiquetaEl(id){if(document.querySelector('.etiqueta[data-prim="'+id+'"]')) return;const row=document.createElement('div');row.className='etiq-row';const el=document.createElement('div');el.className='etiqueta';el.dataset.prim=id;el.appendChild(document.createTextNode(id.substring(0,7)));const led=document.createElement('span');led.className='led';led.dataset.ledPrim=id;el.appendChild(led);row.appendChild(el);el.addEventListener('click',()=>{el.classList.toggle('activa');if(el.classList.contains('activa')) state.etiquetasActivas.add(id);else state.etiquetasActivas.delete(id);actualizarAtenuacion();if(state.etiquetasActivas.size>0){document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));state.primActivo=null;}});document.getElementById('tagStrip').appendChild(row);}
+function actualizarAtenuacion(){const activas=state.etiquetasActivas;document.querySelectorAll('.etiqueta').forEach(el=>{if(activas.size===0){el.classList.remove('atenuada');return;}if(activas.has(el.dataset.prim)) el.classList.remove('atenuada');else el.classList.add('atenuada');});}
+function dispararPulso(led,nivel){led.classList.remove('pulso-fuerte','pulso-media');void led.offsetWidth;led.classList.add(nivel==='fuerte'?'pulso-fuerte':'pulso-media');}
+function actualizarTagStrip(prim){tagCounts[prim]=(tagCounts[prim]||0)+1;if(!document.querySelector('.etiqueta[data-prim="'+prim+'"]')) crearEtiquetaEl(prim);const led=document.querySelector('.led[data-led-prim="'+prim+'"]');if(!led) return;const ev=tagCounts[prim];led.className='led';if(ev>=UMBRAL_FUERTE){led.classList.add('fuerte');dispararPulso(led,'fuerte');}else if(ev>=UMBRAL_MEDIA){led.classList.add('media');dispararPulso(led,'media');}else if(ev>=1) led.classList.add('debil');}
 
-function crearEtiquetaEl(id){
-  if(document.querySelector(`.etiqueta[data-prim="${id}"]`)) return;
-  const row=document.createElement('div'); row.className='etiq-row';
-  const el=document.createElement('div'); el.className='etiqueta'; el.dataset.prim=id;
-  el.appendChild(document.createTextNode(id.substring(0,7)));
-  const led=document.createElement('span'); led.className='led'; led.dataset.ledPrim=id;
-  el.appendChild(led); row.appendChild(el);
-  el.addEventListener('click',()=>{
-    el.classList.toggle('activa');
-    if(el.classList.contains('activa')) state.etiquetasActivas.add(id);
-    else state.etiquetasActivas.delete(id);
-    actualizarAtenuacion();
-    if(state.etiquetasActivas.size>0){document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));state.primActivo=null;}
-  });
-  document.getElementById('tagStrip').appendChild(row);
-}
-
-function actualizarAtenuacion(){
-  const activas=state.etiquetasActivas;
-  document.querySelectorAll('.etiqueta').forEach(el=>{
-    if(activas.size===0){el.classList.remove('atenuada');return;}
-    if(activas.has(el.dataset.prim)) el.classList.remove('atenuada');
-    else el.classList.add('atenuada');
-  });
-}
-
-function dispararPulso(led,nivel){
-  led.classList.remove('pulso-fuerte','pulso-media');
-  void led.offsetWidth;
-  led.classList.add(nivel==='fuerte'?'pulso-fuerte':'pulso-media');
-}
-
-function actualizarTagStrip(prim){
-  tagCounts[prim]=(tagCounts[prim]||0)+1;
-  if(!document.querySelector(`.etiqueta[data-prim="${prim}"]`)) crearEtiquetaEl(prim);
-  const led=document.querySelector(`.led[data-led-prim="${prim}"]`);
-  if(!led) return;
-  const ev=tagCounts[prim]; led.className='led';
-  if(ev>=UMBRAL_FUERTE){led.classList.add('fuerte');dispararPulso(led,'fuerte');}
-  else if(ev>=UMBRAL_MEDIA){led.classList.add('media');dispararPulso(led,'media');}
-  else if(ev>=1) led.classList.add('debil');
-}
-
-function exportarEtiquetas(){
-  if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}
-  const celdas=[];
-  for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});
-  const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})); a.download='ver_'+Date.now()+'.json'; a.click();
-  showNotif('JSON exportado');
-}
-
+function exportarEtiquetas(){if(state.totalEtiquetas===0){showNotif('Nada que exportar');return;}const celdas=[];for(let r=0;r<RES;r++) for(let c=0;c<RES;c++) if(Object.keys(state.grid[r][c]).length) celdas.push({r,c,e:state.grid[r][c]});const data={prims:tagCounts,celdas,spots:state.spots.map(s=>({id:s.id,col:s.col,row:s.row})),ts:new Date().toISOString()};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='ver_'+Date.now()+'.json';a.click();showNotif('JSON exportado');}
 function updateFrameCount(){document.getElementById('frameCount').textContent=state.totalEtiquetas+' etiq';}
 function showNotif(msg,dur=1800){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),dur);}
 </script>
