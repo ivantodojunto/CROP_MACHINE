@@ -11,13 +11,16 @@
 :root{--black:#000;--near:#0a0a0a;--dim:#111;--border:#222;--mid:#555;--light:#999;--white:#fff;--green:#00ff41;--amber:#ffb800;--red:#ff2d2d;--r-op:8px;--r-etiq:20px;}
 html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'Courier New',monospace;overflow:hidden;touch-action:none;}
 #app{display:flex;flex-direction:column;height:100dvh;position:relative;}
+
+/* HEADER */
 #header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;}
 #logo{font-size:9px;font-weight:700;letter-spacing:0.2em;border:1px solid var(--border);padding:4px 7px;flex-shrink:0;}
 #modoActivo{font-size:9px;font-weight:700;letter-spacing:0.15em;color:var(--mid);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:4px;flex-shrink:0;}
 #frameCount{font-size:9px;color:var(--mid);letter-spacing:0.1em;flex:1;text-align:center;}
 #btnOjo{width:36px;height:36px;border-radius:50%;background:var(--dim);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;opacity:0.4;transition:all 0.2s;}
-#btnOjo:hover{opacity:1;}
 #btnCanal{background:transparent;border:1px solid #444;color:#666;font-family:'Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:4px 8px;cursor:pointer;border-radius:3px;flex-shrink:0;}
+
+/* PANEL MODOS */
 #modosPanel{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.94);gap:14px;}
 #modosPanel.visible{display:flex;}
 .modo-opt{width:220px;padding:14px 20px;border-radius:40px;background:var(--dim);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:14px;color:var(--mid);font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;transition:all 0.15s;}
@@ -26,8 +29,10 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .modo-opt img{width:24px;height:24px;filter:invert(0.4);flex-shrink:0;}
 .modo-opt.active img{filter:invert(1) sepia(1) saturate(3) hue-rotate(80deg);}
 #modosCerrar{margin-top:8px;font-size:9px;letter-spacing:0.15em;color:var(--mid);cursor:pointer;padding:8px 20px;}
-#cameraZone{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;}
-#viewCanvas{image-rendering:pixelated;display:block;pointer-events:none;}
+
+/* ZONA CÁMARA */
+#cameraZone{flex:1;position:relative;overflow:hidden;background:#000;}
+#viewCanvas{image-rendering:pixelated;display:block;pointer-events:none;position:absolute;}
 #overlayCanvas{position:absolute;top:0;left:0;cursor:crosshair;}
 #video{display:none;}
 #cameraOff{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--mid);pointer-events:none;}
@@ -36,32 +41,68 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 #colorChannel{position:absolute;bottom:8px;right:8px;display:none;}
 #colorCanvas{width:56px;height:56px;image-rendering:pixelated;border:1px solid rgba(255,255,255,0.12);display:block;}
 
-/* ESPECTRÓMETRO — se superpone al cameraZone, dentro del flujo */
-#specOverlay{position:absolute;inset:0;display:none;flex-direction:row;}
-#specOverlay.visible{display:flex;}
-#specMain{flex:1;position:relative;overflow:hidden;}
-#specCanvas{display:block;width:100%;height:100%;}
-#specHud{position:absolute;top:6px;left:44px;font-family:'VT323',monospace;font-size:26px;color:#ff8c00;letter-spacing:.06em;pointer-events:none;line-height:1;}
-#specThumb{position:absolute;bottom:8px;right:8px;width:80px;height:60px;border:1.5px solid #00cc33;}
-#specThumbCanvas{width:100%;height:100%;image-rendering:pixelated;display:block;}
-#specThumbHud{position:absolute;bottom:10px;right:94px;font-family:'VT323',monospace;font-size:16px;color:#00cc33;text-align:right;line-height:1.2;}
-#specWheel{position:absolute;left:-8px;top:15%;width:36px;height:70%;background:linear-gradient(90deg,#111,#2e2e2e 35%,#383838 65%,#1a1a1a);border-radius:8px;cursor:ns-resize;z-index:10;touch-action:none;box-shadow:3px 0 8px rgba(0,0,0,0.7);}
-#specWheelCanvas{position:absolute;top:0;left:0;border-radius:8px;}
+/* ESPECTRÓMETRO overlay */
+#specOverlay{position:absolute;inset:0;display:none;pointer-events:none;}
+#specOverlay.visible{display:block;}
+#specCanvas{position:absolute;inset:0;width:100%;height:100%;}
 
-/* Panel inferior del espectrómetro — sustituye a primitivosPanel cuando está activo */
-#specTools{display:none;justify-content:center;}
-#specTools.visible{display:flex;}
-#specToolsInner{display:flex;align-items:center;gap:8px;padding:8px 12px;width:100%;max-width:420px;}
-#specDialWrap{width:90px;height:90px;flex-shrink:0;cursor:grab;touch-action:none;}
-#specDialWrap:active{cursor:grabbing;}
+/* HUD espectrómetro */
+#specHud{position:absolute;top:10px;left:54px;font-family:'VT323',monospace;font-size:32px;color:#ff8c00;letter-spacing:.05em;pointer-events:none;line-height:1;text-shadow:0 0 20px rgba(255,140,0,0.4);}
+#specR{position:absolute;top:10px;right:12px;font-family:'VT323',monospace;font-size:36px;color:#ff8c00;pointer-events:none;text-shadow:0 0 20px rgba(255,140,0,0.4);}
+#specThumbWrap{position:absolute;bottom:10px;right:10px;pointer-events:none;}
+#specThumbHud{font-family:'VT323',monospace;font-size:16px;color:#00cc33;line-height:1.2;text-align:right;margin-bottom:4px;}
+#specThumb{width:88px;height:66px;border:1.5px solid #00cc33;display:block;}
+#specThumbCanvas{width:100%;height:100%;image-rendering:pixelated;display:block;}
+
+/* RUEDA lateral — metálica, sale por la izquierda */
+#specWheel{
+  position:absolute;left:-12px;top:12%;width:48px;height:76%;
+  cursor:ns-resize;z-index:20;touch-action:none;pointer-events:all;
+  border-radius:10px;
+  /* sombra azulada en modo multiplicar simulada con box-shadow */
+  filter:drop-shadow(8px 0 18px rgba(40,80,255,0.45));
+}
+#specWheelCanvas{display:block;border-radius:10px;width:48px;}
+
+/* PANEL INFERIOR espectrómetro */
+#specBottom{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(18,14,4,0.96);border-top:1px solid #2a2000;
+  display:none;pointer-events:all;
+}
+#specBottom.visible{display:flex;}
+#specBottomInner{display:flex;align-items:center;gap:10px;padding:8px 12px;width:100%;}
+
+/* Dial circular */
+#specDialWrap{position:relative;width:100px;height:100px;flex-shrink:0;touch-action:none;}
 #specDialCanvas{display:block;}
-#specToggles{display:flex;flex-direction:column;gap:4px;flex:1;}
-.spec-toggle{display:flex;align-items:center;gap:5px;font-size:8px;color:#444;cursor:pointer;letter-spacing:.1em;user-select:none;}
-.spec-dot{width:16px;height:8px;border-radius:4px;background:#1a1a1a;border:1px solid #333;transition:background .2s;flex-shrink:0;}
+#dialPushBtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ddd,#888);border:1px solid #555;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.6);z-index:5;}
+#dialPushBtn:active{transform:translate(-50%,-50%) scale(0.92);}
+#dialPushLabel{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:7px;color:#666;letter-spacing:.08em;white-space:nowrap;}
+
+/* Controles derecha */
+#specControls{display:flex;flex-direction:column;gap:5px;flex:1;}
+.spec-row{display:flex;align-items:center;gap:6px;}
+.spec-toggle{display:flex;align-items:center;gap:5px;font-size:8px;color:#444;cursor:pointer;letter-spacing:.1em;user-select:none;flex:1;}
+.spec-dot{width:22px;height:10px;border-radius:5px;background:#1a1a1a;border:1px solid #333;transition:background .2s;flex-shrink:0;}
 .spec-dot.on{background:#00ff41;border-color:#00ff41;}
 .spec-toggle.on{color:#00ff41;}
+#autoBtn{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#555,#222);border:1px solid #444;cursor:pointer;flex-shrink:0;font-size:7px;color:#888;letter-spacing:.05em;}
+#autoBtn.on{background:radial-gradient(circle at 40% 35%,#00ff41,#008820);color:#000;border-color:#00ff41;}
 
-#tagStrip{position:fixed;left:6px;overflow-y:auto;overflow-x:visible;display:flex;flex-direction:column;gap:5px;padding:8px 0;scrollbar-width:none;z-index:100;width:160px;}
+/* Botones FAR/NEAR */
+#specColors{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.color-btn{width:52px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;transition:transform .1s;}
+.color-btn:active{transform:scale(0.95);}
+#colorFar{background:#1a3a6a;}
+#colorNear{background:#b87420;}
+.color-label{font-size:7px;color:#555;letter-spacing:.1em;text-align:center;margin-bottom:1px;}
+
+#specSalir{font-size:8px;color:#333;cursor:pointer;padding:2px 6px;letter-spacing:.1em;border-top:1px solid #222;margin-top:2px;text-align:center;}
+
+/* ETIQUETAS — ocultas en modo PATRÓN */
+#tagStrip{position:fixed;left:6px;overflow-y:auto;overflow-x:visible;display:flex;flex-direction:column;gap:5px;padding:8px 0;scrollbar-width:none;z-index:100;width:160px;transition:opacity 0.3s;}
+#tagStrip.hidden{opacity:0;pointer-events:none;}
 #tagStrip::-webkit-scrollbar{display:none;}
 .etiq-row{display:flex;flex-shrink:0;}
 .etiqueta{width:130px;min-width:130px;max-width:130px;padding:10px;border:1px solid #444;border-radius:var(--r-etiq);background:#000;color:#666;font-size:11px;font-weight:700;letter-spacing:0.06em;white-space:nowrap;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:8px;transform:translateX(-70px);transition:transform 0.18s ease,border-color 0.18s,color 0.18s,opacity 0.3s;box-sizing:border-box;}
@@ -76,6 +117,7 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .led.pulso-fuerte{animation:sonar 0.5s ease-out;}
 .led.pulso-media{animation:sonar-media 0.7s ease-out;}
 
+/* HERRAMIENTAS */
 #toolsWrapper{flex-shrink:0;border-top:1px solid var(--border);background:var(--black);display:flex;justify-content:center;}
 #primitivosPanel{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:3px;padding:4px;width:100%;max-width:420px;}
 .prim-btn{height:68px;width:100%;background:var(--dim);border:1px solid var(--border);color:#666;font-family:'Courier New',monospace;font-size:8px;font-weight:700;letter-spacing:0.04em;cursor:pointer;border-radius:var(--r-op);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.1s;}
@@ -84,6 +126,7 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 .prim-btn.selected img{opacity:1;}
 .prim-btn:active{background:var(--border);}
 
+/* BOTTOM BAR */
 #bottomBar{flex-shrink:0;border-top:1px solid var(--border);display:flex;justify-content:center;}
 #bottomBar .inner{display:flex;width:100%;max-width:420px;}
 .b-btn{flex:1;background:var(--dim);border:none;border-right:1px solid var(--border);color:#555;padding:8px 4px;font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.07em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all 0.15s;}
@@ -121,21 +164,50 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
     <div id="cameraOff"><div class="eye">👁</div><p>CAM APAGADA</p></div>
     <div id="colorChannel"><canvas id="colorCanvas" width="16" height="16"></canvas></div>
 
-    <!-- ESPECTRÓMETRO — overlay dentro del cameraZone -->
+    <!-- ESPECTRÓMETRO overlay (sobre la foto) -->
     <div id="specOverlay">
-      <div id="specMain">
-        <canvas id="specCanvas"></canvas>
-        <div id="specWheel"><canvas id="specWheelCanvas" width="36"></canvas></div>
-        <div id="specHud">b=<span id="specB">2.0</span> φ=<span id="specPhi">0</span>°</div>
+      <canvas id="specCanvas"></canvas>
+      <div id="specWheel"><canvas id="specWheelCanvas" width="48"></canvas></div>
+      <div id="specHud">b=<span id="specB">2.0</span> <span id="specPhiHud">0</span>°</div>
+      <div id="specR"><span id="specRVal">—</span></div>
+      <div id="specThumbWrap">
         <div id="specThumbHud"><span id="specThumbPhi">0</span>°<br>1:<span id="specThumbB">2</span></div>
-        <div id="specThumb"><canvas id="specThumbCanvas" width="80" height="60"></canvas></div>
+        <div id="specThumb"><canvas id="specThumbCanvas" width="88" height="66"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Panel inferior espectrómetro (dentro del cameraZone, pegado abajo) -->
+    <div id="specBottom">
+      <div id="specBottomInner">
+        <!-- Dial -->
+        <div id="specDialWrap">
+          <div id="dialPushLabel">1 PUSH: 10°</div>
+          <canvas id="specDialCanvas" width="100" height="100"></canvas>
+          <button id="dialPushBtn" onclick="dialPush()"></button>
+        </div>
+        <!-- Toggles -->
+        <div id="specControls">
+          <div class="spec-row">
+            <div class="spec-toggle on" onclick="specToggle('log')"><div class="spec-dot on" id="specDotLog"></div>LOG(n)</div>
+            <button id="autoBtn" onclick="toggleAuto()">AUTO</button>
+          </div>
+          <div class="spec-toggle" onclick="specToggle('angle')"><div class="spec-dot" id="specDotAngle"></div>ANGLE</div>
+          <div class="spec-toggle" onclick="specToggle('zoom')"><div class="spec-dot" id="specDotZoom"></div>ZOOM</div>
+          <div id="specSalir" onclick="desactivarPatron()">— SALIR —</div>
+        </div>
+        <!-- FAR / NEAR -->
+        <div id="specColors">
+          <div class="color-label">FAR</div>
+          <div class="color-btn" id="colorFar"></div>
+          <div class="color-btn" id="colorNear"></div>
+          <div class="color-label">NEAR</div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="tagStrip"></div>
 
-  <!-- Herramientas normales -->
   <div id="toolsWrapper">
     <div id="primitivosPanel">
       <button class="prim-btn" data-prim="SPOT" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/POSSITION.png" alt="">SPOT</button>
@@ -146,18 +218,6 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
       <button class="prim-btn" data-prim="GRADIENTE" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/GRADIENT.png" alt="">GRAD</button>
       <button class="prim-btn" data-prim="VERTICE" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/VERTEX.png" alt="">VÉRTICE</button>
       <button class="prim-btn" data-prim="FIGURA" onclick="selectPrim(this)"><img src="https://ivantodojunto.github.io/CROP_MACHINE/FIGURE.png" alt="">FIGURA</button>
-    </div>
-    <!-- Herramientas espectrómetro — se muestran cuando PATRÓN está activo -->
-    <div id="specTools">
-      <div id="specToolsInner">
-        <div id="specDialWrap"><canvas id="specDialCanvas" width="90" height="90"></canvas></div>
-        <div id="specToggles">
-          <div class="spec-toggle on" onclick="specToggle('log')"><div class="spec-dot on" id="specDotLog"></div>LOG(n)</div>
-          <div class="spec-toggle" onclick="specToggle('angle')"><div class="spec-dot" id="specDotAngle"></div>ANGLE</div>
-          <div class="spec-toggle" onclick="specToggle('zoom')"><div class="spec-dot" id="specDotZoom"></div>ZOOM</div>
-          <div class="spec-toggle" onclick="desactivarPatron()" style="margin-top:4px;color:#444;border-top:1px solid #222;padding-top:4px;"><div class="spec-dot" style="background:#333;"></div>SALIR</div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -176,8 +236,7 @@ html,body{height:100dvh;background:var(--black);color:var(--white);font-family:'
 <div id="notif"></div>
 
 <script>
-const RES=64,CRES=16,UMBRAL_MEDIA=3,UMBRAL_FUERTE=10;
-const N_BANDAS=16;
+const RES=64,CRES=16,UMBRAL_MEDIA=3,UMBRAL_FUERTE=10,N_BANDAS=16;
 
 const state={
   stream:null,running:false,frozen:false,
@@ -191,8 +250,10 @@ const state={
 const spec={
   base:2.0,phi:0,wheelOff:0,
   dragW:false,dragWY:0,wheelOffStart:0,
-  dialDrag:false,dialA0:0,phi0:0,
-  frameSnap:null,rotCanvas:null,rotCtx:null,
+  dialAngle:0,dialDragActive:false,dialLastAngle:0,dialAngleStart:0,
+  autoRunning:false,autoFrame:null,autoLastT:0,
+  frameSnap:null,
+  rotCanvas:null,rotCtx:null,
 };
 
 const gesto={fase:0,p1:null,p2:null,downPos:null,moviendo:null,tapMoved:false};
@@ -235,9 +296,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   specThumbCanvas=document.getElementById('specThumbCanvas');
   specThumbCtx=specThumbCanvas.getContext('2d');
 
-  // Canvas para foto rotada
   spec.rotCanvas=document.createElement('canvas');
-  spec.rotCanvas.width=spec.rotCanvas.height=RES*2;
+  spec.rotCanvas.width=spec.rotCanvas.height=RES*3;
   spec.rotCtx=spec.rotCanvas.getContext('2d');
 
   posicionarTagStrip(); iniciarEtiquetasBase(); actualizarBtnCam();
@@ -249,19 +309,31 @@ document.addEventListener('DOMContentLoaded',()=>{
   overlayCanvas.addEventListener('mousemove',onPointerMove);
   overlayCanvas.addEventListener('mouseup',onPointerUp);
 
-  // Rueda espectrómetro
+  // Rueda — drag vertical
   const sw=document.getElementById('specWheel');
-  sw.addEventListener('mousedown',e=>{spec.dragW=true;spec.dragWY=e.clientY;spec.wheelOffStart=spec.wheelOff;e.preventDefault();});
-  sw.addEventListener('touchstart',e=>{e.preventDefault();spec.dragW=true;spec.dragWY=e.touches[0].clientY;spec.wheelOffStart=spec.wheelOff;},{passive:false});
+  sw.addEventListener('mousedown',e=>{spec.dragW=true;spec.dragWY=e.clientY;spec.wheelOffStart=spec.wheelOff;e.stopPropagation();e.preventDefault();});
+  sw.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();spec.dragW=true;spec.dragWY=e.touches[0].clientY;spec.wheelOffStart=spec.wheelOff;},{passive:false});
 
-  // Dial espectrómetro
+  // Dial — giro tangencial como objetivo de cámara
   const sd=document.getElementById('specDialWrap');
-  function getDialAngle(cx,cy){
+  function dialGetAngle(cx,cy){
     const r=sd.getBoundingClientRect();
-    return Math.atan2(cy-r.top-45,cx-r.left-45)*180/Math.PI;
+    return Math.atan2(cy-r.top-50,cx-r.left-50)*180/Math.PI;
   }
-  sd.addEventListener('mousedown',e=>{spec.dialDrag=true;spec.dialA0=getDialAngle(e.clientX,e.clientY);spec.phi0=spec.phi;});
-  sd.addEventListener('touchstart',e=>{e.preventDefault();spec.dialDrag=true;spec.dialA0=getDialAngle(e.touches[0].clientX,e.touches[0].clientY);spec.phi0=spec.phi;},{passive:false});
+  sd.addEventListener('mousedown',e=>{
+    if(e.target.id==='dialPushBtn') return;
+    spec.dialDragActive=true;
+    spec.dialLastAngle=dialGetAngle(e.clientX,e.clientY);
+    spec.dialAngleStart=spec.phi;
+    e.preventDefault();
+  });
+  sd.addEventListener('touchstart',e=>{
+    if(e.target.id==='dialPushBtn') return;
+    e.preventDefault();
+    spec.dialDragActive=true;
+    spec.dialLastAngle=dialGetAngle(e.touches[0].clientX,e.touches[0].clientY);
+    spec.dialAngleStart=spec.phi;
+  },{passive:false});
 
   window.addEventListener('mousemove',e=>{
     if(spec.dragW){
@@ -271,11 +343,16 @@ document.addEventListener('DOMContentLoaded',()=>{
       spec.base=1.05+n*8.95;
       if(state.patronActivo) renderSpec();
     }
-    if(spec.dialDrag){
-      const sd2=document.getElementById('specDialWrap');
-      const r=sd2.getBoundingClientRect();
-      const a=Math.atan2(e.clientY-r.top-45,e.clientX-r.left-45)*180/Math.PI;
-      spec.phi=(spec.phi0+(a-spec.dialA0)+360)%360;
+    if(spec.dialDragActive){
+      const a=Math.atan2(
+        e.clientY-document.getElementById('specDialWrap').getBoundingClientRect().top-50,
+        e.clientX-document.getElementById('specDialWrap').getBoundingClientRect().left-50
+      )*180/Math.PI;
+      const delta=a-spec.dialLastAngle;
+      // Corrección de wrap
+      const dAdj=delta>180?delta-360:delta<-180?delta+360:delta;
+      spec.phi=(spec.phi+dAdj+360)%360;
+      spec.dialLastAngle=a;
       if(state.patronActivo) renderSpec();
     }
   });
@@ -287,16 +364,18 @@ document.addEventListener('DOMContentLoaded',()=>{
       spec.base=1.05+n*8.95;
       if(state.patronActivo) renderSpec();
     }
-    if(spec.dialDrag){
-      const sd2=document.getElementById('specDialWrap');
-      const r=sd2.getBoundingClientRect();
-      const a=Math.atan2(e.touches[0].clientY-r.top-45,e.touches[0].clientX-r.left-45)*180/Math.PI;
-      spec.phi=(spec.phi0+(a-spec.dialA0)+360)%360;
+    if(spec.dialDragActive){
+      const r=document.getElementById('specDialWrap').getBoundingClientRect();
+      const a=Math.atan2(e.touches[0].clientY-r.top-50,e.touches[0].clientX-r.left-50)*180/Math.PI;
+      const delta=a-spec.dialLastAngle;
+      const dAdj=delta>180?delta-360:delta<-180?delta+360:delta;
+      spec.phi=(spec.phi+dAdj+360)%360;
+      spec.dialLastAngle=a;
       if(state.patronActivo) renderSpec();
     }
   },{passive:false});
-  window.addEventListener('mouseup',()=>{spec.dragW=false;spec.dialDrag=false;});
-  window.addEventListener('touchend',()=>{spec.dragW=false;spec.dialDrag=false;});
+  window.addEventListener('mouseup',()=>{spec.dragW=false;spec.dialDragActive=false;});
+  window.addEventListener('touchend',()=>{spec.dragW=false;spec.dialDragActive=false;});
 
   window.addEventListener('resize',()=>{resizeCanvases();posicionarTagStrip();resizeSpec();});
   window.addEventListener('beforeunload',()=>{if(state.stream) state.stream.getTracks().forEach(t=>t.stop());});
@@ -314,24 +393,26 @@ function posicionarTagStrip(){
 function resizeCanvases(){
   if(!viewCanvas) return;
   const zone=document.getElementById('cameraZone');
-  const size=Math.min(zone.clientWidth,zone.clientHeight)*0.96;
+  const W=zone.clientWidth,H=zone.clientHeight;
+  // En modo patrón la foto ocupa todo el cameraZone
+  const size=state.patronActivo?Math.max(W,H)*1.1:Math.min(W,H)*0.96;
   [viewCanvas,overlayCanvas].forEach(c=>{
     c.style.width=c.style.height=size+'px'; c.width=c.height=size;
     c.style.position='absolute';
-    c.style.left=((zone.clientWidth-size)/2)+'px';
-    c.style.top=((zone.clientHeight-size)/2)+'px';
+    c.style.left=((W-size)/2)+'px';
+    c.style.top=((H-size)/2)+'px';
   });
 }
 
 function resizeSpec(){
   if(!specCanvas) return;
-  const main=document.getElementById('specMain');
-  const W=main.clientWidth||360,H=main.clientHeight||280;
-  specCanvas.width=W; specCanvas.height=H;
-  const wh=Math.floor(H*0.65);
-  specWheelCanvas.width=36; specWheelCanvas.height=wh;
+  const zone=document.getElementById('cameraZone');
+  specCanvas.width=zone.clientWidth||360;
+  specCanvas.height=zone.clientHeight||400;
+  const wh=Math.floor((zone.clientHeight||400)*0.7);
+  specWheelCanvas.width=48; specWheelCanvas.height=wh;
   document.getElementById('specWheel').style.height=wh+'px';
-  document.getElementById('specWheel').style.top=Math.floor(H*0.175)+'px';
+  document.getElementById('specWheel').style.top=Math.floor((zone.clientHeight||400)*0.15)+'px';
 }
 
 // MODOS
@@ -344,24 +425,25 @@ function setModo(btn){
   cerrarModos(); showNotif(btn.dataset.modo);
 }
 
-// PATRÓN / ESPECTRÓMETRO
+// PATRÓN
 function activarPatron(btn){
-  if(state.patronActivo){ desactivarPatron(); return; }
+  if(state.patronActivo){desactivarPatron();return;}
   state.patronActivo=true;
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
-  // Congelar frame
+  // Ocultar etiquetas
+  document.getElementById('tagStrip').classList.add('hidden');
+  // Mostrar overlay y panel
+  document.getElementById('specOverlay').classList.add('visible');
+  document.getElementById('specBottom').classList.add('visible');
+  // Capturar frame
   if(state.running){
     spec.frameSnap=wCtx.getImageData(0,0,RES,RES);
     specThumbCtx.imageSmoothingEnabled=false;
-    specThumbCtx.drawImage(workCanvas,0,0,80,60);
+    specThumbCtx.drawImage(workCanvas,0,0,88,66);
   }
-  document.getElementById('specOverlay').classList.add('visible');
-  document.getElementById('primitivosPanel').style.display='none';
-  document.getElementById('specTools').classList.add('visible');
-  resizeSpec();
-  renderSpec();
-  // Loop continuo mientras patron activo
+  resizeCanvases(); resizeSpec();
+  // Loop del espectrómetro
   function specLoop(){
     if(!state.patronActivo) return;
     if(state.running&&!state.frozen&&video.readyState>=2){
@@ -376,11 +458,13 @@ function activarPatron(btn){
 function desactivarPatron(){
   state.patronActivo=false;
   if(specAnimFrame) cancelAnimationFrame(specAnimFrame);
+  if(spec.autoRunning) toggleAuto();
   document.getElementById('specOverlay').classList.remove('visible');
-  document.getElementById('primitivosPanel').style.display='';
-  document.getElementById('specTools').classList.remove('visible');
+  document.getElementById('specBottom').classList.remove('visible');
+  document.getElementById('tagStrip').classList.remove('hidden');
   document.querySelectorAll('.prim-btn').forEach(b=>b.classList.remove('selected'));
   state.primActivo=null;
+  resizeCanvases();
 }
 
 function specToggle(key){
@@ -391,7 +475,53 @@ function specToggle(key){
   tog.classList.toggle('on',on);
 }
 
-// Rasterizar foto rotada en bandas logarítmicas
+// Palanca — avanza 10° por pulso, animado
+function dialPush(){
+  const target=spec.phi+10;
+  const start=spec.phi,dur=400;
+  let t0=null;
+  function anim(ts){
+    if(!t0) t0=ts;
+    const p=Math.min(1,(ts-t0)/dur);
+    const ease=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    spec.phi=(start+ease*10)%360;
+    if(state.patronActivo) renderSpec();
+    if(p<1) requestAnimationFrame(anim);
+  }
+  requestAnimationFrame(anim);
+}
+
+// AUTO
+function toggleAuto(){
+  spec.autoRunning=!spec.autoRunning;
+  const btn=document.getElementById('autoBtn');
+  btn.classList.toggle('on',spec.autoRunning);
+  if(spec.autoRunning){
+    spec.autoLastT=0;
+    function autoLoop(ts){
+      if(!spec.autoRunning) return;
+      if(spec.autoLastT){
+        const dt=(ts-spec.autoLastT)/1000;
+        const dotLog=document.getElementById('specDotLog').classList.contains('on');
+        const dotAngle=document.getElementById('specDotAngle').classList.contains('on');
+        if(dotAngle) spec.phi=(spec.phi+dt*15)%360;
+        if(dotLog){
+          spec.wheelOff+=dt*30;
+          const n=((spec.wheelOff%240)+240)%240/240;
+          spec.base=1.05+n*8.95;
+        }
+        if(state.patronActivo) renderSpec();
+      }
+      spec.autoLastT=ts;
+      spec.autoFrame=requestAnimationFrame(autoLoop);
+    }
+    requestAnimationFrame(autoLoop);
+  } else {
+    if(spec.autoFrame) cancelAnimationFrame(spec.autoFrame);
+  }
+}
+
+// Rasterización: foto rotada + bandas logarítmicas
 function rayasLog(b,H){
   const pos=[];
   for(let i=0;i<=N_BANDAS;i++){
@@ -401,73 +531,83 @@ function rayasLog(b,H){
   return pos;
 }
 
-function renderFotoRotadaBandas(ctx,W,H){
-  if(!spec.frameSnap) return;
-
-  const S=RES*2; // tamaño del canvas de rotación
-  const rc=spec.rotCtx,rC=spec.rotCanvas;
-
-  // 1. Pintar foto en canvas de rotación, centrada y rotada
-  rc.clearRect(0,0,S,S);
-  rc.save();
-  rc.translate(S/2,S/2);
-  rc.rotate(spec.phi*Math.PI/180);
-  rc.imageSmoothingEnabled=false;
-
-  // Crear imagedata temporal con la foto
-  const tmp=document.createElement('canvas'); tmp.width=tmp.height=RES;
-  tmp.getContext('2d').putImageData(spec.frameSnap,0,0);
-  rc.drawImage(tmp,-RES/2,-RES/2,RES,RES);
-  rc.restore();
-
-  // 2. Cortar en N_BANDAS franjas horizontales y redibujar con deformación log
-  const posLog=rayasLog(spec.base,H);
-  const srcH=S/N_BANDAS; // alto de cada franja en la foto rotada
-
-  ctx.save();
-  for(let i=0;i<N_BANDAS;i++){
-    const srcY=i*srcH;
-    const dstY=posLog[i];
-    const dstH=posLog[i+1]-posLog[i];
-    if(dstH<=0) continue;
-
-    // Dibujar franja con opacidad según densidad
-    const lineal=H/N_BANDAS;
-    const dens=dstH/lineal;
-    ctx.globalAlpha=Math.min(0.85,0.5/Math.max(0.1,dens))*0.7;
-    ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(rC, 0,srcY, S,srcH, 0,dstY, W,Math.max(1,dstH));
+function calcR(){
+  if(!spec.frameSnap) return 0;
+  const d=spec.frameSnap.data;
+  const rad=spec.phi*Math.PI/180;
+  const ux=Math.cos(rad),uy=Math.sin(rad);
+  let sum=0,count=0;
+  for(let r=1;r<RES-1;r+=2) for(let c=1;c<RES-1;c+=2){
+    const gx=d[(r*RES+c+1)*4]-d[(r*RES+c-1)*4];
+    const gy=d[((r+1)*RES+c)*4]-d[((r-1)*RES+c)*4];
+    const mag=Math.sqrt(gx*gx+gy*gy);
+    if(mag<8) continue;
+    sum+=Math.abs((gx*ux+gy*uy)/mag);
+    count++;
   }
-  ctx.globalAlpha=1;
-  ctx.restore();
-
-  // 3. Líneas de banda encima (las "17 rayas")
-  const posLogFull=rayasLog(spec.base,H);
-  for(let i=0;i<=N_BANDAS;i++){
-    const y=posLogFull[i];
-    const dens=i>0?(posLogFull[i]-posLogFull[i-1])/(H/N_BANDAS):1;
-    const bright=Math.min(0.9,0.25/Math.max(0.03,dens));
-    ctx.strokeStyle=`rgba(255,140,0,${bright.toFixed(2)})`;
-    ctx.lineWidth=dens<0.4?2:0.8;
-    ctx.beginPath(); ctx.moveTo(32,y); ctx.lineTo(W,y); ctx.stroke();
-  }
+  return count>0?sum/count:0;
 }
 
 function renderSpec(){
   if(!specCanvas) return;
   const W=specCanvas.width,H=specCanvas.height;
-  specCtx.fillStyle='#060500'; specCtx.fillRect(0,0,W,H);
+  specCtx.fillStyle='#050400'; specCtx.fillRect(0,0,W,H);
 
   if(spec.frameSnap){
-    renderFotoRotadaBandas(specCtx,W,H);
+    const S=spec.rotCanvas.width;
+    const rc=spec.rotCtx;
+
+    // 1. Foto rotada en canvas auxiliar
+    rc.clearRect(0,0,S,S);
+    rc.save();
+    rc.translate(S/2,S/2);
+    rc.rotate(spec.phi*Math.PI/180);
+    rc.imageSmoothingEnabled=false;
+    const tmp=document.createElement('canvas'); tmp.width=tmp.height=RES;
+    tmp.getContext('2d').putImageData(spec.frameSnap,0,0);
+    // Escalar para que llene el canvas rotado
+    const sc=S/RES*0.9;
+    rc.drawImage(tmp,-RES*sc/2,-RES*sc/2,RES*sc,RES*sc);
+    rc.restore();
+
+    // 2. Bandas logarítmicas
+    const posLog=rayasLog(spec.base,H);
+    const srcH=S/N_BANDAS;
+    specCtx.save();
+    for(let i=0;i<N_BANDAS;i++){
+      const srcY=i*srcH;
+      const dstY=posLog[i];
+      const dstH=posLog[i+1]-posLog[i];
+      if(dstH<=0) continue;
+      const lineal=H/N_BANDAS;
+      const dens=dstH/lineal;
+      specCtx.globalAlpha=Math.min(0.9,0.6/Math.max(0.08,dens))*0.85;
+      specCtx.imageSmoothingEnabled=false;
+      specCtx.drawImage(spec.rotCanvas,0,srcY,S,srcH,0,dstY,W,Math.max(1,dstH));
+    }
+    specCtx.globalAlpha=1;
+    specCtx.restore();
+
+    // 3. Rayas naranja encima
+    for(let i=0;i<=N_BANDAS;i++){
+      const y=posLog[i];
+      const dens=i>0?(posLog[i]-posLog[i-1])/(H/N_BANDAS):1;
+      const bright=Math.min(0.9,0.2/Math.max(0.03,dens));
+      specCtx.strokeStyle=`rgba(255,140,0,${bright.toFixed(2)})`;
+      specCtx.lineWidth=dens<0.4?2:0.8;
+      specCtx.beginPath(); specCtx.moveTo(44,y); specCtx.lineTo(W,y); specCtx.stroke();
+    }
   } else {
-    specCtx.fillStyle='rgba(255,140,0,0.2)';
+    specCtx.fillStyle='rgba(255,140,0,0.18)';
     specCtx.font='10px Courier New';
-    specCtx.fillText('activa CAM para analizar',36,H/2);
+    specCtx.fillText('activa CAM para analizar',48,H/2);
   }
 
+  // Calcular R y actualizar HUD
+  const R=calcR();
   document.getElementById('specB').textContent=spec.base.toFixed(1);
-  document.getElementById('specPhi').textContent=Math.round(spec.phi);
+  document.getElementById('specPhiHud').textContent=Math.round(spec.phi);
+  document.getElementById('specRVal').textContent=Math.round(R*100)+'%';
   document.getElementById('specThumbPhi').textContent=Math.round(spec.phi);
   document.getElementById('specThumbB').textContent=Math.round(spec.base*8);
 
@@ -475,58 +615,103 @@ function renderSpec(){
 }
 
 function renderSpecWheel(){
-  const W=36,H=specWheelCanvas.height||160;
+  const W=48,H=specWheelCanvas.height||200;
   specWheelCtx.clearRect(0,0,W,H);
-  const sp=20,off=((spec.wheelOff%sp)+sp)%sp;
+
+  // Cuerpo metálico plateado con gradiente
+  const grad=specWheelCtx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,'#1a1a1a');
+  grad.addColorStop(0.15,'#4a4a4a');
+  grad.addColorStop(0.4,'#888');
+  grad.addColorStop(0.55,'#aaa');
+  grad.addColorStop(0.75,'#777');
+  grad.addColorStop(0.9,'#3a3a3a');
+  grad.addColorStop(1,'#111');
+  specWheelCtx.fillStyle=grad;
+  specWheelCtx.beginPath();
+  specWheelCtx.roundRect(2,0,W-2,H,8);
+  specWheelCtx.fill();
+
+  // Estrías horizontales
+  const sp=16,off=((spec.wheelOff%sp)+sp)%sp;
   for(let y=off-sp;y<H+sp;y+=sp){
-    specWheelCtx.strokeStyle='rgba(0,0,0,0.65)'; specWheelCtx.lineWidth=3;
+    // Ranura oscura
+    specWheelCtx.strokeStyle='rgba(0,0,0,0.55)'; specWheelCtx.lineWidth=4;
     specWheelCtx.beginPath(); specWheelCtx.moveTo(4,y); specWheelCtx.lineTo(W-4,y); specWheelCtx.stroke();
-    specWheelCtx.strokeStyle='rgba(255,120,120,0.2)'; specWheelCtx.lineWidth=1;
-    specWheelCtx.beginPath(); specWheelCtx.moveTo(4,y+1); specWheelCtx.lineTo(W-4,y+1); specWheelCtx.stroke();
+    // Brillo superior de la ranura
+    specWheelCtx.strokeStyle='rgba(255,255,255,0.15)'; specWheelCtx.lineWidth=1;
+    specWheelCtx.beginPath(); specWheelCtx.moveTo(4,y-1); specWheelCtx.lineTo(W-4,y-1); specWheelCtx.stroke();
   }
-  specWheelCtx.strokeStyle='rgba(255,140,0,0.9)'; specWheelCtx.lineWidth=2;
-  specWheelCtx.beginPath(); specWheelCtx.moveTo(0,H/2); specWheelCtx.lineTo(W,H/2); specWheelCtx.stroke();
+
+  // Indicador central — bulto metálico
+  const cy=H/2,bw=W-6,bh=14;
+  const bg=specWheelCtx.createLinearGradient(3,cy-bh/2,3,cy+bh/2);
+  bg.addColorStop(0,'#ddd'); bg.addColorStop(0.4,'#fff'); bg.addColorStop(1,'#888');
+  specWheelCtx.fillStyle=bg;
+  specWheelCtx.beginPath();
+  specWheelCtx.roundRect(3,cy-bh/2,bw,bh,4);
+  specWheelCtx.fill();
+  specWheelCtx.strokeStyle='rgba(0,0,0,0.3)'; specWheelCtx.lineWidth=0.5;
+  specWheelCtx.stroke();
 }
 
 function renderSpecDial(){
-  const W=90,H=90,cx=45,cy=45,R=38;
+  const W=100,H=100,cx=50,cy=50,R=42;
   specDialCtx.clearRect(0,0,W,H);
-  specDialCtx.fillStyle='#0d0d0d';
-  specDialCtx.beginPath(); specDialCtx.arc(cx,cy,R+5,0,Math.PI*2); specDialCtx.fill();
-  for(let i=0;i<60;i++){
-    const a=i/60*Math.PI*2,len=i%5===0?6:3;
-    specDialCtx.strokeStyle=i%5===0?'#444':'#2a2a2a'; specDialCtx.lineWidth=i%5===0?1.2:0.7;
+
+  // Fondo
+  specDialCtx.fillStyle='#0f0e0a';
+  specDialCtx.beginPath(); specDialCtx.arc(cx,cy,R+6,0,Math.PI*2); specDialCtx.fill();
+
+  // Borde con marcas
+  for(let i=0;i<72;i++){
+    const a=i/72*Math.PI*2,len=i%6===0?8:i%2===0?4:2;
+    specDialCtx.strokeStyle=i%6===0?'#555':'#2a2a2a';
+    specDialCtx.lineWidth=i%6===0?1.5:0.7;
     specDialCtx.beginPath();
     specDialCtx.moveTo(cx+(R+1)*Math.cos(a),cy+(R+1)*Math.sin(a));
     specDialCtx.lineTo(cx+(R+1+len)*Math.cos(a),cy+(R+1+len)*Math.sin(a));
     specDialCtx.stroke();
   }
+
+  // Disco
   specDialCtx.fillStyle='#080808';
   specDialCtx.beginPath(); specDialCtx.arc(cx,cy,R,0,Math.PI*2); specDialCtx.fill();
-  [R*0.3,R*0.55,R*0.78,R*0.95].forEach((r,i)=>{
-    specDialCtx.strokeStyle=`rgba(0,200,50,${0.08+i*0.05})`; specDialCtx.lineWidth=0.8;
+
+  // Anillos escala (256, 16, 4) — etiquetas a la derecha
+  [[R*0.28,'256'],[R*0.54,'16'],[R*0.8,'4']].forEach(([r,v])=>{
+    specDialCtx.strokeStyle=`rgba(0,180,50,0.12)`; specDialCtx.lineWidth=0.8;
     specDialCtx.beginPath(); specDialCtx.arc(cx,cy,r,0,Math.PI*2); specDialCtx.stroke();
-  });
-  specDialCtx.strokeStyle='rgba(255,255,255,0.15)'; specDialCtx.lineWidth=0.5; specDialCtx.setLineDash([2,4]);
-  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R); specDialCtx.lineTo(cx,cy+R); specDialCtx.stroke();
-  specDialCtx.setLineDash([]);
-  // etiquetas
-  specDialCtx.fillStyle='rgba(255,255,255,0.2)'; specDialCtx.font='6px Courier New';
-  [[R*0.3,'256'],[R*0.55,'64'],[R*0.78,'16'],[R*0.95,'4']].forEach(([r,v])=>{
+    specDialCtx.fillStyle='rgba(255,255,255,0.18)'; specDialCtx.font='6px Courier New';
     specDialCtx.fillText(v,cx+r+2,cy+2);
   });
-  // aguja φ=0 arriba
-  const rad=(spec.phi-90)*Math.PI/180,agLen=R*0.72;
+
+  // Eje vertical de referencia (0° = arriba)
+  specDialCtx.strokeStyle='rgba(255,255,255,0.12)'; specDialCtx.lineWidth=0.5;
+  specDialCtx.setLineDash([2,4]);
+  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R); specDialCtx.lineTo(cx,cy+R); specDialCtx.stroke();
+  specDialCtx.setLineDash([]);
+
+  // Aguja naranja — 0° apunta arriba (-90° en canvas)
+  const rad=(spec.phi-90)*Math.PI/180,agLen=R*0.78;
   specDialCtx.save(); specDialCtx.translate(cx,cy);
-  specDialCtx.strokeStyle='rgba(0,0,0,0.5)'; specDialCtx.lineWidth=5; specDialCtx.lineCap='round';
+  // sombra
+  specDialCtx.strokeStyle='rgba(0,0,0,0.6)'; specDialCtx.lineWidth=7; specDialCtx.lineCap='round';
   specDialCtx.beginPath(); specDialCtx.moveTo(0,0); specDialCtx.lineTo(agLen*Math.cos(rad),agLen*Math.sin(rad)); specDialCtx.stroke();
-  specDialCtx.strokeStyle='#e8a020'; specDialCtx.lineWidth=3;
+  // cuerpo naranja ancho (como palanca de timbre)
+  const gNeedle=specDialCtx.createLinearGradient(0,-4,0,4);
+  gNeedle.addColorStop(0,'#ffcc60'); gNeedle.addColorStop(0.5,'#e8a020'); gNeedle.addColorStop(1,'#a05000');
+  specDialCtx.strokeStyle=gNeedle; specDialCtx.lineWidth=8; specDialCtx.lineCap='round';
   specDialCtx.beginPath(); specDialCtx.moveTo(0,0); specDialCtx.lineTo(agLen*Math.cos(rad),agLen*Math.sin(rad)); specDialCtx.stroke();
-  specDialCtx.fillStyle='#e8a020'; specDialCtx.beginPath(); specDialCtx.arc(0,0,4,0,Math.PI*2); specDialCtx.fill();
-  specDialCtx.fillStyle='#ffee00'; specDialCtx.beginPath(); specDialCtx.arc(0,0,2,0,Math.PI*2); specDialCtx.fill();
+  // Bulbo base
+  const gb=specDialCtx.createRadialGradient(-1,-1,0,0,0,7);
+  gb.addColorStop(0,'#ffdd88'); gb.addColorStop(1,'#c87020');
+  specDialCtx.fillStyle=gb; specDialCtx.beginPath(); specDialCtx.arc(0,0,7,0,Math.PI*2); specDialCtx.fill();
   specDialCtx.restore();
-  specDialCtx.fillStyle='#fff';
-  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R-1); specDialCtx.lineTo(cx-3,cy-R-7); specDialCtx.lineTo(cx+3,cy-R-7); specDialCtx.closePath(); specDialCtx.fill();
+
+  // Puntero fijo arriba (blanco)
+  specDialCtx.fillStyle='#ccc';
+  specDialCtx.beginPath(); specDialCtx.moveTo(cx,cy-R); specDialCtx.lineTo(cx-4,cy-R-9); specDialCtx.lineTo(cx+4,cy-R-9); specDialCtx.closePath(); specDialCtx.fill();
 }
 
 // CÁMARA
@@ -590,25 +775,27 @@ function renderLoop(){
     cwCtx.putImageData(cd_,0,0);
     cCtx.imageSmoothingEnabled=false; cCtx.drawImage(colorWork,0,0,16,16);
   }
-  vCtx.fillStyle='#000'; vCtx.fillRect(0,0,sz,sz);
-  if(state.running){
-    const vista=VISTAS[state.vistaIdx];
-    vCtx.imageSmoothingEnabled=false; vCtx.globalAlpha=0.35;
-    if(vista.id==='BN') vCtx.drawImage(workCanvas,0,0,sz,sz);
-    else if(vista.id==='COLOR') vCtx.drawImage(colorWork,0,0,sz,sz);
-    else if(vista.umbral){
-      const imgU=wCtx.getImageData(0,0,RES,RES),du=new Uint8ClampedArray(imgU.data);
-      for(let i=0;i<du.length;i+=4){const v=du[i]>vista.umbral?255:0;du[i]=du[i+1]=du[i+2]=v;du[i+3]=255;}
-      const tmp=document.createElement('canvas');tmp.width=tmp.height=RES;
-      tmp.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
-      vCtx.drawImage(tmp,0,0,sz,sz);
+  if(!state.patronActivo){
+    vCtx.fillStyle='#000'; vCtx.fillRect(0,0,sz,sz);
+    if(state.running){
+      const vista=VISTAS[state.vistaIdx];
+      vCtx.imageSmoothingEnabled=false; vCtx.globalAlpha=0.35;
+      if(vista.id==='BN') vCtx.drawImage(workCanvas,0,0,sz,sz);
+      else if(vista.id==='COLOR') vCtx.drawImage(colorWork,0,0,sz,sz);
+      else if(vista.umbral){
+        const imgU=wCtx.getImageData(0,0,RES,RES),du=new Uint8ClampedArray(imgU.data);
+        for(let i=0;i<du.length;i+=4){const v=du[i]>vista.umbral?255:0;du[i]=du[i+1]=du[i+2]=v;du[i+3]=255;}
+        const tmp=document.createElement('canvas');tmp.width=tmp.height=RES;
+        tmp.getContext('2d').putImageData(new ImageData(du,RES,RES),0,0);
+        vCtx.drawImage(tmp,0,0,sz,sz);
+      }
+      vCtx.globalAlpha=1;
     }
-    vCtx.globalAlpha=1;
+    renderAcumulacion();
+    if(state.etiquetasActivas.size>0) renderParticulas();
+    else renderDeteccion();
+    renderOverlay();
   }
-  renderAcumulacion();
-  if(state.etiquetasActivas.size>0) renderParticulas();
-  else renderDeteccion();
-  renderOverlay();
   requestAnimationFrame(renderLoop);
 }
 
@@ -716,27 +903,9 @@ function mostrarRelacion(z1,z2){
 
 function renderOverlay(){
   oCtx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
-  if(state.patronActivo) return; // en modo patrón no hay overlay
   state.spots.forEach(sp=>{
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,5,0,Math.PI*2); oCtx.fillStyle='rgba(60,120,255,0.9)'; oCtx.fill();
     oCtx.beginPath(); oCtx.arc(sp.x,sp.y,9,0,Math.PI*2); oCtx.strokeStyle='rgba(60,120,255,0.25)'; oCtx.lineWidth=1.5; oCtx.stroke();
-  });
-  state.zonas.forEach(z=>{
-    const s=overlayCanvas.width,px=z.x*s,py=z.y*s,r=z.radio*s;
-    oCtx.beginPath(); oCtx.arc(px,py,r,0,Math.PI*2);
-    oCtx.strokeStyle='rgba(255,255,255,0.5)'; oCtx.lineWidth=1; oCtx.setLineDash([3,3]); oCtx.stroke(); oCtx.setLineDash([]);
-    oCtx.font='bold 10px monospace';
-    z.etiquetas.forEach((e,i)=>{
-      const tx=Math.min(px+r+6+i*14,overlayCanvas.width-55),ty=py+i*8;
-      oCtx.fillStyle='rgba(0,0,0,0.8)'; oCtx.fillText(e.substring(0,6),tx+1,ty+1);
-      oCtx.fillStyle='rgba(255,255,255,1)'; oCtx.fillText(e.substring(0,6),tx,ty);
-    });
-    oCtx.fillStyle='rgba(255,184,0,0.8)'; oCtx.fillText('Z'+z.id,px-8,py+4);
-    if(z.id>1){
-      const zp=state.zonas[z.id-2];
-      oCtx.beginPath(); oCtx.moveTo(zp.x*s,zp.y*s); oCtx.lineTo(px,py);
-      oCtx.strokeStyle='rgba(255,184,0,0.3)'; oCtx.lineWidth=1; oCtx.setLineDash([2,4]); oCtx.stroke(); oCtx.setLineDash([]);
-    }
   });
   const p1=gesto.p1,p2=gesto.p2||gesto.moviendo;
   if(!p1) return;
