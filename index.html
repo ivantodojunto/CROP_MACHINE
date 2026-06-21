@@ -449,7 +449,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function posicionarTagStrip(){const zone=document.getElementById('cameraZone'),strip=document.getElementById('tagStrip');const rect=zone.getBoundingClientRect();strip.style.top=rect.top+'px';strip.style.height=rect.height+'px';}
-function resizeCanvases(){if(!viewCanvas) return;const zone=document.getElementById('cameraZone');const W=zone.clientWidth,H=zone.clientHeight;const ratio=W/H;let cW,cH;if(ratio<1.4){const s=Math.min(W,H)*0.98;cW=cH=s;}else{cH=H*0.98;cW=Math.min(W*0.98,cH*1.6);}[viewCanvas,overlayCanvas].forEach(c=>{c.style.width=cW+'px';c.style.height=cH+'px';c.width=Math.round(cW);c.height=Math.round(cH);c.style.position='absolute';c.style.left=((W-cW)/2)+'px';c.style.top=((H-cH)/2)+'px';});}
+function resizeCanvases(){if(!viewCanvas) return;const zone=document.getElementById('cameraZone');const W=zone.clientWidth,H=zone.clientHeight;const size=Math.min(W,H)*0.96;[viewCanvas,overlayCanvas].forEach(c=>{c.style.width=c.style.height=size+'px';c.width=c.height=size;c.style.position='absolute';c.style.left=((W-size)/2)+'px';c.style.top=((H-size)/2)+'px';});}
 function resizeSpec(){if(!specCanvas) return;const zone=document.getElementById('cameraZone');specCanvas.width=zone.clientWidth||360;specCanvas.height=zone.clientHeight||400;}
 
 function abrirModos(){document.getElementById('modosPanel').classList.add('visible');}
